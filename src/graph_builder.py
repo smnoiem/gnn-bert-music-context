@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -35,8 +36,15 @@ def main() -> None:
         y, sr = load_audio(str(Path(args.audio_root) / row.path), args.sample_rate)
         graph = build_segment_graph(segment_features(y, sr, args.segment_seconds), args.threshold)
         graph.update({"track_id": str(row.track_id), "text": str(getattr(row, "text", "")), "labels": str(getattr(row, "labels", ""))})
-        target = output / f"{row.track_id}.pt"; torch.save(graph, target); manifest.append({"track_id": row.track_id, "graph": str(target), "split": getattr(row, "split", "train")})
-    pd.DataFrame(manifest).to_csv(output / "manifest.csv", index=False)
+        target = output / f"{row.track_id}.pt"; torch.save(graph, target)
+        item = {"track_id": str(row.track_id), "graph": str(target), "split": str(getattr(row, "split", "train")), "text": str(getattr(row, "text", "")), "labels": str(getattr(row, "labels", "")), "artist_id": str(getattr(row, "artist_id", ""))}
+        if hasattr(row, "valence") and hasattr(row, "arousal"):
+            item.update({"valence": float(row.valence), "arousal": float(row.arousal)})
+        manifest.append(item)
+    manifest_path = output.parent / "manifest.jsonl"
+    with open(manifest_path, "w") as stream:
+        for item in manifest: stream.write(json.dumps(item) + "\n")
+    print(f"Wrote {len(manifest)} graphs and {manifest_path}")
 
 
 if __name__ == "__main__": main()

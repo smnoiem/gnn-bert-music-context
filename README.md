@@ -2,25 +2,96 @@
 
 Implementation of CSE425 Tasks 1--3: text-only multi-label tagging, audio-structure graphs, and cross-attention GNN-BERT fusion. Task 4 contrastive retrieval is deliberately excluded.
 
-## Quick start
+## Run it step by step
+
+All commands below must be run in a terminal. First enter the project folder and create an isolated Python environment (only needed once):
 
 ```bash
+cd "/home/noiem/Documents/ChatGPT/gnn-bert-music-context"
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
-python scripts/make_synthetic_data.py --count 24
-python -m src.train --task bert --synthetic --epochs 2
-python -m src.train --task gnn --synthetic --epochs 2
-python -m src.train --task fusion --synthetic --epochs 2
 ```
 
-The synthetic route is an integration test, not a reported experiment. For a real experiment, place audio files under `data/raw/audio`, create `data/raw/metadata.csv` with `track_id,path,text,labels,split` columns (labels are pipe-separated), then run:
+Every time you open a new terminal later, return to the folder and activate the environment again:
 
 ```bash
-python -m src.graph_builder --metadata data/raw/metadata.csv --audio-root data/raw/audio
-python -m src.train --task fusion --config config.yaml
+cd "/home/noiem/Documents/ChatGPT/gnn-bert-music-context"
+source .venv/bin/activate
+```
+
+### 1. Run the safe synthetic demo
+
+This creates fake, small input data. It confirms that the code runs but its scores are **not** suitable for your report.
+
+```bash
+python scripts/make_synthetic_data.py --count 24
+```
+
+### 2. Train one model at a time
+
+```bash
+# Task 1: text/tag classifier
+python -m src.train --task bert --synthetic --epochs 5
+
+# Task 2: music-structure graph classifier
+python -m src.train --task gnn --synthetic --epochs 5
+
+# Task 3: GNN + text cross-attention fusion model
+python -m src.train --task fusion --synthetic --epochs 5
+```
+
+`--epochs 5` is just a quick test. Increase it for real experiments once the pipeline works.
+
+### 3. Evaluate a trained model
+
+```bash
 python -m src.evaluate --checkpoint results/fusion_best.pt --task fusion
 ```
 
-`labels` can contain genre and mood tags together. Splits must be artist-disjoint where artist metadata is available; `src.data.assert_no_artist_leakage` enforces this. The graph builder resamples to 22,050 Hz, makes normalized chroma/MFCC segment nodes, and adds temporal plus cosine-similarity edges.
+Look in `results/` afterward:
+
+- `*_best.pt`: saved best model checkpoint.
+- `*_metrics.json`: metrics for each training epoch.
+- `*_f1_curve.png`: train/validation F1 plot.
+- `fusion_test_metrics.json`: Macro-F1, Micro-F1, and AUC-PR on the test split.
+- `fusion_tsne.png`: 2D embedding visualization.
+- `fusion_case_studies.json`: three prediction examples.
+
+### 4. Run the required ablation comparison
+
+```bash
+python scripts/run_ablations.py --synthetic --epochs 5
+```
+
+This runs and saves four comparisons: BERT-only, GNN-only, simple early-concatenation fusion, and cross-attention fusion. For a real report, compare their test Macro-F1, Micro-F1, and AUC-PR in one table.
+
+### 5. Run on a real dataset
+
+Place audio in `data/raw/audio/`. Create `data/raw/metadata.csv` with these columns:
+
+```csv
+track_id,path,text,labels,split,artist_id
+001,rock/song001.mp3,"energetic distorted guitar rock","rock|energetic",train,artist_001
+002,jazz/song002.mp3,"calm piano jazz","jazz|calm",val,artist_002
+```
+
+`path` is relative to `data/raw/audio/`; `labels` are separated by `|`; and an artist must appear in only one split to prevent leakage. Then build graphs, train, and evaluate:
+
+```bash
+python -m src.graph_builder --metadata data/raw/metadata.csv --audio-root data/raw/audio
+python -m src.train --task fusion --config config.yaml --epochs 10
+python -m src.evaluate --checkpoint results/fusion_best.pt --task fusion
+```
+
+For a full real-data ablation, omit `--synthetic`:
+
+```bash
+python scripts/run_ablations.py --epochs 10
+```
+
+For actual BERT weights, use an internet connection on the first real-data run. The default model is `distilbert-base-uncased`, chosen to be more practical on a weak computer. Change `model.text_model` in `config.yaml` to `bert-base-uncased` only if you want to test the larger model.
 
 ## Implemented deliverables
 
