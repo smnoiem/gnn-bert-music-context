@@ -1,0 +1,24 @@
+{
+  "history": [
+    {
+      "epoch": 1,
+      "train_auc_pr": 0.9373412698412699,
+      "train_loss": 0.6370934645334879,
+      "train_macro_f1": 0.7778379028379029,
+      "train_micro_f1": 0.7868852459016393,
+      "val_auc_pr": 1.0,
+      "val_loss": 0.5506637543439865,
+      "val_macro_f1": 1.0,
+      "val_micro_f1": 1.0
+    }
+  ],
+  "labels": [
+    "calm",
+    "electronic",
+    "energetic",
+    "jazz",
+    "melancholic",
+    "rock"
+  ],
+  "task": "fusion"
+}

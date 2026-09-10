@@ -1,0 +1,24 @@
+seed: 42
+data:
+  audio_root: data/raw/audio
+  metadata_csv: data/raw/metadata.csv
+  processed_dir: data/processed/graphs
+  split_dir: data/splits
+  sample_rate: 22050
+  n_mels: 128
+  segment_seconds: 5.0
+  similarity_threshold: 0.75
+  max_text_length: 128
+model:
+  text_model: distilbert-base-uncased
+  text_hidden: 256
+  gnn_hidden: 128
+  gnn_layers: 2
+  num_labels: 8
+  dropout: 0.2
+training:
+  batch_size: 8
+  epochs: 10
+  learning_rate: 0.0003
+  weight_decay: 0.00001
+  freeze_text_encoder: false
