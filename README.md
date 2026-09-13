@@ -93,6 +93,26 @@ python scripts/run_ablations.py --epochs 10
 
 For actual BERT weights, use an internet connection on the first real-data run. The default model is `distilbert-base-uncased`, chosen to be more practical on a weak computer. Change `model.text_model` in `config.yaml` to `bert-base-uncased` only if you want to test the larger model.
 
+### MusicCaps caption-to-tag proxy baseline
+
+MusicCaps supplies captions but not a conventional multi-label tag column. The
+standalone Task 1 runner therefore accepts a local MusicCaps CSV, JSON, JSONL,
+or parquet export and creates reproducible proxy tags by matching documented
+music phrases in each caption. If the input already has a `tags`, `labels`, or
+`label` column, those labels are used instead. Rows are split by a stable hash
+of `ytid` (or `track_id`/`id`) so the split is reproducible:
+
+```bash
+python scripts/train_bert_musiccaps.py --input data/raw/musiccaps.csv \
+  --model-name distilbert-base-uncased --epochs 10
+```
+
+The command writes `bert_musiccaps_best.pt`, `bert_musiccaps_metrics.json`,
+`bert_musiccaps_test_metrics.json`, and `bert_musiccaps_f1_curve.png` to
+`results/`. The JSON history contains Macro-F1 and Micro-F1 for every epoch;
+the PNG plots both validation curves. These are proxy-task results and should
+be reported as such, not as human-annotated MusicCaps tag accuracy.
+
 ## Implemented deliverables
 
 - Task 1: HuggingFace BERT/DistilBERT tag classifier with offline lightweight fallback, BCE loss, macro/micro F1 and PR-AUC curves.
