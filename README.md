@@ -1,135 +1,151 @@
 # GNN-BERT Music Context
 
-Implementation of CSE425 Tasks 1--3: text-only multi-label tagging, audio-structure graphs, and cross-attention GNN-BERT fusion. Task 4 contrastive retrieval is deliberately excluded.
+This repository implements:
 
-## Run it step by step
+- **Task 1:** a DistilBERT/BERT text-only multi-label tag classifier.
+- **Task 2:** an audio-segment graph classifier.
+- **Task 3:** graph/text fusion with early concatenation or cross-attention.
 
-All commands below must be run in a terminal. First enter the project folder and create an isolated Python environment (only needed once):
+The commands below use real MusicCaps captions and real audio metadata. Synthetic
+data is not part of the documented workflow or the reported results.
 
-```bash
-cd "/home/noiem/Documents/ChatGPT/gnn-bert-music-context"
-python3 -m venv .venv
-source .venv/bin/activate
+## Windows setup
+
+Open **PowerShell** and change to the project directory. Replace the example
+path with the directory where this repository is located:
+
+```powershell
+Set-Location -LiteralPath "C:\Users\YOUR_USERNAME\Documents\gnn-bert-music-context"
+```
+
+Create the virtual environment once, then install the dependencies:
+
+```powershell
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-Every time you open a new terminal later, return to the folder and activate the environment again:
+If PowerShell blocks activation, run this once in an Administrator PowerShell:
 
-```bash
-cd "/home/noiem/Documents/ChatGPT/gnn-bert-music-context"
-source .venv/bin/activate
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ```
 
-### 1. Run the safe synthetic demo
+For later sessions, run these commands from the project directory:
 
-This creates fake, small input data. It confirms that the code runs but its scores are **not** suitable for your report.
-
-```bash
-python scripts/make_synthetic_data.py --count 24
+```powershell
+.\.venv\Scripts\Activate.ps1
 ```
 
-### 2. Train one model at a time
+The first training run downloads `distilbert-base-uncased` from Hugging Face.
+An internet connection is required unless the model has already been cached.
 
-```bash
-# Task 1: text/tag classifier
-python -m src.train --task bert --synthetic --epochs 5
+## Task 1: train the DistilBERT text classifier
 
-# Task 2: music-structure graph classifier
-python -m src.train --task gnn --synthetic --epochs 5
+### 1. Export the MusicCaps captions
 
-# Task 3: GNN + text cross-attention fusion model
-python -m src.train --task fusion --synthetic --epochs 5
+Create the raw-data directory and export only the caption and identifier
+columns needed by the Task 1 runner:
+
+```powershell
+New-Item -ItemType Directory -Force data\raw | Out-Null
+python -c "from datasets import load_dataset; ds=load_dataset('google/MusicCaps', split='train'); ds.select_columns(['ytid','caption','start_s','end_s']).to_csv('data/raw/musiccaps.csv', index=False)"
 ```
 
-`--epochs 5` is just a quick test. Increase it for real experiments once the pipeline works.
+The runner also accepts a local CSV, JSON, JSONL, or parquet file. A CSV must
+contain a caption/text/description column and either a `tags`, `labels`, or
+`label` column. When those label columns are absent, the runner creates the
+documented proxy tags by matching music phrases in each caption. These are
+proxy-task labels, not human-annotated MusicCaps tags.
 
-### 3. Evaluate a trained model
+### 2. Run the actual Task 1 DistilBERT training command
 
-```bash
-python -m src.evaluate --checkpoint results/fusion_best.pt --task fusion
+Run this from the repository root:
+
+```powershell
+python scripts\train_bert_musiccaps.py --input data\raw\musiccaps.csv --model-name distilbert-base-uncased --output-dir results --run-name task1_distilbert --epochs 10 --batch-size 8 --learning-rate 2e-5 --max-length 128 --hidden-size 256 --seed 42
 ```
 
-Look in `results/` afterward:
+This command uses the best validation Macro-F1 checkpoint and evaluates it on
+the held-out test split. The stable hash split is 80% train, 10% validation,
+and 10% test.
 
-- `*_best.pt`: saved best model checkpoint.
-- `*_metrics.json`: metrics for each training epoch.
-- `*_f1_curve.png`: train/validation F1 plot.
-- `fusion_test_metrics.json`: Macro-F1, Micro-F1, and AUC-PR on the test split.
-- `fusion_tsne.png`: 2D embedding visualization.
-- `fusion_case_studies.json`: three prediction examples.
+Outputs are written to `results\`:
 
-### 4. Run the required ablation comparison
+- `task1_distilbert_best.pt`
+- `task1_distilbert_metrics.json`
+- `task1_distilbert_test_metrics.json`
+- `task1_distilbert_predictions.json`
+- `task1_distilbert_f1_curve.png`
 
-```bash
-python scripts/run_ablations.py --synthetic --epochs 5
+To use a locally cached model without network access, add
+`--local-files-only` to the training command.
+
+## Tasks 2 and 3: real audio graphs and fusion
+
+These tasks require a real `data\raw\metadata.csv` and the corresponding audio
+files. The metadata must contain `track_id`, `path`, `text`, `labels`, `split`,
+and `artist_id`. `path` is relative to `data\raw\audio`; `labels` are separated
+by `|`; and each artist must occur in only one split.
+
+Place the files as follows:
+
+```text
+data\
+  raw\
+    audio\
+      <real audio files>
+    metadata.csv
 ```
 
-This runs and saves four comparisons: BERT-only, GNN-only, simple early-concatenation fusion, and cross-attention fusion. For a real report, compare their test Macro-F1, Micro-F1, and AUC-PR in one table.
+Build the segment graphs:
 
-### 5. Run on a real dataset
-
-Place audio in `data/raw/audio/`. Create `data/raw/metadata.csv` with these columns:
-
-```csv
-track_id,path,text,labels,split,artist_id
-001,rock/song001.mp3,"energetic distorted guitar rock","rock|energetic",train,artist_001
-002,jazz/song002.mp3,"calm piano jazz","jazz|calm",val,artist_002
+```powershell
+python -m src.graph_builder --metadata data\raw\metadata.csv --audio-root data\raw\audio --output data\processed\graphs --sample-rate 22050 --segment-seconds 5 --threshold 0.75
 ```
 
-`path` is relative to `data/raw/audio/`; `labels` are separated by `|`; and an artist must appear in only one split to prevent leakage. Then build graphs, train, and evaluate:
+Train the real-data models:
 
-```bash
-python -m src.graph_builder --metadata data/raw/metadata.csv --audio-root data/raw/audio
-python -m src.train --task fusion --config config.yaml --epochs 10
-python -m src.evaluate --checkpoint results/fusion_best.pt --task fusion
+```powershell
+python -m src.train --task bert --config config.yaml --manifest data\processed\manifest.jsonl --run-name task1_bert --epochs 10
+python -m src.train --task gnn --config config.yaml --manifest data\processed\manifest.jsonl --run-name task2_gnn --epochs 10
+python -m src.train --task fusion --config config.yaml --manifest data\processed\manifest.jsonl --run-name task3_fusion --epochs 10
 ```
 
-For a full real-data ablation, omit `--synthetic`:
+For the Task 3 early-concatenation comparison:
 
-```bash
-python scripts/run_ablations.py --epochs 10
+```powershell
+python -m src.train --task fusion --config config.yaml --manifest data\processed\manifest.jsonl --run-name task3_fusion_early_concat --epochs 10 --early-concat
 ```
 
-The Task 1 runner requires actual HuggingFace weights; use an internet connection
-on the first run or provide a locally cached checkpoint. The default model is
-`distilbert-base-uncased`, chosen to be more practical on a weak computer.
-Change `model.text_model` in `config.yaml` to `bert-base-uncased` only if you
-want to test the larger model.
+All checkpoints, metric histories, and learning curves are written to
+`results\`. The text model configured by default is
+`distilbert-base-uncased`; change `model.text_model` in `config.yaml` only when
+you intentionally want to use another Hugging Face checkpoint.
 
-### MusicCaps caption-to-tag proxy baseline
+## Ablation comparison
 
-MusicCaps supplies captions but not a conventional multi-label tag column. The
-standalone Task 1 runner therefore accepts a local MusicCaps CSV, JSON, JSONL,
-or parquet export and creates reproducible proxy tags by matching documented
-music phrases in each caption. If the input already has a `tags`, `labels`, or
-`label` column, those labels are used instead. Rows are split by a stable hash
-of `ytid` (or `track_id`/`id`), including clip boundaries when present, so the
-split is reproducible:
+After building the real graph manifest, run all four real-data conditions:
 
-```bash
-# With exactly one CSV in data/raw:
-python scripts/train_bert_musiccaps.py --epochs 10
-
-# Or select the CSV explicitly:
-python scripts/train_bert_musiccaps.py --input data/raw/musiccaps.csv \
-  --model-name distilbert-base-uncased --epochs 10
+```powershell
+python scripts\run_ablations.py --epochs 10
 ```
 
-The command writes `bert_musiccaps_best.pt`, `bert_musiccaps_metrics.json`,
-`bert_musiccaps_test_metrics.json`, `bert_musiccaps_predictions.json`, and
-`bert_musiccaps_f1_curve.png` to `results/`. The predictions file contains five
-test examples with their true tags, predicted tags, and top tag probabilities.
-Test metrics are computed from the checkpoint with the best validation Macro-F1.
-The JSON history contains Macro-F1 and Micro-F1 for every epoch;
-the PNG plots both validation curves. These are proxy-task results and should
-be reported as such, not as human-annotated MusicCaps tag accuracy.
+The ablation script runs BERT-only, GNN-only, early-concatenation fusion, and
+cross-attention fusion. Compare their test Macro-F1, Micro-F1, and mean
+PR-AUC in the report.
 
-## Implemented deliverables
+## Project directories
 
-- Task 1: HuggingFace BERT/DistilBERT tag classifier with BCE loss, macro/micro F1 and PR-AUC curves.
-- Task 2: segment graph construction and GraphSAGE message passing, plus a mel-spectrogram CNN baseline.
-- Task 3: paired graph/text fusion with both early concatenation and cross-attention, optional valence/arousal auxiliary regression, ablation runner, t-SNE, and case-study export.
-- `scripts/make_synthetic_data.py` generates 24 serialised graph samples (meeting the 20-sample submission requirement) and reproducible train/validation/test splits.
+- `data\raw\`: real input audio and metadata; raw files are ignored by Git.
+- `data\processed\graphs\`: serialized audio graphs.
+- `data\processed\manifest.jsonl`: graph paths, text, labels, and split metadata.
+- `results\`: checkpoints, metrics, plots, and prediction examples.
+- `src\`: model, graph, training, evaluation, and metric implementations.
+- `scripts\`: dataset export/training and ablation utilities.
+- `config.yaml`: default model and training settings.
 
-Results are written below `results/`; plots and case studies are generated by `src.evaluate`. Do not use the illustrative scores from the assignment PDF: all metrics produced here come from your actual data.
+Do not use illustrative scores from the assignment PDF. Report only metrics
+generated from the real dataset and record whether Task 1 uses proxy labels.
