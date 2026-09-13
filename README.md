@@ -91,7 +91,11 @@ For a full real-data ablation, omit `--synthetic`:
 python scripts/run_ablations.py --epochs 10
 ```
 
-For actual BERT weights, use an internet connection on the first real-data run. The default model is `distilbert-base-uncased`, chosen to be more practical on a weak computer. Change `model.text_model` in `config.yaml` to `bert-base-uncased` only if you want to test the larger model.
+The Task 1 runner requires actual HuggingFace weights; use an internet connection
+on the first run or provide a locally cached checkpoint. The default model is
+`distilbert-base-uncased`, chosen to be more practical on a weak computer.
+Change `model.text_model` in `config.yaml` to `bert-base-uncased` only if you
+want to test the larger model.
 
 ### MusicCaps caption-to-tag proxy baseline
 
@@ -104,20 +108,26 @@ of `ytid` (or `track_id`/`id`), including clip boundaries when present, so the
 split is reproducible:
 
 ```bash
+# With exactly one CSV in data/raw:
+python scripts/train_bert_musiccaps.py --epochs 10
+
+# Or select the CSV explicitly:
 python scripts/train_bert_musiccaps.py --input data/raw/musiccaps.csv \
   --model-name distilbert-base-uncased --epochs 10
 ```
 
 The command writes `bert_musiccaps_best.pt`, `bert_musiccaps_metrics.json`,
-`bert_musiccaps_test_metrics.json`, and `bert_musiccaps_f1_curve.png` to
-`results/`. Test metrics are computed from the checkpoint with the best
-validation Macro-F1. The JSON history contains Macro-F1 and Micro-F1 for every epoch;
+`bert_musiccaps_test_metrics.json`, `bert_musiccaps_predictions.json`, and
+`bert_musiccaps_f1_curve.png` to `results/`. The predictions file contains five
+test examples with their true tags, predicted tags, and top tag probabilities.
+Test metrics are computed from the checkpoint with the best validation Macro-F1.
+The JSON history contains Macro-F1 and Micro-F1 for every epoch;
 the PNG plots both validation curves. These are proxy-task results and should
 be reported as such, not as human-annotated MusicCaps tag accuracy.
 
 ## Implemented deliverables
 
-- Task 1: HuggingFace BERT/DistilBERT tag classifier with offline lightweight fallback, BCE loss, macro/micro F1 and PR-AUC curves.
+- Task 1: HuggingFace BERT/DistilBERT tag classifier with BCE loss, macro/micro F1 and PR-AUC curves.
 - Task 2: segment graph construction and GraphSAGE message passing, plus a mel-spectrogram CNN baseline.
 - Task 3: paired graph/text fusion with both early concatenation and cross-attention, optional valence/arousal auxiliary regression, ablation runner, t-SNE, and case-study export.
 - `scripts/make_synthetic_data.py` generates 24 serialised graph samples (meeting the 20-sample submission requirement) and reproducible train/validation/test splits.
