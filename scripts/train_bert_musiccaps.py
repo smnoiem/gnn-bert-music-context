@@ -104,6 +104,10 @@ def prepare_rows(path: Path) -> tuple[list[dict], list[str]]:
         if not tags:
             continue
         identifier = _first_value(row, ("ytid", "track_id", "id")) or caption
+        start = _first_value(row, ("start_s", "start"))
+        end = _first_value(row, ("end_s", "end"))
+        if start or end:
+            identifier = f"{identifier}:{start}:{end}"
         prepared.append({"id": identifier, "text": caption, "tags": sorted(set(tags))})
     if not prepared:
         raise ValueError("No caption rows with at least one tag or proxy tag were found.")
@@ -194,8 +198,12 @@ def main() -> None:
         name: DataLoader(CaptionDataset(items), batch_size=args.batch_size, shuffle=name == "train", collate_fn=_collate)
         for name, items in splits.items()
     }
-    optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate)
+    optimizer = torch.optim.AdamW(
+        (parameter for parameter in model.parameters() if parameter.requires_grad),
+        lr=args.learning_rate,
+    )
     history, best = [], -1.0
+    best_checkpoint = output_dir / f"{args.run_name}_best.pt"
     output_dir = ensure_dir(args.output_dir)
     for epoch in range(1, args.epochs + 1):
         train_loss, train_metrics = run_epoch(model, loaders["train"], optimizer, device)
@@ -213,17 +221,43 @@ def main() -> None:
         if val_metrics["macro_f1"] > best:
             best = val_metrics["macro_f1"]
             torch.save(
-                {"model": model.state_dict(), "vocab": vocabulary, "model_name": args.model_name},
-                output_dir / f"{args.run_name}_best.pt",
+                {
+                    "model": model.state_dict(),
+                    "vocab": vocabulary,
+                    "model_name": args.model_name,
+                    "hidden_size": args.hidden_size,
+                    "max_length": args.max_length,
+                    "dataset": "musiccaps",
+                    "proxy_task": True,
+                },
+                best_checkpoint,
             )
 
+    best_state = torch.load(best_checkpoint, map_location=device, weights_only=False)
+    model.load_state_dict(best_state["model"])
     with torch.no_grad():
         test_loss, test_metrics = run_epoch(model, loaders["test"], None, device)
     save_json(
-        {"dataset": "musiccaps", "proxy_task": True, "labels": vocabulary, "history": history},
+        {
+            "dataset": "musiccaps",
+            "proxy_task": True,
+            "labels": vocabulary,
+            "split_sizes": {name: len(items) for name, items in splits.items()},
+            "model_name": args.model_name,
+            "history": history,
+        },
         output_dir / f"{args.run_name}_metrics.json",
     )
-    save_json({"loss": test_loss, **test_metrics}, output_dir / f"{args.run_name}_test_metrics.json")
+    save_json(
+        {
+            "dataset": "musiccaps",
+            "proxy_task": True,
+            "checkpoint": str(best_checkpoint),
+            "loss": test_loss,
+            **test_metrics,
+        },
+        output_dir / f"{args.run_name}_test_metrics.json",
+    )
 
     import matplotlib.pyplot as plt
 
