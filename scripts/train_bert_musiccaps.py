@@ -19,6 +19,7 @@ import numpy as np
 import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
+from tqdm.auto import tqdm
 
 # Allow the documented ``python scripts/...`` invocation from the repository root.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -59,7 +60,17 @@ def _read_rows(path: Path) -> list[dict]:
         return payload
     if suffix == ".csv":
         with path.open(newline="", encoding="utf-8") as handle:
-            return list(csv.DictReader(handle))
+            reader = csv.DictReader(handle)
+            if not reader.fieldnames:
+                raise ValueError(f"CSV input {path} has no header row.")
+            return [
+                {
+                    str(key).strip().lower(): value
+                    for key, value in row.items()
+                    if key is not None
+                }
+                for row in reader
+            ]
     if suffix == ".parquet":
         try:
             import pandas as pd
@@ -71,7 +82,7 @@ def _read_rows(path: Path) -> list[dict]:
 
 def _first_value(row: dict, names: tuple[str, ...]) -> str:
     for name in names:
-        value = row.get(name)
+        value = row.get(name.lower())
         if value is not None and str(value).strip():
             return str(value).strip()
     return ""
@@ -118,15 +129,24 @@ def prepare_rows(path: Path) -> tuple[list[dict], list[str]]:
 
 
 def split_rows(rows: list[dict], seed: int) -> dict[str, list[dict]]:
-    """Split by stable row identity so rerunning never changes the examples."""
+    """Split by stable row identity while guaranteeing three non-empty splits."""
+    if len(rows) < 3:
+        raise ValueError("The input must contain at least three tagged rows.")
+    ranked = sorted(
+        rows,
+        key=lambda row: hashlib.sha256(
+            f"{seed}:{row['id']}".encode("utf-8")
+        ).digest(),
+    )
+    val_count = max(1, round(len(rows) * 0.1))
+    test_count = max(1, round(len(rows) * 0.1))
+    train_count = len(rows) - val_count - test_count
+    if train_count < 1:
+        raise ValueError("The input must contain enough rows for a training split.")
     buckets = {"train": [], "val": [], "test": []}
-    for row in rows:
-        digest = hashlib.sha256(f"{seed}:{row['id']}".encode("utf-8")).digest()
-        value = int.from_bytes(digest[:8], "big") / 2**64
-        split = "train" if value < 0.8 else "val" if value < 0.9 else "test"
-        buckets[split].append(row)
-    if not all(buckets.values()):
-        raise ValueError("The input must contain enough rows for non-empty train, val, and test splits.")
+    buckets["train"] = ranked[:train_count]
+    buckets["val"] = ranked[train_count : train_count + val_count]
+    buckets["test"] = ranked[train_count + val_count :]
     return buckets
 
 
@@ -152,7 +172,15 @@ def run_epoch(model, loader, optimizer, device) -> tuple[float, dict]:
     model.train(training)
     criterion = nn.BCEWithLogitsLoss()
     losses, logits, targets = [], [], []
-    for texts, target in loader:
+    phase = "train" if training else "eval"
+    progress = tqdm(
+        loader,
+        desc=phase,
+        unit="batch",
+        leave=False,
+        dynamic_ncols=True,
+    )
+    for texts, target in progress:
         target = target.to(device)
         prediction = model(texts)
         loss = criterion(prediction, target)
@@ -163,12 +191,48 @@ def run_epoch(model, loader, optimizer, device) -> tuple[float, dict]:
         losses.append(loss.item())
         logits.append(prediction.detach().cpu().numpy())
         targets.append(target.cpu().numpy())
+        progress.set_postfix(loss=f"{loss.item():.4f}")
     return float(np.mean(losses)), multilabel_metrics(np.concatenate(logits), np.concatenate(targets))
+
+
+def prediction_examples(model, rows: list[dict], vocabulary: list[str]) -> list[dict]:
+    """Return human-readable predictions for the first five test examples."""
+    examples = []
+    model.eval()
+    for row in rows[:5]:
+        with torch.no_grad():
+            logits = model([row["text"]])
+            probabilities = torch.sigmoid(logits[0]).cpu().tolist()
+        predicted = [
+            tag for tag, probability in zip(vocabulary, probabilities) if probability >= 0.5
+        ]
+        ranked = sorted(
+            zip(vocabulary, probabilities),
+            key=lambda item: item[1],
+            reverse=True,
+        )
+        examples.append(
+            {
+                "id": row["id"],
+                "text": row["text"],
+                "true_tags": row["tags"],
+                "predicted_tags": predicted,
+                "top_scores": [
+                    {"tag": tag, "probability": round(probability, 6)}
+                    for tag, probability in ranked[:5]
+                ],
+            }
+        )
+    return examples
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", type=Path, required=True, help="MusicCaps CSV, JSON, JSONL, or parquet file.")
+    parser.add_argument(
+        "--input",
+        type=Path,
+        help="MusicCaps CSV, JSON, JSONL, or parquet file (defaults to the only CSV in data/raw).",
+    )
     parser.add_argument("--model-name", default="distilbert-base-uncased")
     parser.add_argument("--output-dir", type=Path, default=Path("results"))
     parser.add_argument("--run-name", default="bert_musiccaps")
@@ -183,9 +247,20 @@ def main() -> None:
     if args.epochs < 1 or args.batch_size < 1:
         raise ValueError("--epochs and --batch-size must be positive.")
 
+    if args.input is None:
+        candidates = sorted(Path("data/raw").glob("*.csv"))
+        if len(candidates) != 1:
+            raise ValueError(
+                "Pass --input explicitly, or place exactly one CSV in data/raw."
+            )
+        args.input = candidates[0]
+    if not args.input.is_file():
+        raise FileNotFoundError(f"Input dataset does not exist: {args.input}")
+
     seed_everything(args.seed)
     rows, vocabulary = prepare_rows(args.input)
     splits = split_rows(rows, args.seed)
+    output_dir = ensure_dir(args.output_dir)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = BertTagClassifier(
         len(vocabulary),
@@ -194,6 +269,7 @@ def main() -> None:
         local_files_only=args.local_files_only,
         max_length=args.max_length,
     ).to(device)
+    backend = model.encoder.backend
     loaders = {
         name: DataLoader(CaptionDataset(items), batch_size=args.batch_size, shuffle=name == "train", collate_fn=_collate)
         for name, items in splits.items()
@@ -204,7 +280,6 @@ def main() -> None:
     )
     history, best = [], -1.0
     best_checkpoint = output_dir / f"{args.run_name}_best.pt"
-    output_dir = ensure_dir(args.output_dir)
     for epoch in range(1, args.epochs + 1):
         train_loss, train_metrics = run_epoch(model, loaders["train"], optimizer, device)
         with torch.no_grad():
@@ -217,7 +292,7 @@ def main() -> None:
             **{f"val_{key}": value for key, value in val_metrics.items()},
         }
         history.append(record)
-        print(record)
+        print(record, flush=True)
         if val_metrics["macro_f1"] > best:
             best = val_metrics["macro_f1"]
             torch.save(
@@ -229,6 +304,7 @@ def main() -> None:
                     "max_length": args.max_length,
                     "dataset": "musiccaps",
                     "proxy_task": True,
+                    "backend": backend,
                 },
                 best_checkpoint,
             )
@@ -237,13 +313,16 @@ def main() -> None:
     model.load_state_dict(best_state["model"])
     with torch.no_grad():
         test_loss, test_metrics = run_epoch(model, loaders["test"], None, device)
+    examples = prediction_examples(model, splits["test"], vocabulary)
     save_json(
         {
             "dataset": "musiccaps",
             "proxy_task": True,
             "labels": vocabulary,
+            "input": str(args.input),
             "split_sizes": {name: len(items) for name, items in splits.items()},
             "model_name": args.model_name,
+            "backend": backend,
             "history": history,
         },
         output_dir / f"{args.run_name}_metrics.json",
@@ -253,10 +332,20 @@ def main() -> None:
             "dataset": "musiccaps",
             "proxy_task": True,
             "checkpoint": str(best_checkpoint),
+            "backend": backend,
             "loss": test_loss,
             **test_metrics,
         },
         output_dir / f"{args.run_name}_test_metrics.json",
+    )
+    save_json(
+        {
+            "dataset": "musiccaps",
+            "proxy_task": True,
+            "backend": backend,
+            "examples": examples,
+        },
+        output_dir / f"{args.run_name}_predictions.json",
     )
 
     import matplotlib.pyplot as plt
