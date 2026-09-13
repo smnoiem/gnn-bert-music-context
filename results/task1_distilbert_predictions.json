@@ -1,0 +1,173 @@
+{
+  "backend": "transformers",
+  "dataset": "musiccaps",
+  "examples": [
+    {
+      "id": "1heMbyumHAo:30:40",
+      "predicted_tags": [
+        "acoustic",
+        "piano"
+      ],
+      "text": "This is a remix of an R&B soul piece. There is a male vocal singing in a laid-back manner joined by an auto-tuned male vocal. The keyboard provides the melody with a gentle bass guitar playing in the background. The rhythmic structure is composed of the acoustic drums and the percussion playing a medium tempo beat. The atmosphere of the piece is groovy and there is a feelgood aura to it. This piece could be used in the soundtrack of a sitcom.",
+      "top_scores": [
+        {
+          "probability": 0.999194,
+          "tag": "piano"
+        },
+        {
+          "probability": 0.998865,
+          "tag": "acoustic"
+        },
+        {
+          "probability": 0.000934,
+          "tag": "pop"
+        },
+        {
+          "probability": 0.000803,
+          "tag": "jazz"
+        },
+        {
+          "probability": 0.000721,
+          "tag": "electronic"
+        }
+      ],
+      "true_tags": [
+        "acoustic",
+        "piano"
+      ]
+    },
+    {
+      "id": "Pzp_oTEn0Yk:30:40",
+      "predicted_tags": [
+        "acoustic",
+        "jazz",
+        "piano"
+      ],
+      "text": "This is a toy package opening video with a jazz music piece in the background. In the piece, there is a clarinet playing the leading melody while other brass elements, the piano and the upright bass are accompanying it with backing tunes. The rhythm is being played by the upbeat jazz acoustic drums. The atmosphere of the piece is lively. If the package opening sounds could be removed, the piece would suit well in the soundtrack of a feelgood animation movie.",
+      "top_scores": [
+        {
+          "probability": 0.997717,
+          "tag": "piano"
+        },
+        {
+          "probability": 0.996231,
+          "tag": "acoustic"
+        },
+        {
+          "probability": 0.992172,
+          "tag": "jazz"
+        },
+        {
+          "probability": 0.003181,
+          "tag": "blues"
+        },
+        {
+          "probability": 0.002466,
+          "tag": "classical"
+        }
+      ],
+      "true_tags": [
+        "acoustic",
+        "jazz",
+        "piano"
+      ]
+    },
+    {
+      "id": "-1LrH01Ei1w:30:40",
+      "predicted_tags": [
+        "folk"
+      ],
+      "text": "This song features a rubber instrument being played. The strumming is fast. The melody is played on one fretted string and other open strings. The melody is played on the lower octave and is later repeated on the higher octave. This song can be played at a folk party.",
+      "top_scores": [
+        {
+          "probability": 0.994165,
+          "tag": "folk"
+        },
+        {
+          "probability": 0.001544,
+          "tag": "electronic"
+        },
+        {
+          "probability": 0.001157,
+          "tag": "classical"
+        },
+        {
+          "probability": 0.001157,
+          "tag": "rock"
+        },
+        {
+          "probability": 0.001083,
+          "tag": "jazz"
+        }
+      ],
+      "true_tags": [
+        "folk"
+      ]
+    },
+    {
+      "id": "HVA9-fjtv6U:60:70",
+      "predicted_tags": [
+        "piano"
+      ],
+      "text": "This music is a short instrumental. The tempo is medium with a church organ harmony with a male voice speaking something incoherent and subtle sounds like clinking and whirring. The audio is short and skillful. This is a tutorial on how to play the piano/organ.",
+      "top_scores": [
+        {
+          "probability": 0.999398,
+          "tag": "piano"
+        },
+        {
+          "probability": 0.000232,
+          "tag": "pop"
+        },
+        {
+          "probability": 0.000232,
+          "tag": "classical"
+        },
+        {
+          "probability": 0.000199,
+          "tag": "acoustic"
+        },
+        {
+          "probability": 0.000191,
+          "tag": "electronic"
+        }
+      ],
+      "true_tags": [
+        "piano"
+      ]
+    },
+    {
+      "id": "2dyxjGTXSpA:30:40",
+      "predicted_tags": [
+        "piano"
+      ],
+      "text": "A male vocalist sings this intense melody in a foreign language.The tempo is slow with a keyboard and organ accompaniment that is burgeoning as the song progresses. The vocals are eloquent, emphatic, persuasive and lilting and the vibe of the song is mellow, persuasive, passionate, emotional and appealing.",
+      "top_scores": [
+        {
+          "probability": 0.999501,
+          "tag": "piano"
+        },
+        {
+          "probability": 0.000364,
+          "tag": "pop"
+        },
+        {
+          "probability": 0.000212,
+          "tag": "classical"
+        },
+        {
+          "probability": 0.000208,
+          "tag": "electronic"
+        },
+        {
+          "probability": 0.00018,
+          "tag": "ambient"
+        }
+      ],
+      "true_tags": [
+        "piano"
+      ]
+    }
+  ],
+  "proxy_task": true
+}

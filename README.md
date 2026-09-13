@@ -65,7 +65,7 @@ proxy-task labels, not human-annotated MusicCaps tags.
 Run this from the repository root:
 
 ```powershell
-python scripts\train_bert_musiccaps.py --input data\raw\musiccaps.csv --model-name distilbert-base-uncased --output-dir results --run-name task1_distilbert --epochs 10 --batch-size 8 --learning-rate 2e-5 --max-length 128 --hidden-size 256 --seed 42
+python scripts\train_bert_musiccaps.py --input data\raw\musiccaps\musiccaps_public.csv --model-name distilbert-base-uncased --output-dir results --run-name task1_distilbert --epochs 10 --batch-size 8 --learning-rate 2e-5 --max-length 128 --hidden-size 256 --seed 42
 ```
 
 This command uses the best validation Macro-F1 checkpoint and evaluates it on
