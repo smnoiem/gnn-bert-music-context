@@ -18,8 +18,8 @@ class SimpleTextEncoder(nn.Module):
 
 
 class BertTextEncoder(nn.Module):
-    def __init__(self, model_name: str = "distilbert-base-uncased", hidden_size: int = 256, freeze: bool = False, local_files_only: bool = False):
-        super().__init__(); self.backend = "simple"
+    def __init__(self, model_name: str = "distilbert-base-uncased", hidden_size: int = 256, freeze: bool = False, local_files_only: bool = False, max_length: int = 128):
+        super().__init__(); self.backend = "simple"; self.max_length = max_length
         try:
             from transformers import AutoModel, AutoTokenizer
             self.tokenizer = AutoTokenizer.from_pretrained(model_name, local_files_only=local_files_only)
@@ -33,7 +33,7 @@ class BertTextEncoder(nn.Module):
     def forward(self, texts: list[str], return_tokens: bool = False):
         if self.backend == "simple":
             pooled = self.model(texts); return (pooled[:, None, :], pooled) if return_tokens else pooled
-        batch = self.tokenizer(texts, padding=True, truncation=True, max_length=128, return_tensors="pt").to(next(self.model.parameters()).device)
+        batch = self.tokenizer(texts, padding=True, truncation=True, max_length=self.max_length, return_tensors="pt").to(next(self.model.parameters()).device)
         out = self.model(**batch).last_hidden_state; token = self.project(out); pooled = token[:, 0]
         return (token, pooled) if return_tokens else pooled
 
