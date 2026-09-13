@@ -100,7 +100,8 @@ standalone Task 1 runner therefore accepts a local MusicCaps CSV, JSON, JSONL,
 or parquet export and creates reproducible proxy tags by matching documented
 music phrases in each caption. If the input already has a `tags`, `labels`, or
 `label` column, those labels are used instead. Rows are split by a stable hash
-of `ytid` (or `track_id`/`id`) so the split is reproducible:
+of `ytid` (or `track_id`/`id`), including clip boundaries when present, so the
+split is reproducible:
 
 ```bash
 python scripts/train_bert_musiccaps.py --input data/raw/musiccaps.csv \
@@ -109,7 +110,8 @@ python scripts/train_bert_musiccaps.py --input data/raw/musiccaps.csv \
 
 The command writes `bert_musiccaps_best.pt`, `bert_musiccaps_metrics.json`,
 `bert_musiccaps_test_metrics.json`, and `bert_musiccaps_f1_curve.png` to
-`results/`. The JSON history contains Macro-F1 and Micro-F1 for every epoch;
+`results/`. Test metrics are computed from the checkpoint with the best
+validation Macro-F1. The JSON history contains Macro-F1 and Micro-F1 for every epoch;
 the PNG plots both validation curves. These are proxy-task results and should
 be reported as such, not as human-annotated MusicCaps tag accuracy.
 

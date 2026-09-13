@@ -1,7 +1,17 @@
 from __future__ import annotations
 
+import hashlib
+
 import torch
 from torch import nn
+
+
+def _stable_token_ids(text: str, buckets: int) -> list[int]:
+    tokens = []
+    for word in text.lower().split():
+        digest = hashlib.sha256(word.encode("utf-8")).digest()
+        tokens.append(int.from_bytes(digest[:8], "big") % buckets)
+    return tokens or [0]
 
 
 class SimpleTextEncoder(nn.Module):
@@ -11,7 +21,7 @@ class SimpleTextEncoder(nn.Module):
     def forward(self, texts: list[str]):
         ids, offsets = [], [0]
         for text in texts:
-            tokens = [abs(hash(x)) % self.buckets for x in text.lower().split()] or [0]
+            tokens = _stable_token_ids(text, self.buckets)
             ids.extend(tokens); offsets.append(offsets[-1] + len(tokens))
         device = self.embedding.weight.device
         return self.embedding(torch.tensor(ids, device=device), torch.tensor(offsets[:-1], device=device))
@@ -19,7 +29,7 @@ class SimpleTextEncoder(nn.Module):
 
 class BertTextEncoder(nn.Module):
     def __init__(self, model_name: str = "distilbert-base-uncased", hidden_size: int = 256, freeze: bool = False, local_files_only: bool = False, max_length: int = 128):
-        super().__init__(); self.backend = "simple"; self.max_length = max_length
+        super().__init__(); self.backend = "simple"; self.max_length = max_length; self.tokenizer = None
         try:
             from transformers import AutoModel, AutoTokenizer
             self.tokenizer = AutoTokenizer.from_pretrained(model_name, local_files_only=local_files_only)
