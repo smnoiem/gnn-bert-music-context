@@ -5,14 +5,123 @@ from pathlib import Path
 import numpy as np
 import torch
 from torch import nn
+from torch.utils.data import Dataset
 import yaml
 
 from .bert_encoder import BertTagClassifier
-from .data import MusicGraphDataset
 from .fusion_model import FusionModel
 from .gnn_model import GNNClassifier
 from .metrics import multilabel_metrics
 from .utils import ensure_dir, save_json, seed_everything
+
+
+def load_manifest(manifest: str | Path) -> list[dict]:
+    with open(manifest, encoding="utf-8") as stream:
+        rows = [json.loads(line) for line in stream if line.strip()]
+    if not rows:
+        raise ValueError(f"Manifest is empty: {manifest}")
+    return rows
+
+
+def label_vocabulary(rows: list[dict]) -> list[str]:
+    return sorted(
+        {
+            tag
+            for row in rows
+            for tag in str(row.get("labels", "")).split("|")
+            if tag
+        }
+    )
+
+
+def genre_vocabulary(rows: list[dict]) -> list[str]:
+    genres = sorted({str(row.get("genre", "")).strip() for row in rows})
+    if not genres or "" in genres:
+        raise ValueError("Every graph manifest row must contain a non-empty genre")
+    return genres
+
+
+def encode_genre(genre: str, vocabulary: list[str]) -> torch.Tensor:
+    try:
+        return torch.tensor(vocabulary.index(str(genre).strip()), dtype=torch.long)
+    except ValueError as exc:
+        raise ValueError(f"Unknown genre {genre!r}; expected one of {vocabulary}") from exc
+
+
+def assert_no_artist_leakage(rows: list[dict]) -> None:
+    seen = {}
+    for row in rows:
+        artist, split = row.get("artist_id"), row.get("split")
+        if artist and artist in seen and seen[artist] != split:
+            raise ValueError(
+                f"artist leakage: {artist} in {seen[artist]} and {split}"
+            )
+        if artist:
+            seen[artist] = split
+
+
+class MusicGraphDataset(Dataset):
+    def __init__(
+        self,
+        manifest: str | Path,
+        split: str | None = None,
+        vocab: list[str] | None = None,
+    ):
+        rows = load_manifest(manifest)
+        assert_no_artist_leakage(rows)
+        self.rows = [row for row in rows if split is None or row.get("split") == split]
+        self.vocab = vocab or label_vocabulary(rows)
+
+    def __len__(self) -> int:
+        return len(self.rows)
+
+    def __getitem__(self, index: int) -> dict:
+        row = self.rows[index]
+        graph = torch.load(row["graph"], weights_only=False)
+        tagged = set(str(row["labels"]).split("|"))
+        graph["y"] = torch.tensor(
+            [label in tagged for label in self.vocab], dtype=torch.float32
+        )
+        graph["text"] = row.get("text", "")
+        graph["track_id"] = row["track_id"]
+        if "valence" in row:
+            graph["emotion"] = torch.tensor(
+                [float(row["valence"]), float(row["arousal"])]
+            )
+        return graph
+
+
+class GenreGraphDataset(Dataset):
+    """Load Task 2 graph samples with single-label genre targets."""
+
+    def __init__(
+        self,
+        manifest: str | Path,
+        split: str | None = None,
+        vocabulary: list[str] | None = None,
+    ):
+        rows = load_manifest(manifest)
+        assert_no_artist_leakage(rows)
+        self.rows = [row for row in rows if split is None or row.get("split") == split]
+        if not self.rows:
+            raise ValueError(f"No graph samples found for split {split!r}")
+        self.vocabulary = vocabulary or genre_vocabulary(rows)
+
+    def __len__(self) -> int:
+        return len(self.rows)
+
+    def __getitem__(self, index: int) -> dict:
+        row = self.rows[index]
+        graph_path = Path(row["graph"])
+        if not graph_path.is_file():
+            raise FileNotFoundError(f"Graph file was not found: {graph_path}")
+        graph = torch.load(graph_path, weights_only=False)
+        if "x" not in graph or "edge_index" not in graph:
+            raise ValueError(f"Graph is missing x or edge_index: {graph_path}")
+        graph["y"] = encode_genre(row["genre"], self.vocabulary)
+        graph["track_id"] = int(row["track_id"])
+        graph["genre"] = str(row["genre"])
+        return graph
 
 
 def device_graph(graph, device): return {k: (v.to(device) if torch.is_tensor(v) else v) for k, v in graph.items()}

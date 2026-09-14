@@ -6,11 +6,10 @@ import torch
 import matplotlib.pyplot as plt
 
 from .bert_encoder import BertTagClassifier
-from .data import MusicGraphDataset
 from .fusion_model import FusionModel
 from .gnn_model import GNNClassifier
 from .metrics import multilabel_metrics
-from .train import device_graph
+from .train import MusicGraphDataset, device_graph
 from .utils import ensure_dir, save_json
 
 
