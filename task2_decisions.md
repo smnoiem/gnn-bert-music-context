@@ -27,8 +27,11 @@ The Task 2 implementation follows the PDF project tree: reusable preprocessing,
 graph, model, training, and evaluation code belongs under `src/`; raw inputs
 belong under `data/raw/`; generated features and graphs belong under
 `data/processed/`; split files belong under `data/splits/`; and outputs belong
-under `results/`. The PDF-listed `scripts/` directory is not used for the new
-Task 2 pipeline.
+under `results/`. Task 2 uses the following task-specific generated locations:
+`data/processed/task2/` for derived metadata, graphs, and the named graph
+manifest; `data/splits/task2/` for split files; and `results/task2/` for model
+checkpoints and evaluation outputs. The PDF-listed `scripts/` directory is not
+used for the new Task 2 pipeline.
 
 Existing Task 1 and Task 3 code does not need to remain intact when it conflicts
 with the requirements or with a coherent Task 2 architecture. Modules may be

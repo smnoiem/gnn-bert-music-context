@@ -85,32 +85,47 @@ To use a locally cached model without network access, add
 
 ## Tasks 2 and 3: real audio graphs and fusion
 
-These tasks require a real `data\raw\metadata.csv` and the corresponding audio
-files. The metadata must contain `track_id`, `path`, `text`, `labels`, `split`,
-and `artist_id`. `path` is relative to `data\raw\audio`; `labels` are separated
-by `|`; and each artist must occur in only one split.
+Task 2 keeps its derived metadata, graphs, manifest, splits, and results in
+task-specific locations. The original FMA files remain under `data\raw\fma`.
 
-Place the files as follows:
+The relevant layout is:
 
 ```text
 data\
   raw\
-    audio\
-      <real audio files>
-    metadata.csv
+    fma\
+      fma_metadata\
+      fma_small\
+  processed\
+    task2\
+      fma_metadata.csv
+      graphs\
+      task2_graph_manifest.jsonl
+  splits\
+    task2\
+      train.json
+      val.json
+      test.json
+results\
+  task2\
+    graphsage_genre_best.pt
+    graphsage_genre_metrics.json
+    cnn_melspectrogram_genre_best.pt
+    cnn_melspectrogram_genre_metrics.json
 ```
 
 Build the segment graphs:
 
 ```powershell
-python -m src.graph_builder --prepare-metadata --tracks-csv data\raw\fma\fma_metadata\tracks.csv --audio-root data\raw\fma\fma_small --metadata-output data\raw\metadata.csv
-python -m src.graph_builder --metadata data\raw\metadata.csv --audio-root data\raw\fma\fma_small --output data\processed\graphs --manifest data\processed\manifest.jsonl --split-dir data\splits --sample-rate 22050 --segment-seconds 5 --threshold 0.75
+python -m src.graph_builder --prepare-metadata --tracks-csv data\raw\fma\fma_metadata\tracks.csv --audio-root data\raw\fma\fma_small --metadata-output data\processed\task2\fma_metadata.csv
+python -m src.graph_builder --metadata data\processed\task2\fma_metadata.csv --audio-root data\raw\fma\fma_small --output data\processed\task2\graphs --manifest data\processed\task2\task2_graph_manifest.jsonl --split-dir data\splits\task2 --sample-rate 22050 --segment-seconds 5 --threshold 0.75
 ```
 
 Train the real-data models:
 
 ```powershell
-python -m src.train --task genre_gnn --config config.yaml --manifest data\processed\manifest.jsonl --run-name task2_gnn --epochs 10
+python -m src.train --task genre_gnn --config config.yaml --manifest data\processed\task2\task2_graph_manifest.jsonl --run-name task2\graphsage_genre --epochs 10
+python -m src.train --task genre_cnn --config config.yaml --manifest data\processed\task2\task2_graph_manifest.jsonl --metadata data\processed\task2\fma_metadata.csv --audio-root data\raw\fma\fma_small --run-name task2\cnn_melspectrogram_genre --epochs 10
 python -m src.train --task bert --config config.yaml --manifest data\processed\manifest.jsonl --run-name task1_bert --epochs 10
 python -m src.train --task gnn --config config.yaml --manifest data\processed\manifest.jsonl --run-name task2_gnn --epochs 10
 python -m src.train --task fusion --config config.yaml --manifest data\processed\manifest.jsonl --run-name task3_fusion --epochs 10
@@ -119,8 +134,12 @@ python -m src.train --task fusion --config config.yaml --manifest data\processed
 Evaluate the best Task 2 checkpoint:
 
 ```powershell
-python -m src.evaluate --task genre_gnn --checkpoint results\task2_gnn_best.pt --manifest data\processed\manifest.jsonl --output-dir results
+python -m src.evaluate --task genre_gnn --checkpoint results\task2\graphsage_genre_best.pt --manifest data\processed\task2\task2_graph_manifest.jsonl --output-dir results\task2
 ```
+
+Task 2 evaluation writes `task2_graphsage_test_metrics.json`,
+`task2_graphsage_predictions.json`, and
+`plots\task2_graphsage_confusion_matrix.png` under `results\task2`.
 
 For the Task 3 early-concatenation comparison:
 

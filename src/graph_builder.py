@@ -194,12 +194,16 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Prepare FMA metadata or build Task 2 graphs.")
     parser.add_argument("--prepare-metadata", action="store_true")
     parser.add_argument("--tracks-csv", default="data/raw/fma/fma_metadata/tracks.csv")
-    parser.add_argument("--metadata-output", default="data/raw/metadata.csv")
+    parser.add_argument(
+        "--metadata-output", default="data/processed/task2/fma_metadata.csv"
+    )
     parser.add_argument("--metadata")
     parser.add_argument("--audio-root", default="data/raw/fma/fma_small")
-    parser.add_argument("--output", default="data/processed/graphs")
-    parser.add_argument("--manifest", default="data/processed/manifest.jsonl")
-    parser.add_argument("--split-dir", default="data/splits")
+    parser.add_argument("--output", default="data/processed/task2/graphs")
+    parser.add_argument(
+        "--manifest", default="data/processed/task2/task2_graph_manifest.jsonl"
+    )
+    parser.add_argument("--split-dir", default="data/splits/task2")
     parser.add_argument("--sample-rate", type=int, default=22050)
     parser.add_argument("--segment-seconds", type=float, default=5.0)
     parser.add_argument("--threshold", type=float, default=0.75)

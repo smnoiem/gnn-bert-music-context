@@ -98,13 +98,13 @@ def evaluate_genre_gnn(checkpoint_path: Path, manifest: Path, output_dir: Path) 
     targets_array = np.asarray(targets)
     metrics = single_label_metrics(predictions_array, targets_array, genres)
     plots = ensure_dir(output_dir / "plots")
-    save_json(metrics, output_dir / "task2_gnn_test_metrics.json")
-    save_json({"predictions": cases}, output_dir / "task2_gnn_predictions.json")
+    save_json(metrics, output_dir / "task2_graphsage_test_metrics.json")
+    save_json({"predictions": cases}, output_dir / "task2_graphsage_predictions.json")
     save_confusion_matrix(
         predictions_array,
         targets_array,
         genres,
-        plots / "task2_gnn_confusion_matrix.png",
+        plots / "task2_graphsage_confusion_matrix.png",
     )
     return metrics
 
@@ -112,7 +112,9 @@ def evaluate_genre_gnn(checkpoint_path: Path, manifest: Path, output_dir: Path) 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Evaluate project models.")
     parser.add_argument("--checkpoint", required=True)
-    parser.add_argument("--manifest", default="data/processed/manifest.jsonl")
+    parser.add_argument(
+        "--manifest", default="data/processed/task2/task2_graph_manifest.jsonl"
+    )
     parser.add_argument("--task", choices=["genre_gnn", "bert", "gnn", "fusion"], required=True)
     parser.add_argument("--output-dir", default="results")
     args = parser.parse_args()
