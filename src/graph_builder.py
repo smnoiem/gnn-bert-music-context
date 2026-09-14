@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import logging
 import json
 from pathlib import Path
 
@@ -9,6 +10,7 @@ import pandas as pd
 import torch
 
 from .audio_features import load_audio, segment_features
+from .utils import configure_logging, progress
 from .utils import ensure_dir
 
 
@@ -159,7 +161,11 @@ def build_graph_dataset(
     _write_split_files(metadata, split_dir)
 
     manifest: list[dict[str, object]] = []
-    for row in metadata.itertuples(index=False):
+    for row in progress(
+        metadata.itertuples(index=False),
+        desc="Building graph samples",
+        total=len(metadata),
+    ):
         audio_path = audio_root / str(row.path)
         waveform, actual_rate = load_audio(str(audio_path), sample_rate)
         features = segment_features(waveform, actual_rate, segment_seconds)
@@ -191,6 +197,7 @@ def build_graph_dataset(
 
 
 def main() -> None:
+    logger = configure_logging()
     parser = argparse.ArgumentParser(description="Prepare FMA metadata or build Task 2 graphs.")
     parser.add_argument("--prepare-metadata", action="store_true")
     parser.add_argument("--tracks-csv", default="data/raw/fma/fma_metadata/tracks.csv")
@@ -211,8 +218,8 @@ def main() -> None:
 
     if args.prepare_metadata:
         metadata = prepare_fma_metadata(args.tracks_csv, args.audio_root, args.metadata_output)
-        print(f"Wrote {len(metadata)} tracks to {args.metadata_output}")
-        print(metadata.groupby("split").size().to_string())
+        logger.info("Wrote %d tracks to %s", len(metadata), args.metadata_output)
+        logger.info("Split counts:\n%s", metadata.groupby("split").size().to_string())
         return
     if not args.metadata:
         parser.error("--metadata is required unless --prepare-metadata is used")
@@ -227,8 +234,8 @@ def main() -> None:
         args.segment_seconds,
         args.threshold,
     )
-    print(f"Wrote {len(manifest)} graphs to {args.output}")
-    print(f"Wrote manifest to {args.manifest}")
+    logger.info("Wrote %d graphs to %s", len(manifest), args.output)
+    logger.info("Wrote manifest to %s", args.manifest)
 
 
 if __name__ == "__main__":

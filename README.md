@@ -42,6 +42,15 @@ For later sessions, run these commands from the project directory:
 The first training run downloads `distilbert-base-uncased` from Hugging Face.
 An internet connection is required unless the model has already been cached.
 
+## Logs and progress
+
+Command-line workflows emit timestamped `INFO` logs for setup, phase changes,
+epoch summaries, output files, and failures. Dataset and graph-building loops
+also show live progress bars. Progress is written to stderr so JSON metrics and
+other structured output on stdout remain usable. Ablation child processes inherit
+unbuffered output, so each command's logs appear as it runs rather than only
+after the process exits.
+
 ## Task 1: train the DistilBERT text classifier
 
 ### 1. Export the MusicCaps captions

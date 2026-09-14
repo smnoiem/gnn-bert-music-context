@@ -26,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.bert_encoder import BertTagClassifier
 from src.metrics import multilabel_metrics
-from src.utils import ensure_dir, save_json, seed_everything
+from src.utils import configure_logging, ensure_dir, save_json, seed_everything
 
 
 PROXY_TAGS = {
@@ -227,6 +227,7 @@ def prediction_examples(model, rows: list[dict], vocabulary: list[str]) -> list[
 
 
 def main() -> None:
+    logger = configure_logging()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--input",
@@ -260,6 +261,12 @@ def main() -> None:
     seed_everything(args.seed)
     rows, vocabulary = prepare_rows(args.input)
     splits = split_rows(rows, args.seed)
+    logger.info(
+        "Prepared %d rows (%s); vocabulary=%d labels",
+        len(rows),
+        ", ".join(f"{name}={len(items)}" for name, items in splits.items()),
+        len(vocabulary),
+    )
     output_dir = ensure_dir(args.output_dir)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = BertTagClassifier(
@@ -280,6 +287,7 @@ def main() -> None:
     )
     history, best = [], -1.0
     best_checkpoint = output_dir / f"{args.run_name}_best.pt"
+    logger.info("Starting %s for %d epochs on %s", args.run_name, args.epochs, device)
     for epoch in range(1, args.epochs + 1):
         train_loss, train_metrics = run_epoch(model, loaders["train"], optimizer, device)
         with torch.no_grad():
@@ -292,7 +300,7 @@ def main() -> None:
             **{f"val_{key}": value for key, value in val_metrics.items()},
         }
         history.append(record)
-        print(record, flush=True)
+        logger.info("Epoch %d/%d: %s", epoch, args.epochs, record)
         if val_metrics["macro_f1"] > best:
             best = val_metrics["macro_f1"]
             torch.save(
@@ -360,6 +368,7 @@ def main() -> None:
     plt.tight_layout()
     plt.savefig(output_dir / f"{args.run_name}_f1_curve.png", dpi=160)
     plt.close()
+    logger.info("Completed %s; test metrics: loss=%.4f, %s", args.run_name, test_loss, test_metrics)
 
 
 if __name__ == "__main__":
