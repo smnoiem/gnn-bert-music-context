@@ -10,7 +10,7 @@ from sklearn.metrics import average_precision_score
 
 from .gnn_model import GenreGraphSAGEClassifier, MelCNN
 from .train import GenreGraphDataset, GenreMelDataset, device_graph
-from .utils import ensure_dir, save_json
+from .utils import configure_logging, ensure_dir, save_json
 
 
 def single_label_metrics(
@@ -200,6 +200,7 @@ def evaluate_genre_cnn(
 
 
 def main() -> None:
+    logger = configure_logging()
     parser = argparse.ArgumentParser(description="Evaluate project models.")
     parser.add_argument("--checkpoint", required=True)
     parser.add_argument(
@@ -215,7 +216,8 @@ def main() -> None:
     output_dir = ensure_dir(args.output_dir)
     if args.task == "genre_gnn":
         metrics = evaluate_genre_gnn(args.checkpoint, args.manifest, output_dir)
-        print(metrics)
+        logger.info("Evaluation complete: %s", metrics)
+        print(metrics, flush=True)
         return
     if args.task == "genre_cnn":
         metrics = evaluate_genre_cnn(
@@ -225,7 +227,8 @@ def main() -> None:
             args.audio_root,
             output_dir,
         )
-        print(metrics)
+        logger.info("Evaluation complete: %s", metrics)
+        print(metrics, flush=True)
         return
     raise NotImplementedError("Only Task 2 genre_gnn and genre_cnn evaluation is currently implemented.")
 

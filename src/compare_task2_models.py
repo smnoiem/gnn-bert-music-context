@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from .utils import save_json
+from .utils import configure_logging, save_json
 
 
 METRIC_NAMES = ("accuracy", "macro_f1", "micro_f1", "auc_pr")
@@ -50,6 +50,7 @@ def compare_task2_models(
 
 
 def main() -> None:
+    logger = configure_logging()
     parser = argparse.ArgumentParser(
         description="Compare the Task 2 GraphSAGE model with the CNN baseline."
     )
@@ -71,7 +72,13 @@ def main() -> None:
         Path(args.cnn_metrics),
         Path(args.output),
     )
-    print(json.dumps(comparison, indent=2))
+    logger.info(
+        "Compared GraphSAGE metrics from %s with CNN metrics from %s; wrote %s",
+        args.graphsage_metrics,
+        args.cnn_metrics,
+        args.output,
+    )
+    print(json.dumps(comparison, indent=2), flush=True)
 
 
 if __name__ == "__main__":

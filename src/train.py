@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse, csv, json
+import logging
 from pathlib import Path
 import numpy as np
 import torch
@@ -13,7 +14,10 @@ from .bert_encoder import BertTagClassifier
 from .fusion_model import FusionModel
 from .gnn_model import GNNClassifier, GenreGraphSAGEClassifier, MelCNN
 from .metrics import multilabel_metrics
-from .utils import ensure_dir, save_json, seed_everything
+from .utils import configure_logging, ensure_dir, progress, save_json, seed_everything
+
+
+LOGGER = logging.getLogger("music-context")
 
 
 def load_manifest(manifest: str | Path) -> list[dict]:
@@ -211,7 +215,8 @@ def device_graph(graph, device): return {k: (v.to(device) if torch.is_tensor(v) 
 
 def run_epoch(model, data, optimizer, task, device):
     training = optimizer is not None; model.train(training); criterion = nn.BCEWithLogitsLoss(); losses=[]; logits=[]; targets=[]
-    for graph in data:
+    phase = "train" if training else "validation"
+    for graph in progress(data, desc=f"{phase} batches", total=len(data)):
         graph = device_graph(graph, device); y = graph["y"].unsqueeze(0).to(device)
         if task == "bert": prediction = model([graph["text"]])
         elif task == "gnn": prediction = model(graph).unsqueeze(0)
@@ -248,7 +253,8 @@ def run_genre_epoch(model, data, optimizer, device, num_classes: int) -> tuple[f
     losses: list[float] = []
     predictions: list[int] = []
     targets: list[int] = []
-    for graph in data:
+    phase = "train" if training else "validation"
+    for graph in progress(data, desc=f"{phase} batches", total=len(data)):
         graph = device_graph(graph, device)
         target = graph["y"].reshape(1).to(device)
         logits = model(graph).reshape(1, num_classes)
@@ -270,7 +276,8 @@ def run_cnn_epoch(model, data, optimizer, device, num_classes: int) -> tuple[flo
     losses: list[float] = []
     predictions: list[int] = []
     targets: list[int] = []
-    for sample in data:
+    phase = "train" if training else "validation"
+    for sample in progress(data, desc=f"{phase} batches", total=len(data)):
         inputs = sample["x"].to(device)
         target = sample["y"].reshape(1).to(device)
         segment_logits = model(inputs)
@@ -339,7 +346,9 @@ def train_genre_gnn(args, cfg) -> None:
     results = ensure_dir("results/task2")
     history = []
     best = -1.0
-    for epoch in range(args.epochs or cfg["training"]["epochs"]):
+    total_epochs = args.epochs or cfg["training"]["epochs"]
+    LOGGER.info("Starting %s for %d epochs on %s", run_name, total_epochs, device)
+    for epoch in range(total_epochs):
         train_loss, train_metrics = run_genre_epoch(
             model, train, optimizer, device, len(train.vocabulary)
         )
@@ -354,7 +363,7 @@ def train_genre_gnn(args, cfg) -> None:
             **{f"val_{key}": value for key, value in val_metrics.items()},
         }
         history.append(row)
-        print(row)
+        LOGGER.info("Epoch %d/%d: %s", epoch + 1, total_epochs, row)
         if val_metrics["macro_f1"] > best:
             best = val_metrics["macro_f1"]
             torch.save(
@@ -389,6 +398,7 @@ def train_genre_gnn(args, cfg) -> None:
         ensure_dir(results / "plots") / "task2_graphsage_learning_curves.png",
         "Task 2 GraphSAGE learning curves",
     )
+    LOGGER.info("Completed %s; test metrics: %s", run_name, test_metrics)
 
 
 def train_genre_cnn(args, cfg) -> None:
@@ -424,7 +434,9 @@ def train_genre_cnn(args, cfg) -> None:
     results = ensure_dir("results/task2")
     history = []
     best = -1.0
-    for epoch in range(args.epochs or cfg["training"]["epochs"]):
+    total_epochs = args.epochs or cfg["training"]["epochs"]
+    LOGGER.info("Starting %s for %d epochs on %s", run_name, total_epochs, device)
+    for epoch in range(total_epochs):
         train_loss, train_metrics = run_cnn_epoch(
             model, train, optimizer, device, len(train.vocabulary)
         )
@@ -439,7 +451,7 @@ def train_genre_cnn(args, cfg) -> None:
             **{f"val_{key}": value for key, value in val_metrics.items()},
         }
         history.append(row)
-        print(row)
+        LOGGER.info("Epoch %d/%d: %s", epoch + 1, total_epochs, row)
         if val_metrics["macro_f1"] > best:
             best = val_metrics["macro_f1"]
             torch.save(
@@ -474,11 +486,16 @@ def train_genre_cnn(args, cfg) -> None:
         ensure_dir(results / "plots") / "task2_cnn_learning_curves.png",
         "Task 2 CNN learning curves",
     )
+    LOGGER.info("Completed %s; test metrics: %s", run_name, test_metrics)
 
 
 def main():
+    configure_logging()
     ap=argparse.ArgumentParser(); ap.add_argument("--task", choices=["bert","gnn","fusion","genre_gnn","genre_cnn"], required=True); ap.add_argument("--config", default="config.yaml"); ap.add_argument("--manifest", default="data/processed/task2/task2_graph_manifest.jsonl"); ap.add_argument("--metadata", default="data/processed/task2/fma_metadata.csv"); ap.add_argument("--audio-root", default="data/raw/fma/fma_small"); ap.add_argument("--synthetic", action="store_true"); ap.add_argument("--epochs", type=int); ap.add_argument("--early-concat", action="store_true"); ap.add_argument("--run-name"); args=ap.parse_args()
-    cfg=yaml.safe_load(open(args.config)); seed_everything(cfg["seed"])
+    with open(args.config, encoding="utf-8") as stream:
+        cfg = yaml.safe_load(stream)
+    seed_everything(cfg["seed"])
+    LOGGER.info("Task=%s, seed=%s, synthetic=%s", args.task, cfg["seed"], args.synthetic)
     if args.synthetic: args.manifest="data/processed/manifest.jsonl"
     if args.task == "genre_gnn":
         train_genre_gnn(args, cfg)
@@ -493,13 +510,16 @@ def main():
     else: model=FusionModel(**model_args, cross_attention=not args.early_concat, local_files_only=args.synthetic)
     device=torch.device("cuda" if torch.cuda.is_available() else "cpu"); model.to(device); opt=torch.optim.AdamW(filter(lambda p:p.requires_grad, model.parameters()), lr=cfg["training"]["learning_rate"], weight_decay=cfg["training"]["weight_decay"])
     results=ensure_dir("results"); run_name=args.run_name or args.task; history=[]; best=-1
-    for epoch in range(args.epochs or cfg["training"]["epochs"]):
-        tl,tm=run_epoch(model, train, opt, args.task, device); vl,vm=run_epoch(model, val, None, args.task, device); row={"epoch":epoch+1,"train_loss":tl,"val_loss":vl,**{f"train_{k}":v for k,v in tm.items()},**{f"val_{k}":v for k,v in vm.items()}}; history.append(row); print(row)
+    total_epochs = args.epochs or cfg["training"]["epochs"]
+    LOGGER.info("Starting %s for %d epochs on %s", run_name, total_epochs, device)
+    for epoch in range(total_epochs):
+        tl,tm=run_epoch(model, train, opt, args.task, device); vl,vm=run_epoch(model, val, None, args.task, device); row={"epoch":epoch+1,"train_loss":tl,"val_loss":vl,**{f"train_{k}":v for k,v in tm.items()},**{f"val_{k}":v for k,v in vm.items()}}; history.append(row); LOGGER.info("Epoch %d/%d: %s", epoch + 1, total_epochs, row)
         if vm["macro_f1"] > best: best=vm["macro_f1"]; torch.save({"model":model.state_dict(),"vocab":train.vocab,"config":cfg,"task":args.task,"early_concat":args.early_concat}, results / f"{run_name}_best.pt")
     save_json({"task":args.task,"labels":train.vocab,"history":history}, results / f"{run_name}_metrics.json")
     # Required learning curves: metrics are also retained as JSON for the report table.
     import matplotlib.pyplot as plt
     epochs = [x["epoch"] for x in history]
     plt.figure(figsize=(6, 4)); plt.plot(epochs, [x["train_macro_f1"] for x in history], label="train macro-F1"); plt.plot(epochs, [x["val_macro_f1"] for x in history], label="validation macro-F1"); plt.plot(epochs, [x["val_micro_f1"] for x in history], label="validation micro-F1"); plt.xlabel("epoch"); plt.ylabel("F1"); plt.legend(); plt.tight_layout(); plt.savefig(results / f"{run_name}_f1_curve.png", dpi=160); plt.close()
+    LOGGER.info("Completed %s; metrics written to %s", run_name, results)
 
 if __name__ == "__main__": main()
