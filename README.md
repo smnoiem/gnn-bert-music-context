@@ -65,7 +65,7 @@ proxy-task labels, not human-annotated MusicCaps tags.
 Run this from the repository root:
 
 ```powershell
-python scripts\train_bert_musiccaps.py --input data\raw\musiccaps\musiccaps_public.csv --model-name distilbert-base-uncased --output-dir results --run-name task1_distilbert --epochs 10 --batch-size 8 --learning-rate 2e-5 --max-length 128 --hidden-size 256 --seed 42
+python -m src.train_bert_musiccaps --input data\raw\musiccaps\musiccaps_public.csv --model-name distilbert-base-uncased --output-dir results --run-name task1_distilbert --epochs 10 --batch-size 8 --learning-rate 2e-5 --max-length 128 --hidden-size 256 --seed 42
 ```
 
 This command uses the best validation Macro-F1 checkpoint and evaluates it on
@@ -85,33 +85,178 @@ To use a locally cached model without network access, add
 
 ## Tasks 2 and 3: real audio graphs and fusion
 
-These tasks require a real `data\raw\metadata.csv` and the corresponding audio
-files. The metadata must contain `track_id`, `path`, `text`, `labels`, `split`,
-and `artist_id`. `path` is relative to `data\raw\audio`; `labels` are separated
-by `|`; and each artist must occur in only one split.
+Task 2 keeps its derived metadata, graphs, manifest, splits, and results in
+task-specific locations. The original FMA files remain under `data\raw\fma`.
 
-Place the files as follows:
+The relevant layout is:
 
 ```text
 data\
   raw\
-    audio\
-      <real audio files>
-    metadata.csv
+    fma\
+      fma_metadata\
+      fma_small\
+  processed\
+    task2\
+      fma_metadata.csv
+      graphs\
+      task2_graph_manifest.jsonl
+  splits\
+    task2\
+      train.json
+      val.json
+      test.json
+results\
+  task2\
+    graphsage_genre_best.pt
+    graphsage_genre_metrics.json
+    cnn_melspectrogram_genre_best.pt
+    cnn_melspectrogram_genre_metrics.json
 ```
 
 Build the segment graphs:
 
 ```powershell
-python -m src.graph_builder --metadata data\raw\metadata.csv --audio-root data\raw\audio --output data\processed\graphs --sample-rate 22050 --segment-seconds 5 --threshold 0.75
+python -m src.graph_builder --prepare-metadata --tracks-csv data\raw\fma\fma_metadata\tracks.csv --audio-root data\raw\fma\fma_small --metadata-output data\processed\task2\fma_metadata.csv
+python -m src.graph_builder --metadata data\processed\task2\fma_metadata.csv --audio-root data\raw\fma\fma_small --output data\processed\task2\graphs --manifest data\processed\task2\task2_graph_manifest.jsonl --split-dir data\splits\task2 --sample-rate 22050 --segment-seconds 5 --threshold 0.75
 ```
 
 Train the real-data models:
 
 ```powershell
-python -m src.train --task bert --config config.yaml --manifest data\processed\manifest.jsonl --run-name task1_bert --epochs 10
-python -m src.train --task gnn --config config.yaml --manifest data\processed\manifest.jsonl --run-name task2_gnn --epochs 10
-python -m src.train --task fusion --config config.yaml --manifest data\processed\manifest.jsonl --run-name task3_fusion --epochs 10
+python -m src.train --task genre_gnn --config config.yaml --manifest data\processed\task2\task2_graph_manifest.jsonl --run-name graphsage_genre --epochs 10
+python -m src.train --task genre_cnn --config config.yaml --manifest data\processed\task2\task2_graph_manifest.jsonl --metadata data\processed\task2\fma_metadata.csv --audio-root data\raw\fma\fma_small --run-name cnn_melspectrogram_genre --epochs 10
+```
+
+Evaluate the best Task 2 checkpoint:
+
+```powershell
+python -m src.evaluate --task genre_gnn --checkpoint results\task2\graphsage_genre_best.pt --manifest data\processed\task2\task2_graph_manifest.jsonl --output-dir results\task2
+```
+
+Task 2 evaluation writes `task2_graphsage_test_metrics.json`,
+`task2_graphsage_predictions.json`, and
+`plots\task2_graphsage_confusion_matrix.png` under `results\task2`.
+
+Evaluate the CNN baseline:
+
+```powershell
+python -m src.evaluate `
+  --task genre_cnn `
+  --checkpoint results\task2\cnn_melspectrogram_genre_best.pt `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --metadata data\processed\task2\fma_metadata.csv `
+  --audio-root data\raw\fma\fma_small `
+  --output-dir results\task2
+```
+
+This writes `task2_cnn_test_metrics.json`, `task2_cnn_predictions.json`, and
+`plots\task2_cnn_confusion_matrix.png` under `results\task2`.
+
+Both Task 2 training commands also save learning curves under
+`results\task2\plots`:
+
+```text
+task2_graphsage_learning_curves.png
+task2_cnn_learning_curves.png
+```
+
+Compare the trained Task 2 models:
+
+```powershell
+python -m src.compare_task2_models `
+  --graphsage-metrics results\task2\task2_graphsage_test_metrics.json `
+  --cnn-metrics results\task2\task2_cnn_test_metrics.json `
+  --output results\task2\task2_model_comparison.json
+```
+
+The comparison file contains test loss, Accuracy, Macro-F1, Micro-F1, and
+one-vs-rest Macro PR-AUC for the GraphSAGE model and the mel-spectrogram CNN
+baseline. The CNN averages logits from every 5-second segment in each track,
+matching the full-track coverage of the graph model.
+
+## Task 2 complete pipeline
+
+Run these commands sequentially from the repository root after the FMA-small
+archives have been extracted under `data\raw\fma`.
+
+### 1. Prepare Task 2 metadata
+
+```powershell
+python -m src.graph_builder `
+  --prepare-metadata `
+  --tracks-csv data\raw\fma\fma_metadata\tracks.csv `
+  --audio-root data\raw\fma\fma_small `
+  --metadata-output data\processed\task2\fma_metadata.csv
+```
+
+### 2. Build Task 2 segment graphs, manifest, and split files
+
+```powershell
+python -m src.graph_builder `
+  --metadata data\processed\task2\fma_metadata.csv `
+  --audio-root data\raw\fma\fma_small `
+  --output data\processed\task2\graphs `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --split-dir data\splits\task2 `
+  --sample-rate 22050 `
+  --segment-seconds 5 `
+  --threshold 0.75
+```
+
+### 3. Train GraphSAGE
+
+```powershell
+python -m src.train `
+  --task genre_gnn `
+  --config config.yaml `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --run-name graphsage_genre `
+  --epochs 10
+```
+
+### 4. Train the mel-spectrogram CNN baseline
+
+```powershell
+python -m src.train `
+  --task genre_cnn `
+  --config config.yaml `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --metadata data\processed\task2\fma_metadata.csv `
+  --audio-root data\raw\fma\fma_small `
+  --run-name cnn_melspectrogram_genre `
+  --epochs 10
+```
+
+### 5. Evaluate GraphSAGE on the held-out test split
+
+```powershell
+python -m src.evaluate `
+  --task genre_gnn `
+  --checkpoint results\task2\graphsage_genre_best.pt `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --output-dir results\task2
+```
+
+### 6. Evaluate the CNN baseline on the held-out test split
+
+```powershell
+python -m src.evaluate `
+  --task genre_cnn `
+  --checkpoint results\task2\cnn_melspectrogram_genre_best.pt `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --metadata data\processed\task2\fma_metadata.csv `
+  --audio-root data\raw\fma\fma_small `
+  --output-dir results\task2
+```
+
+### 7. Compare GraphSAGE and CNN results
+
+```powershell
+python -m src.compare_task2_models `
+  --graphsage-metrics results\task2\task2_graphsage_test_metrics.json `
+  --cnn-metrics results\task2\task2_cnn_test_metrics.json `
+  --output results\task2\task2_model_comparison.json
 ```
 
 For the Task 3 early-concatenation comparison:
@@ -130,7 +275,7 @@ you intentionally want to use another Hugging Face checkpoint.
 After building the real graph manifest, run all four real-data conditions:
 
 ```powershell
-python scripts\run_ablations.py --epochs 10
+python -m src.run_ablations --epochs 10
 ```
 
 The ablation script runs BERT-only, GNN-only, early-concatenation fusion, and
@@ -139,12 +284,13 @@ PR-AUC in the report.
 
 ## Project directories
 
-- `data\raw\`: real input audio and metadata; raw files are ignored by Git.
-- `data\processed\graphs\`: serialized audio graphs.
-- `data\processed\manifest.jsonl`: graph paths, text, labels, and split metadata.
-- `results\`: checkpoints, metrics, plots, and prediction examples.
-- `src\`: model, graph, training, evaluation, and metric implementations.
-- `scripts\`: dataset export/training and ablation utilities.
+- `data\raw\`: FMA, MagnaTagATune, MusicCaps, audio, and metadata downloads.
+- `data\processed\`: serialized graphs, mel-spectrograms, and BERT caches.
+- `data\splits\`: train/validation/test split files.
+- `notebooks\`: exploratory analysis and the end-to-end demo notebook.
+- `src\`: preprocessing, graph, model, training, evaluation, and metric code.
+- `results\`: metrics, plots, checkpoints, and retrieval examples.
+- `report\`: final report PDF and related report assets.
 - `config.yaml`: default model and training settings.
 
 Do not use illustrative scores from the assignment PDF. Report only metrics
