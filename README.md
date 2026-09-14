@@ -141,6 +141,21 @@ Task 2 evaluation writes `task2_graphsage_test_metrics.json`,
 `task2_graphsage_predictions.json`, and
 `plots\task2_graphsage_confusion_matrix.png` under `results\task2`.
 
+Evaluate the CNN baseline:
+
+```powershell
+python -m src.evaluate `
+  --task genre_cnn `
+  --checkpoint results\task2\cnn_melspectrogram_genre_best.pt `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --metadata data\processed\task2\fma_metadata.csv `
+  --audio-root data\raw\fma\fma_small `
+  --output-dir results\task2
+```
+
+This writes `task2_cnn_test_metrics.json`, `task2_cnn_predictions.json`, and
+`plots\task2_cnn_confusion_matrix.png` under `results\task2`.
+
 For the Task 3 early-concatenation comparison:
 
 ```powershell

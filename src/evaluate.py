@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
-from .gnn_model import GenreGraphSAGEClassifier
-from .train import GenreGraphDataset, device_graph
+from .gnn_model import GenreGraphSAGEClassifier, MelCNN
+from .train import GenreGraphDataset, GenreMelDataset, device_graph
 from .utils import ensure_dir, save_json
 
 
@@ -37,6 +37,7 @@ def save_confusion_matrix(
     targets: np.ndarray,
     genres: list[str],
     output: Path,
+    title: str,
 ) -> None:
     matrix = np.zeros((len(genres), len(genres)), dtype=np.int64)
     for target, prediction in zip(targets, predictions):
@@ -51,7 +52,7 @@ def save_confusion_matrix(
         yticklabels=genres,
         xlabel="Predicted genre",
         ylabel="True genre",
-        title="Task 2 GraphSAGE confusion matrix",
+        title=title,
     )
     plt.setp(axis.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
     for row in range(len(genres)):
@@ -105,6 +106,65 @@ def evaluate_genre_gnn(checkpoint_path: Path, manifest: Path, output_dir: Path) 
         targets_array,
         genres,
         plots / "task2_graphsage_confusion_matrix.png",
+        "Task 2 GraphSAGE confusion matrix",
+    )
+    return metrics
+
+
+def evaluate_genre_cnn(
+    checkpoint_path: Path,
+    manifest: Path,
+    metadata: Path,
+    audio_root: Path,
+    output_dir: Path,
+) -> dict:
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    state = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    genres = state["vocabulary"]
+    config = state["config"]
+    model = MelCNN(num_labels=len(genres)).to(device)
+    model.load_state_dict(state["model"])
+    model.eval()
+    dataset = GenreMelDataset(
+        manifest=manifest,
+        metadata=metadata,
+        audio_root=audio_root,
+        split="test",
+        vocabulary=genres,
+        sample_rate=config["data"]["sample_rate"],
+        segment_seconds=config["data"]["segment_seconds"],
+        n_mels=config["data"]["n_mels"],
+    )
+    predictions, targets, cases = [], [], []
+    with torch.no_grad():
+        for sample in dataset:
+            probabilities = torch.softmax(
+                model(sample["x"].unsqueeze(0).to(device)), dim=1
+            ).squeeze(0)
+            prediction = int(probabilities.argmax().item())
+            target = int(sample["y"].item())
+            predictions.append(prediction)
+            targets.append(target)
+            cases.append(
+                {
+                    "track_id": int(sample["track_id"]),
+                    "true_genre": genres[target],
+                    "predicted_genre": genres[prediction],
+                    "confidence": float(probabilities[prediction].item()),
+                }
+            )
+    predictions_array = np.asarray(predictions)
+    targets_array = np.asarray(targets)
+    metrics = single_label_metrics(predictions_array, targets_array, genres)
+    plots = ensure_dir(output_dir / "plots")
+    save_json(metrics, output_dir / "task2_cnn_test_metrics.json")
+    save_json({"predictions": cases}, output_dir / "task2_cnn_predictions.json")
+    save_confusion_matrix(
+        predictions_array,
+        targets_array,
+        genres,
+        plots / "task2_cnn_confusion_matrix.png",
+        "Task 2 CNN confusion matrix",
     )
     return metrics
 
@@ -115,15 +175,29 @@ def main() -> None:
     parser.add_argument(
         "--manifest", default="data/processed/task2/task2_graph_manifest.jsonl"
     )
-    parser.add_argument("--task", choices=["genre_gnn", "bert", "gnn", "fusion"], required=True)
-    parser.add_argument("--output-dir", default="results")
+    parser.add_argument("--metadata", default="data/processed/task2/fma_metadata.csv")
+    parser.add_argument("--audio-root", default="data/raw/fma/fma_small")
+    parser.add_argument(
+        "--task", choices=["genre_gnn", "genre_cnn", "bert", "gnn", "fusion"], required=True
+    )
+    parser.add_argument("--output-dir", default="results/task2")
     args = parser.parse_args()
     output_dir = ensure_dir(args.output_dir)
     if args.task == "genre_gnn":
         metrics = evaluate_genre_gnn(args.checkpoint, args.manifest, output_dir)
         print(metrics)
         return
-    raise NotImplementedError("Only Task 2 genre_gnn evaluation is currently implemented.")
+    if args.task == "genre_cnn":
+        metrics = evaluate_genre_cnn(
+            args.checkpoint,
+            args.manifest,
+            args.metadata,
+            args.audio_root,
+            output_dir,
+        )
+        print(metrics)
+        return
+    raise NotImplementedError("Only Task 2 genre_gnn and genre_cnn evaluation is currently implemented.")
 
 
 if __name__ == "__main__":
