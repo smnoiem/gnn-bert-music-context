@@ -49,7 +49,7 @@ def prepare_fma_metadata(
 
     tracks = pd.read_csv(tracks_csv, header=[0, 1], index_col=0)
     tracks.columns = _flatten_columns(tracks.columns)
-    required = {"set_subset", "set_split", "track_genre_top", "artist_artist_id"}
+    required = {"set_subset", "set_split", "track_genre_top", "artist_id"}
     missing = required - set(tracks.columns)
     if missing:
         raise ValueError(f"tracks.csv is missing required columns: {sorted(missing)}")
@@ -76,7 +76,7 @@ def prepare_fma_metadata(
                 "path": relative_path,
                 "genre": genre,
                 "split": split,
-                "artist_id": int(row["artist_artist_id"]),
+                "artist_id": int(row["artist_id"]),
             }
         )
 
