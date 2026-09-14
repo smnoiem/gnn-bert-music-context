@@ -287,8 +287,8 @@ def train_genre_gnn(args, cfg) -> None:
         lr=cfg["training"]["learning_rate"],
         weight_decay=cfg["training"]["weight_decay"],
     )
-    run_name = args.run_name or "task2_gnn"
-    results = ensure_dir(Path("results") / Path(run_name).parent)
+    run_name = args.run_name or "graphsage_genre"
+    results = ensure_dir("results/task2")
     history = []
     best = -1.0
     for epoch in range(args.epochs or cfg["training"]["epochs"]):
@@ -367,8 +367,8 @@ def train_genre_cnn(args, cfg) -> None:
         lr=cfg["training"]["learning_rate"],
         weight_decay=cfg["training"]["weight_decay"],
     )
-    run_name = args.run_name or "task2_cnn"
-    results = ensure_dir(Path("results") / Path(run_name).parent)
+    run_name = args.run_name or "cnn_melspectrogram_genre"
+    results = ensure_dir("results/task2")
     history = []
     best = -1.0
     for epoch in range(args.epochs or cfg["training"]["epochs"]):
