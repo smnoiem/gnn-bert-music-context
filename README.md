@@ -175,6 +175,90 @@ one-vs-rest Macro PR-AUC for the GraphSAGE model and the mel-spectrogram CNN
 baseline. The CNN averages logits from every 5-second segment in each track,
 matching the full-track coverage of the graph model.
 
+## Task 2 complete pipeline
+
+Run these commands sequentially from the repository root after the FMA-small
+archives have been extracted under `data\raw\fma`.
+
+### 1. Prepare Task 2 metadata
+
+```powershell
+python -m src.graph_builder `
+  --prepare-metadata `
+  --tracks-csv data\raw\fma\fma_metadata\tracks.csv `
+  --audio-root data\raw\fma\fma_small `
+  --metadata-output data\processed\task2\fma_metadata.csv
+```
+
+### 2. Build Task 2 segment graphs, manifest, and split files
+
+```powershell
+python -m src.graph_builder `
+  --metadata data\processed\task2\fma_metadata.csv `
+  --audio-root data\raw\fma\fma_small `
+  --output data\processed\task2\graphs `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --split-dir data\splits\task2 `
+  --sample-rate 22050 `
+  --segment-seconds 5 `
+  --threshold 0.75
+```
+
+### 3. Train GraphSAGE
+
+```powershell
+python -m src.train `
+  --task genre_gnn `
+  --config config.yaml `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --run-name graphsage_genre `
+  --epochs 10
+```
+
+### 4. Train the mel-spectrogram CNN baseline
+
+```powershell
+python -m src.train `
+  --task genre_cnn `
+  --config config.yaml `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --metadata data\processed\task2\fma_metadata.csv `
+  --audio-root data\raw\fma\fma_small `
+  --run-name cnn_melspectrogram_genre `
+  --epochs 10
+```
+
+### 5. Evaluate GraphSAGE on the held-out test split
+
+```powershell
+python -m src.evaluate `
+  --task genre_gnn `
+  --checkpoint results\task2\graphsage_genre_best.pt `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --output-dir results\task2
+```
+
+### 6. Evaluate the CNN baseline on the held-out test split
+
+```powershell
+python -m src.evaluate `
+  --task genre_cnn `
+  --checkpoint results\task2\cnn_melspectrogram_genre_best.pt `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --metadata data\processed\task2\fma_metadata.csv `
+  --audio-root data\raw\fma\fma_small `
+  --output-dir results\task2
+```
+
+### 7. Compare GraphSAGE and CNN results
+
+```powershell
+python -m src.compare_task2_models `
+  --graphsage-metrics results\task2\task2_graphsage_test_metrics.json `
+  --cnn-metrics results\task2\task2_cnn_test_metrics.json `
+  --output results\task2\task2_model_comparison.json
+```
+
 For the Task 3 early-concatenation comparison:
 
 ```powershell
