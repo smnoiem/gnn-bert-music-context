@@ -104,7 +104,7 @@ Build the segment graphs:
 
 ```powershell
 python -m src.graph_builder --prepare-metadata --tracks-csv data\raw\fma\fma_metadata\tracks.csv --audio-root data\raw\fma\fma_small --metadata-output data\raw\metadata.csv
-python -m src.graph_builder --metadata data\raw\metadata.csv --audio-root data\raw\fma\fma_small --output data\processed\graphs --sample-rate 22050 --segment-seconds 5 --threshold 0.75
+python -m src.graph_builder --metadata data\raw\metadata.csv --audio-root data\raw\fma\fma_small --output data\processed\graphs --manifest data\processed\manifest.jsonl --split-dir data\splits --sample-rate 22050 --segment-seconds 5 --threshold 0.75
 ```
 
 Train the real-data models:
