@@ -164,6 +164,18 @@ task2_graphsage_learning_curves.png
 task2_cnn_learning_curves.png
 ```
 
+Compare the trained Task 2 models:
+
+```powershell
+python -m src.compare_task2_models `
+  --graphsage-metrics results\task2\graphsage_genre_metrics.json `
+  --cnn-metrics results\task2\cnn_melspectrogram_genre_metrics.json `
+  --output results\task2\task2_model_comparison.json
+```
+
+The comparison file contains test loss, Accuracy, Macro-F1, and Micro-F1 for
+the GraphSAGE model and the mel-spectrogram CNN baseline.
+
 For the Task 3 early-concatenation comparison:
 
 ```powershell
