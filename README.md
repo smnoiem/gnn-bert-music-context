@@ -110,6 +110,7 @@ python -m src.graph_builder --metadata data\raw\metadata.csv --audio-root data\r
 Train the real-data models:
 
 ```powershell
+python -m src.train --task genre_gnn --config config.yaml --manifest data\processed\manifest.jsonl --run-name task2_gnn --epochs 10
 python -m src.train --task bert --config config.yaml --manifest data\processed\manifest.jsonl --run-name task1_bert --epochs 10
 python -m src.train --task gnn --config config.yaml --manifest data\processed\manifest.jsonl --run-name task2_gnn --epochs 10
 python -m src.train --task fusion --config config.yaml --manifest data\processed\manifest.jsonl --run-name task3_fusion --epochs 10

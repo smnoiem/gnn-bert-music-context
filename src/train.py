@@ -10,7 +10,7 @@ import yaml
 
 from .bert_encoder import BertTagClassifier
 from .fusion_model import FusionModel
-from .gnn_model import GNNClassifier
+from .gnn_model import GNNClassifier, GenreGraphSAGEClassifier
 from .metrics import multilabel_metrics
 from .utils import ensure_dir, save_json, seed_everything
 
@@ -141,10 +141,121 @@ def run_epoch(model, data, optimizer, task, device):
     return float(np.mean(losses)), multilabel_metrics(np.asarray(logits), np.asarray(targets))
 
 
+def single_label_metrics(predictions: list[int], targets: list[int], num_classes: int) -> dict:
+    predictions = np.asarray(predictions)
+    targets = np.asarray(targets)
+    per_class = []
+    for class_index in range(num_classes):
+        true_positive = np.sum((predictions == class_index) & (targets == class_index))
+        false_positive = np.sum((predictions == class_index) & (targets != class_index))
+        false_negative = np.sum((predictions != class_index) & (targets == class_index))
+        denominator = 2 * true_positive + false_positive + false_negative
+        per_class.append(float(2 * true_positive / denominator) if denominator else 0.0)
+    return {
+        "accuracy": float(np.mean(predictions == targets)),
+        "macro_f1": float(np.mean(per_class)),
+        "micro_f1": float(np.mean(predictions == targets)),
+    }
+
+
+def run_genre_epoch(model, data, optimizer, device, num_classes: int) -> tuple[float, dict]:
+    training = optimizer is not None
+    model.train(training)
+    criterion = nn.CrossEntropyLoss()
+    losses: list[float] = []
+    predictions: list[int] = []
+    targets: list[int] = []
+    for graph in data:
+        graph = device_graph(graph, device)
+        target = graph["y"].reshape(1).to(device)
+        logits = model(graph).reshape(1, num_classes)
+        loss = criterion(logits, target)
+        if training:
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+        losses.append(float(loss.item()))
+        predictions.append(int(logits.argmax(dim=1).item()))
+        targets.append(int(target.item()))
+    return float(np.mean(losses)), single_label_metrics(predictions, targets, num_classes)
+
+
+def train_genre_gnn(args, cfg) -> None:
+    train = GenreGraphDataset(args.manifest, "train")
+    val = GenreGraphDataset(args.manifest, "val", train.vocabulary)
+    test = GenreGraphDataset(args.manifest, "test", train.vocabulary)
+    model = GenreGraphSAGEClassifier(
+        num_genres=len(train.vocabulary),
+        input_dim=32,
+        hidden_dim=cfg["model"]["gnn_hidden"],
+        layers=cfg["model"]["gnn_layers"],
+        dropout=cfg["model"]["dropout"],
+    )
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+    optimizer = torch.optim.AdamW(
+        model.parameters(),
+        lr=cfg["training"]["learning_rate"],
+        weight_decay=cfg["training"]["weight_decay"],
+    )
+    results = ensure_dir("results")
+    run_name = args.run_name or "task2_gnn"
+    history = []
+    best = -1.0
+    for epoch in range(args.epochs or cfg["training"]["epochs"]):
+        train_loss, train_metrics = run_genre_epoch(
+            model, train, optimizer, device, len(train.vocabulary)
+        )
+        val_loss, val_metrics = run_genre_epoch(
+            model, val, None, device, len(train.vocabulary)
+        )
+        row = {
+            "epoch": epoch + 1,
+            "train_loss": train_loss,
+            "val_loss": val_loss,
+            **{f"train_{key}": value for key, value in train_metrics.items()},
+            **{f"val_{key}": value for key, value in val_metrics.items()},
+        }
+        history.append(row)
+        print(row)
+        if val_metrics["macro_f1"] > best:
+            best = val_metrics["macro_f1"]
+            torch.save(
+                {
+                    "model": model.state_dict(),
+                    "vocabulary": train.vocabulary,
+                    "config": cfg,
+                    "task": "genre_gnn",
+                },
+                results / f"{run_name}_best.pt",
+            )
+
+    checkpoint = torch.load(
+        results / f"{run_name}_best.pt", map_location=device, weights_only=False
+    )
+    model.load_state_dict(checkpoint["model"])
+    test_loss, test_metrics = run_genre_epoch(
+        model, test, None, device, len(train.vocabulary)
+    )
+    save_json(
+        {
+            "task": "genre_gnn",
+            "genres": train.vocabulary,
+            "history": history,
+            "test_loss": test_loss,
+            "test_metrics": test_metrics,
+        },
+        results / f"{run_name}_metrics.json",
+    )
+
+
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument("--task", choices=["bert","gnn","fusion"], required=True); ap.add_argument("--config", default="config.yaml"); ap.add_argument("--manifest", default="data/processed/manifest.jsonl"); ap.add_argument("--synthetic", action="store_true"); ap.add_argument("--epochs", type=int); ap.add_argument("--early-concat", action="store_true"); ap.add_argument("--run-name"); args=ap.parse_args()
+    ap=argparse.ArgumentParser(); ap.add_argument("--task", choices=["bert","gnn","fusion","genre_gnn"], required=True); ap.add_argument("--config", default="config.yaml"); ap.add_argument("--manifest", default="data/processed/manifest.jsonl"); ap.add_argument("--synthetic", action="store_true"); ap.add_argument("--epochs", type=int); ap.add_argument("--early-concat", action="store_true"); ap.add_argument("--run-name"); args=ap.parse_args()
     cfg=yaml.safe_load(open(args.config)); seed_everything(cfg["seed"])
     if args.synthetic: args.manifest="data/processed/manifest.jsonl"
+    if args.task == "genre_gnn":
+        train_genre_gnn(args, cfg)
+        return
     train=MusicGraphDataset(args.manifest, "train"); val=MusicGraphDataset(args.manifest, "val", train.vocab)
     num_labels=len(train.vocab); model_args=dict(num_labels=num_labels, text_hidden=cfg["model"]["text_hidden"], graph_hidden=cfg["model"]["gnn_hidden"], layers=cfg["model"]["gnn_layers"], dropout=cfg["model"]["dropout"], model_name=cfg["model"]["text_model"], freeze=cfg["training"]["freeze_text_encoder"])
     if args.task == "bert": model=BertTagClassifier(num_labels, hidden_size=cfg["model"]["text_hidden"], model_name=cfg["model"]["text_model"], freeze=cfg["training"]["freeze_text_encoder"], local_files_only=args.synthetic)
