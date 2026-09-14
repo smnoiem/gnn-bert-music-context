@@ -51,6 +51,10 @@ other structured output on stdout remain usable. Ablation child processes inheri
 unbuffered output, so each command's logs appear as it runs rather than only
 after the process exits.
 
+Graph construction handles failures per audio file: the failing track and full
+exception are logged, later files continue processing, and skipped rows are
+written to a `<manifest>_failures.jsonl` report next to the graph manifest.
+
 ## Task 1: train the DistilBERT text classifier
 
 ### 1. Export the MusicCaps captions

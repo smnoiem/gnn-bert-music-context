@@ -161,38 +161,66 @@ def build_graph_dataset(
     _write_split_files(metadata, split_dir)
 
     manifest: list[dict[str, object]] = []
+    failures: list[dict[str, object]] = []
     for row in progress(
         metadata.itertuples(index=False),
         desc="Building graph samples",
         total=len(metadata),
     ):
         audio_path = audio_root / str(row.path)
-        waveform, actual_rate = load_audio(str(audio_path), sample_rate)
-        features = segment_features(waveform, actual_rate, segment_seconds)
-        graph = build_segment_graph(features, threshold)
-        graph.update(
-            {
+        try:
+            waveform, actual_rate = load_audio(str(audio_path), sample_rate)
+            features = segment_features(waveform, actual_rate, segment_seconds)
+            graph = build_segment_graph(features, threshold)
+            graph.update(
+                {
+                    "track_id": int(row.track_id),
+                    "genre": str(row.genre),
+                    "artist_id": int(row.artist_id),
+                }
+            )
+            graph_path = graph_dir / f"{int(row.track_id):06d}.pt"
+            torch.save(graph, graph_path)
+            manifest.append(
+                {
+                    "track_id": int(row.track_id),
+                    "graph": str(graph_path),
+                    "genre": str(row.genre),
+                    "split": str(row.split),
+                    "artist_id": int(row.artist_id),
+                }
+            )
+        except Exception as exc:
+            failure = {
                 "track_id": int(row.track_id),
-                "genre": str(row.genre),
-                "artist_id": int(row.artist_id),
+                "path": str(audio_path),
+                "error_type": type(exc).__name__,
+                "error": str(exc),
             }
-        )
-        graph_path = graph_dir / f"{int(row.track_id):06d}.pt"
-        torch.save(graph, graph_path)
-        manifest.append(
-            {
-                "track_id": int(row.track_id),
-                "graph": str(graph_path),
-                "genre": str(row.genre),
-                "split": str(row.split),
-                "artist_id": int(row.artist_id),
-            }
-        )
+            failures.append(failure)
+            logging.getLogger("music-context").exception(
+                "Skipping track_id=%s after processing failed: %s",
+                row.track_id,
+                audio_path,
+            )
 
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     with manifest_path.open("w", encoding="utf-8") as stream:
         for item in manifest:
             stream.write(json.dumps(item) + "\n")
+    failure_path = manifest_path.with_name(f"{manifest_path.stem}_failures.jsonl")
+    with failure_path.open("w", encoding="utf-8") as stream:
+        for failure in failures:
+            stream.write(json.dumps(failure) + "\n")
+    logger = logging.getLogger("music-context")
+    if failures:
+        logger.warning(
+            "Completed graph build with %d skipped file(s); failure report: %s",
+            len(failures),
+            failure_path,
+        )
+    else:
+        logger.info("Completed graph build with no skipped files")
     return manifest
 
 
