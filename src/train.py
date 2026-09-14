@@ -269,6 +269,37 @@ def run_cnn_epoch(model, data, optimizer, device, num_classes: int) -> tuple[flo
     return float(np.mean(losses)), single_label_metrics(predictions, targets, num_classes)
 
 
+def save_genre_learning_curves(
+    history: list[dict],
+    output: Path,
+    title: str,
+) -> None:
+    import matplotlib.pyplot as plt
+
+    epochs = [row["epoch"] for row in history]
+    figure, axes = plt.subplots(1, 2, figsize=(11, 4))
+    axes[0].plot(epochs, [row["train_loss"] for row in history], label="train")
+    axes[0].plot(epochs, [row["val_loss"] for row in history], label="validation")
+    axes[0].set_title("Loss")
+    axes[0].set_xlabel("Epoch")
+    axes[0].set_ylabel("Cross-entropy")
+    axes[0].legend()
+    axes[1].plot(
+        epochs, [row["train_macro_f1"] for row in history], label="train Macro-F1"
+    )
+    axes[1].plot(
+        epochs, [row["val_macro_f1"] for row in history], label="validation Macro-F1"
+    )
+    axes[1].set_title("Macro-F1")
+    axes[1].set_xlabel("Epoch")
+    axes[1].set_ylabel("F1")
+    axes[1].legend()
+    figure.suptitle(title)
+    figure.tight_layout()
+    figure.savefig(output, dpi=160)
+    plt.close(figure)
+
+
 def train_genre_gnn(args, cfg) -> None:
     train = GenreGraphDataset(args.manifest, "train")
     val = GenreGraphDataset(args.manifest, "val", train.vocabulary)
@@ -335,6 +366,11 @@ def train_genre_gnn(args, cfg) -> None:
             "test_metrics": test_metrics,
         },
         results / f"{run_name}_metrics.json",
+    )
+    save_genre_learning_curves(
+        history,
+        ensure_dir(results / "plots") / "task2_graphsage_learning_curves.png",
+        "Task 2 GraphSAGE learning curves",
     )
 
 
@@ -415,6 +451,11 @@ def train_genre_cnn(args, cfg) -> None:
             "test_metrics": test_metrics,
         },
         results / f"{run_name}_metrics.json",
+    )
+    save_genre_learning_curves(
+        history,
+        ensure_dir(results / "plots") / "task2_cnn_learning_curves.png",
+        "Task 2 CNN learning curves",
     )
 
 

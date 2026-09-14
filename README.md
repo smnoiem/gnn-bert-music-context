@@ -156,6 +156,14 @@ python -m src.evaluate `
 This writes `task2_cnn_test_metrics.json`, `task2_cnn_predictions.json`, and
 `plots\task2_cnn_confusion_matrix.png` under `results\task2`.
 
+Both Task 2 training commands also save learning curves under
+`results\task2\plots`:
+
+```text
+task2_graphsage_learning_curves.png
+task2_cnn_learning_curves.png
+```
+
 For the Task 3 early-concatenation comparison:
 
 ```powershell
