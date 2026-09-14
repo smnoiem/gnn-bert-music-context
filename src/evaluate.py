@@ -1,48 +1,128 @@
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
+
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import matplotlib.pyplot as plt
 
-from .bert_encoder import BertTagClassifier
-from .fusion_model import FusionModel
-from .gnn_model import GNNClassifier
-from .metrics import multilabel_metrics
-from .train import MusicGraphDataset, device_graph
+from .gnn_model import GenreGraphSAGEClassifier
+from .train import GenreGraphDataset, device_graph
 from .utils import ensure_dir, save_json
 
 
-def load_model(checkpoint, device):
-    state=torch.load(checkpoint, map_location=device, weights_only=False); cfg=state["config"]; n=len(state["vocab"]); task=state["task"]
-    if task=="bert": model=BertTagClassifier(n, hidden_size=cfg["model"]["text_hidden"], model_name=cfg["model"]["text_model"], local_files_only=True)
-    elif task=="gnn": model=GNNClassifier(n, hidden_dim=cfg["model"]["gnn_hidden"], layers=cfg["model"]["gnn_layers"])
-    else: model=FusionModel(n, text_hidden=cfg["model"]["text_hidden"], graph_hidden=cfg["model"]["gnn_hidden"], layers=cfg["model"]["gnn_layers"], cross_attention=not state.get("early_concat",False), local_files_only=True)
-    model.load_state_dict(state["model"]); return model.to(device).eval(), state
+def single_label_metrics(predictions: np.ndarray, targets: np.ndarray, genres: list[str]) -> dict:
+    per_class = {}
+    f1_values = []
+    for index, genre in enumerate(genres):
+        true_positive = np.sum((predictions == index) & (targets == index))
+        false_positive = np.sum((predictions == index) & (targets != index))
+        false_negative = np.sum((predictions != index) & (targets == index))
+        denominator = 2 * true_positive + false_positive + false_negative
+        f1 = float(2 * true_positive / denominator) if denominator else 0.0
+        per_class[genre] = {"f1": f1}
+        f1_values.append(f1)
+    accuracy = float(np.mean(predictions == targets))
+    return {
+        "accuracy": accuracy,
+        "macro_f1": float(np.mean(f1_values)),
+        "micro_f1": accuracy,
+        "per_class": per_class,
+    }
 
 
-def main():
-    ap=argparse.ArgumentParser(); ap.add_argument("--checkpoint", required=True); ap.add_argument("--manifest", default="data/processed/manifest.jsonl"); ap.add_argument("--task", choices=["bert","gnn","fusion"], required=True); args=ap.parse_args()
-    device=torch.device("cuda" if torch.cuda.is_available() else "cpu"); model,state=load_model(args.checkpoint,device); test=MusicGraphDataset(args.manifest,"test",state["vocab"]); logits=[]; ys=[]; embeddings=[]; cases=[]
+def save_confusion_matrix(
+    predictions: np.ndarray,
+    targets: np.ndarray,
+    genres: list[str],
+    output: Path,
+) -> None:
+    matrix = np.zeros((len(genres), len(genres)), dtype=np.int64)
+    for target, prediction in zip(targets, predictions):
+        matrix[int(target), int(prediction)] += 1
+    figure, axis = plt.subplots(figsize=(8, 7))
+    image = axis.imshow(matrix, interpolation="nearest", cmap="Blues")
+    figure.colorbar(image, ax=axis)
+    axis.set(
+        xticks=np.arange(len(genres)),
+        yticks=np.arange(len(genres)),
+        xticklabels=genres,
+        yticklabels=genres,
+        xlabel="Predicted genre",
+        ylabel="True genre",
+        title="Task 2 GraphSAGE confusion matrix",
+    )
+    plt.setp(axis.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+    for row in range(len(genres)):
+        for column in range(len(genres)):
+            axis.text(column, row, matrix[row, column], ha="center", va="center")
+    figure.tight_layout()
+    figure.savefig(output, dpi=160)
+    plt.close(figure)
+
+
+def evaluate_genre_gnn(checkpoint_path: Path, manifest: Path, output_dir: Path) -> dict:
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    state = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    genres = state["vocabulary"]
+    config = state["config"]
+    model = GenreGraphSAGEClassifier(
+        num_genres=len(genres),
+        input_dim=32,
+        hidden_dim=config["model"]["gnn_hidden"],
+        layers=config["model"]["gnn_layers"],
+        dropout=config["model"]["dropout"],
+    ).to(device)
+    model.load_state_dict(state["model"])
+    model.eval()
+    dataset = GenreGraphDataset(manifest, "test", genres)
+    predictions, targets, cases = [], [], []
     with torch.no_grad():
-        for graph in test:
-            graph=device_graph(graph,device)
-            if args.task=="bert": out=model([graph["text"]]); emb=model.encoder([graph["text"]])
-            elif args.task=="gnn": out=model(graph).unsqueeze(0); emb=model.encoder(graph).unsqueeze(0)
-            else: r=model(graph,graph["text"],return_attention=True); out=r["logits"]; emb=r["embedding"]
-            probs=torch.sigmoid(out)[0].cpu().numpy(); logits.append(out[0].cpu().numpy()); ys.append(graph["y"].cpu().numpy()); embeddings.append(emb[0].cpu().numpy())
-            top=np.argsort(probs)[-3:][::-1]; cases.append({"track_id":graph["track_id"],"text":graph["text"],"predictions":[{"label":state["vocab"][i],"score":float(probs[i])} for i in top]})
-    metrics=multilabel_metrics(np.asarray(logits),np.asarray(ys)); output=ensure_dir("results"); save_json(metrics,output/f"{args.task}_test_metrics.json"); save_json({"case_studies":cases[:3]},output/f"{args.task}_case_studies.json"); print(metrics)
-    if len(embeddings)>=3:
-        matrix = np.asarray(embeddings)
-        try:
-            from sklearn.manifold import TSNE
-            points = TSNE(perplexity=min(5, len(matrix)-1), init="random", random_state=42).fit_transform(matrix)
-            title = f"{args.task} t-SNE embeddings"
-        except ImportError:
-            # Keeps the demo usable before optional analysis dependencies are installed.
-            _, _, vectors = np.linalg.svd(matrix - matrix.mean(0), full_matrices=False)
-            points, title = (matrix - matrix.mean(0)) @ vectors[:2].T, f"{args.task} PCA embeddings (install scikit-learn for t-SNE)"
-        plt.scatter(points[:,0],points[:,1],c=np.argmax(ys,axis=1)); plt.title(title); plt.savefig(output/f"{args.task}_tsne.png",dpi=160,bbox_inches="tight"); plt.close()
+        for graph in dataset:
+            graph = device_graph(graph, device)
+            probabilities = torch.softmax(model(graph), dim=0)
+            prediction = int(probabilities.argmax().item())
+            target = int(graph["y"].item())
+            predictions.append(prediction)
+            targets.append(target)
+            cases.append(
+                {
+                    "track_id": int(graph["track_id"]),
+                    "true_genre": genres[target],
+                    "predicted_genre": genres[prediction],
+                    "confidence": float(probabilities[prediction].item()),
+                }
+            )
+    predictions_array = np.asarray(predictions)
+    targets_array = np.asarray(targets)
+    metrics = single_label_metrics(predictions_array, targets_array, genres)
+    plots = ensure_dir(output_dir / "plots")
+    save_json(metrics, output_dir / "task2_gnn_test_metrics.json")
+    save_json({"predictions": cases}, output_dir / "task2_gnn_predictions.json")
+    save_confusion_matrix(
+        predictions_array,
+        targets_array,
+        genres,
+        plots / "task2_gnn_confusion_matrix.png",
+    )
+    return metrics
 
-if __name__ == "__main__": main()
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Evaluate project models.")
+    parser.add_argument("--checkpoint", required=True)
+    parser.add_argument("--manifest", default="data/processed/manifest.jsonl")
+    parser.add_argument("--task", choices=["genre_gnn", "bert", "gnn", "fusion"], required=True)
+    parser.add_argument("--output-dir", default="results")
+    args = parser.parse_args()
+    output_dir = ensure_dir(args.output_dir)
+    if args.task == "genre_gnn":
+        metrics = evaluate_genre_gnn(args.checkpoint, args.manifest, output_dir)
+        print(metrics)
+        return
+    raise NotImplementedError("Only Task 2 genre_gnn evaluation is currently implemented.")
+
+
+if __name__ == "__main__":
+    main()

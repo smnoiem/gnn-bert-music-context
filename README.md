@@ -116,6 +116,12 @@ python -m src.train --task gnn --config config.yaml --manifest data\processed\ma
 python -m src.train --task fusion --config config.yaml --manifest data\processed\manifest.jsonl --run-name task3_fusion --epochs 10
 ```
 
+Evaluate the best Task 2 checkpoint:
+
+```powershell
+python -m src.evaluate --task genre_gnn --checkpoint results\task2_gnn_best.pt --manifest data\processed\manifest.jsonl --output-dir results
+```
+
 For the Task 3 early-concatenation comparison:
 
 ```powershell
