@@ -21,7 +21,7 @@ from torch import nn
 from torch.utils.data import DataLoader, Dataset
 from tqdm.auto import tqdm
 
-# Allow the documented ``python scripts/...`` invocation from the repository root.
+# Allow module execution from the repository root when this file is run directly.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.bert_encoder import BertTagClassifier

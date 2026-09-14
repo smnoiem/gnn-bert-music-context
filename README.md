@@ -65,7 +65,7 @@ proxy-task labels, not human-annotated MusicCaps tags.
 Run this from the repository root:
 
 ```powershell
-python scripts\train_bert_musiccaps.py --input data\raw\musiccaps\musiccaps_public.csv --model-name distilbert-base-uncased --output-dir results --run-name task1_distilbert --epochs 10 --batch-size 8 --learning-rate 2e-5 --max-length 128 --hidden-size 256 --seed 42
+python -m src.train_bert_musiccaps --input data\raw\musiccaps\musiccaps_public.csv --model-name distilbert-base-uncased --output-dir results --run-name task1_distilbert --epochs 10 --batch-size 8 --learning-rate 2e-5 --max-length 128 --hidden-size 256 --seed 42
 ```
 
 This command uses the best validation Macro-F1 checkpoint and evaluates it on
@@ -103,7 +103,8 @@ data\
 Build the segment graphs:
 
 ```powershell
-python -m src.graph_builder --metadata data\raw\metadata.csv --audio-root data\raw\audio --output data\processed\graphs --sample-rate 22050 --segment-seconds 5 --threshold 0.75
+python -m src.graph_builder --prepare-metadata --tracks-csv data\raw\fma\fma_metadata\tracks.csv --audio-root data\raw\fma\fma_small --metadata-output data\raw\metadata.csv
+python -m src.graph_builder --metadata data\raw\metadata.csv --audio-root data\raw\fma\fma_small --output data\processed\graphs --sample-rate 22050 --segment-seconds 5 --threshold 0.75
 ```
 
 Train the real-data models:
@@ -130,7 +131,7 @@ you intentionally want to use another Hugging Face checkpoint.
 After building the real graph manifest, run all four real-data conditions:
 
 ```powershell
-python scripts\run_ablations.py --epochs 10
+python -m src.run_ablations --epochs 10
 ```
 
 The ablation script runs BERT-only, GNN-only, early-concatenation fusion, and
@@ -139,12 +140,13 @@ PR-AUC in the report.
 
 ## Project directories
 
-- `data\raw\`: real input audio and metadata; raw files are ignored by Git.
-- `data\processed\graphs\`: serialized audio graphs.
-- `data\processed\manifest.jsonl`: graph paths, text, labels, and split metadata.
-- `results\`: checkpoints, metrics, plots, and prediction examples.
-- `src\`: model, graph, training, evaluation, and metric implementations.
-- `scripts\`: dataset export/training and ablation utilities.
+- `data\raw\`: FMA, MagnaTagATune, MusicCaps, audio, and metadata downloads.
+- `data\processed\`: serialized graphs, mel-spectrograms, and BERT caches.
+- `data\splits\`: train/validation/test split files.
+- `notebooks\`: exploratory analysis and the end-to-end demo notebook.
+- `src\`: preprocessing, graph, model, training, evaluation, and metric code.
+- `results\`: metrics, plots, checkpoints, and retrieval examples.
+- `report\`: final report PDF and related report assets.
 - `config.yaml`: default model and training settings.
 
 Do not use illustrative scores from the assignment PDF. Report only metrics

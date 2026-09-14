@@ -16,8 +16,16 @@ sessions. Only confirmed decisions are recorded here.
 
 ## Implementation scope
 
-The requirements PDF is authoritative. Existing Task 2 code may be refactored
-or improved when it is inconsistent with the requirements or prevents a
-coherent stepwise pipeline. Changes should remain scoped to Task 2 and should
-preserve Task 1 and Task 3 behavior unless a directly coupled change is
-necessary.
+The requirements PDF is authoritative. Existing Task 2 code and the repository
+project or directory structure may be refactored or reorganized when they are
+inconsistent with the requirements or prevent a coherent stepwise pipeline.
+The existing `src/` and `scripts/` split is not mandatory. Changes should
+remain scoped to Task 2 and should preserve Task 1 and Task 3 behavior unless a
+directly coupled change is necessary.
+
+The Task 2 implementation follows the PDF project tree: reusable preprocessing,
+graph, model, training, and evaluation code belongs under `src/`; raw inputs
+belong under `data/raw/`; generated features and graphs belong under
+`data/processed/`; split files belong under `data/splits/`; and outputs belong
+under `results/`. The PDF-listed `scripts/` directory is not used for the new
+Task 2 pipeline.
