@@ -6,13 +6,19 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+from sklearn.metrics import average_precision_score
 
 from .gnn_model import GenreGraphSAGEClassifier, MelCNN
 from .train import GenreGraphDataset, GenreMelDataset, device_graph
 from .utils import ensure_dir, save_json
 
 
-def single_label_metrics(predictions: np.ndarray, targets: np.ndarray, genres: list[str]) -> dict:
+def single_label_metrics(
+    predictions: np.ndarray,
+    targets: np.ndarray,
+    probabilities: np.ndarray,
+    genres: list[str],
+) -> dict:
     per_class = {}
     f1_values = []
     for index, genre in enumerate(genres):
@@ -24,10 +30,14 @@ def single_label_metrics(predictions: np.ndarray, targets: np.ndarray, genres: l
         per_class[genre] = {"f1": f1}
         f1_values.append(f1)
     accuracy = float(np.mean(predictions == targets))
+    target_matrix = np.eye(len(genres), dtype=np.float32)[targets]
     return {
         "accuracy": accuracy,
         "macro_f1": float(np.mean(f1_values)),
         "micro_f1": accuracy,
+        "auc_pr": float(
+            average_precision_score(target_matrix, probabilities, average="macro")
+        ),
         "per_class": per_class,
     }
 
@@ -63,6 +73,11 @@ def save_confusion_matrix(
     plt.close(figure)
 
 
+def cross_entropy_loss(probabilities: np.ndarray, targets: np.ndarray) -> float:
+    selected = probabilities[np.arange(len(targets)), targets]
+    return float(-np.log(np.clip(selected, 1e-12, 1.0)).mean())
+
+
 def evaluate_genre_gnn(checkpoint_path: Path, manifest: Path, output_dir: Path) -> dict:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     state = torch.load(checkpoint_path, map_location=device, weights_only=False)
@@ -78,26 +93,33 @@ def evaluate_genre_gnn(checkpoint_path: Path, manifest: Path, output_dir: Path) 
     model.load_state_dict(state["model"])
     model.eval()
     dataset = GenreGraphDataset(manifest, "test", genres)
-    predictions, targets, cases = [], [], []
+    predictions, targets, probability_rows, cases = [], [], [], []
     with torch.no_grad():
         for graph in dataset:
             graph = device_graph(graph, device)
-            probabilities = torch.softmax(model(graph), dim=0)
-            prediction = int(probabilities.argmax().item())
+            probability_tensor = torch.softmax(model(graph), dim=0)
+            prediction = int(probability_tensor.argmax().item())
             target = int(graph["y"].item())
             predictions.append(prediction)
             targets.append(target)
+            probabilities_array = probability_tensor.cpu().numpy()
+            probability_rows.append(probabilities_array)
             cases.append(
                 {
                     "track_id": int(graph["track_id"]),
                     "true_genre": genres[target],
                     "predicted_genre": genres[prediction],
-                    "confidence": float(probabilities[prediction].item()),
+                    "confidence": float(probabilities_array[prediction]),
                 }
             )
     predictions_array = np.asarray(predictions)
     targets_array = np.asarray(targets)
-    metrics = single_label_metrics(predictions_array, targets_array, genres)
+    metrics = single_label_metrics(
+        predictions_array, targets_array, np.asarray(probability_rows), genres
+    )
+    metrics["test_loss"] = cross_entropy_loss(
+        np.asarray(probability_rows), targets_array
+    )
     plots = ensure_dir(output_dir / "plots")
     save_json(metrics, output_dir / "task2_graphsage_test_metrics.json")
     save_json({"predictions": cases}, output_dir / "task2_graphsage_predictions.json")
@@ -135,27 +157,35 @@ def evaluate_genre_cnn(
         segment_seconds=config["data"]["segment_seconds"],
         n_mels=config["data"]["n_mels"],
     )
-    predictions, targets, cases = [], [], []
+    predictions, targets, probability_rows, cases = [], [], [], []
     with torch.no_grad():
         for sample in dataset:
-            probabilities = torch.softmax(
-                model(sample["x"].unsqueeze(0).to(device)), dim=1
-            ).squeeze(0)
-            prediction = int(probabilities.argmax().item())
+            segment_logits = model(sample["x"].to(device))
+            probability_tensor = torch.softmax(
+                segment_logits.mean(dim=0), dim=0
+            )
+            prediction = int(probability_tensor.argmax().item())
             target = int(sample["y"].item())
+            probabilities_array = probability_tensor.cpu().numpy()
             predictions.append(prediction)
             targets.append(target)
+            probability_rows.append(probabilities_array)
             cases.append(
                 {
                     "track_id": int(sample["track_id"]),
                     "true_genre": genres[target],
                     "predicted_genre": genres[prediction],
-                    "confidence": float(probabilities[prediction].item()),
+                    "confidence": float(probabilities_array[prediction]),
                 }
             )
     predictions_array = np.asarray(predictions)
     targets_array = np.asarray(targets)
-    metrics = single_label_metrics(predictions_array, targets_array, genres)
+    metrics = single_label_metrics(
+        predictions_array, targets_array, np.asarray(probability_rows), genres
+    )
+    metrics["test_loss"] = cross_entropy_loss(
+        np.asarray(probability_rows), targets_array
+    )
     plots = ensure_dir(output_dir / "plots")
     save_json(metrics, output_dir / "task2_cnn_test_metrics.json")
     save_json({"predictions": cases}, output_dir / "task2_cnn_predictions.json")

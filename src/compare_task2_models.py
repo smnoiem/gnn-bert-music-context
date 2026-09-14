@@ -7,23 +7,22 @@ from pathlib import Path
 from .utils import save_json
 
 
-METRIC_NAMES = ("accuracy", "macro_f1", "micro_f1")
+METRIC_NAMES = ("accuracy", "macro_f1", "micro_f1", "auc_pr")
 
 
 def load_test_metrics(path: Path) -> dict[str, float]:
     if not path.is_file():
         raise FileNotFoundError(f"Metrics file was not found: {path}")
     payload = json.loads(path.read_text(encoding="utf-8"))
-    if "test_metrics" not in payload:
-        raise ValueError(f"Metrics file has no test_metrics section: {path}")
-    metrics = payload["test_metrics"]
+    metrics = payload.get("test_metrics", payload)
     missing = [name for name in METRIC_NAMES if name not in metrics]
-    if "test_loss" not in payload:
+    test_loss = payload.get("test_loss", metrics.get("test_loss"))
+    if test_loss is None:
         missing.append("test_loss")
     if missing:
         raise ValueError(f"Metrics file is missing {missing}: {path}")
     return {
-        "test_loss": float(payload["test_loss"]),
+        "test_loss": float(test_loss),
         **{name: float(metrics[name]) for name in METRIC_NAMES},
     }
 
@@ -56,11 +55,11 @@ def main() -> None:
     )
     parser.add_argument(
         "--graphsage-metrics",
-        default="results/task2/graphsage_genre_metrics.json",
+        default="results/task2/task2_graphsage_test_metrics.json",
     )
     parser.add_argument(
         "--cnn-metrics",
-        default="results/task2/cnn_melspectrogram_genre_metrics.json",
+        default="results/task2/task2_cnn_test_metrics.json",
     )
     parser.add_argument(
         "--output",

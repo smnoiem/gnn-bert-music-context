@@ -126,9 +126,6 @@ Train the real-data models:
 ```powershell
 python -m src.train --task genre_gnn --config config.yaml --manifest data\processed\task2\task2_graph_manifest.jsonl --run-name graphsage_genre --epochs 10
 python -m src.train --task genre_cnn --config config.yaml --manifest data\processed\task2\task2_graph_manifest.jsonl --metadata data\processed\task2\fma_metadata.csv --audio-root data\raw\fma\fma_small --run-name cnn_melspectrogram_genre --epochs 10
-python -m src.train --task bert --config config.yaml --manifest data\processed\manifest.jsonl --run-name task1_bert --epochs 10
-python -m src.train --task gnn --config config.yaml --manifest data\processed\manifest.jsonl --run-name task2_gnn --epochs 10
-python -m src.train --task fusion --config config.yaml --manifest data\processed\manifest.jsonl --run-name task3_fusion --epochs 10
 ```
 
 Evaluate the best Task 2 checkpoint:
@@ -168,13 +165,15 @@ Compare the trained Task 2 models:
 
 ```powershell
 python -m src.compare_task2_models `
-  --graphsage-metrics results\task2\graphsage_genre_metrics.json `
-  --cnn-metrics results\task2\cnn_melspectrogram_genre_metrics.json `
+  --graphsage-metrics results\task2\task2_graphsage_test_metrics.json `
+  --cnn-metrics results\task2\task2_cnn_test_metrics.json `
   --output results\task2\task2_model_comparison.json
 ```
 
-The comparison file contains test loss, Accuracy, Macro-F1, and Micro-F1 for
-the GraphSAGE model and the mel-spectrogram CNN baseline.
+The comparison file contains test loss, Accuracy, Macro-F1, Micro-F1, and
+one-vs-rest Macro PR-AUC for the GraphSAGE model and the mel-spectrogram CNN
+baseline. The CNN averages logits from every 5-second segment in each track,
+matching the full-track coverage of the graph model.
 
 For the Task 3 early-concatenation comparison:
 

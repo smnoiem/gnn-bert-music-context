@@ -8,7 +8,7 @@ from torch import nn
 from torch.utils.data import Dataset
 import yaml
 
-from .audio_features import load_audio, mel_spectrogram
+from .audio_features import load_audio, mel_spectrogram, segment_audio
 from .bert_encoder import BertTagClassifier
 from .fusion_model import FusionModel
 from .gnn_model import GNNClassifier, GenreGraphSAGEClassifier, MelCNN
@@ -53,12 +53,15 @@ def assert_no_artist_leakage(rows: list[dict]) -> None:
     seen = {}
     for row in rows:
         artist, split = row.get("artist_id"), row.get("split")
-        if artist and artist in seen and seen[artist] != split:
+        if artist is None or str(artist).strip().lower() in {"", "nan"}:
+            raise ValueError(f"Missing artist_id for track {row.get('track_id')}")
+        if split is None or str(split).strip().lower() in {"", "nan"}:
+            raise ValueError(f"Missing split for track {row.get('track_id')}")
+        if artist in seen and seen[artist] != split:
             raise ValueError(
                 f"artist leakage: {artist} in {seen[artist]} and {split}"
             )
-        if artist:
-            seen[artist] = split
+        seen[artist] = split
 
 
 class MusicGraphDataset(Dataset):
@@ -143,7 +146,7 @@ def load_audio_metadata(metadata_path: str | Path) -> dict[int, dict[str, str]]:
 
 
 class GenreMelDataset(Dataset):
-    """Load one fixed-size log-mel spectrogram per FMA track."""
+    """Load all fixed-size log-mel spectrogram segments for each FMA track."""
 
     def __init__(
         self,
@@ -180,12 +183,25 @@ class GenreMelDataset(Dataset):
         track_id = int(row["track_id"])
         audio_path = self.audio_root / self.audio_metadata[track_id]["path"]
         waveform, _ = load_audio(str(audio_path), self.sample_rate)
-        waveform = waveform[: self.segment_samples]
-        if len(waveform) < self.segment_samples:
-            waveform = np.pad(waveform, (0, self.segment_samples - len(waveform)))
-        mel = mel_spectrogram(waveform, self.sample_rate, self.n_mels)
+        segments = segment_audio(
+            waveform,
+            self.sample_rate,
+            segment_seconds=self.segment_samples / self.sample_rate,
+            minimum_seconds=1.0,
+        )
+        if not segments:
+            raise ValueError(f"Audio file contains no valid segments: {audio_path}")
+        mel_segments = []
+        for segment in segments:
+            if len(segment) < self.segment_samples:
+                segment = np.pad(segment, (0, self.segment_samples - len(segment)))
+            mel_segments.append(
+                torch.from_numpy(
+                    mel_spectrogram(segment, self.sample_rate, self.n_mels)
+                ).unsqueeze(0)
+            )
         return {
-            "x": torch.from_numpy(mel).unsqueeze(0),
+            "x": torch.stack(mel_segments),
             "y": encode_genre(row["genre"], self.vocabulary),
             "track_id": track_id,
         }
@@ -255,9 +271,10 @@ def run_cnn_epoch(model, data, optimizer, device, num_classes: int) -> tuple[flo
     predictions: list[int] = []
     targets: list[int] = []
     for sample in data:
-        inputs = sample["x"].unsqueeze(0).to(device)
+        inputs = sample["x"].to(device)
         target = sample["y"].reshape(1).to(device)
-        logits = model(inputs)
+        segment_logits = model(inputs)
+        logits = segment_logits.mean(dim=0, keepdim=True)
         loss = criterion(logits, target)
         if training:
             optimizer.zero_grad()
