@@ -29,3 +29,8 @@ belong under `data/raw/`; generated features and graphs belong under
 `data/processed/`; split files belong under `data/splits/`; and outputs belong
 under `results/`. The PDF-listed `scripts/` directory is not used for the new
 Task 2 pipeline.
+
+Existing Task 1 and Task 3 code does not need to remain intact when it conflicts
+with the requirements or with a coherent Task 2 architecture. Modules may be
+refactored, replaced, or removed as needed; compatibility is not a goal when it
+would preserve an inconsistent design.
