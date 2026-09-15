@@ -36,7 +36,7 @@ def compare_task2_models(
         "task": "task2_genre_classification",
         "models": {
             "graphsage": {
-                "description": "PyTorch Geometric GraphSAGE on MFCC+chroma segment graphs",
+                "description": "PyTorch Geometric GraphSAGE on rich spectral, harmonic, rhythm, and energy segment graphs",
                 "metrics": load_test_metrics(graphsage_metrics),
             },
             "cnn_melspectrogram": {

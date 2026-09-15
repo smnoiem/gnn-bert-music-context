@@ -11,7 +11,7 @@ class GraphSAGEEncoder(nn.Module):
 
     def __init__(
         self,
-        input_dim: int = 32,
+        input_dim: int = 182,
         hidden_dim: int = 128,
         layers: int = 2,
         dropout: float = 0.2,
@@ -46,7 +46,7 @@ class GenreGraphSAGEClassifier(nn.Module):
     def __init__(
         self,
         num_genres: int,
-        input_dim: int = 32,
+        input_dim: int = 182,
         hidden_dim: int = 128,
         layers: int = 2,
         dropout: float = 0.2,

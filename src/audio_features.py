@@ -3,6 +3,19 @@ from __future__ import annotations
 import numpy as np
 
 
+DEFAULT_N_MFCC = 20
+CHROMA_BINS = 12
+SPECTRAL_CONTRAST_BANDS = 7
+TONNETZ_COMPONENTS = 6
+AUDIO_FEATURE_DIM = (
+    DEFAULT_N_MFCC * 6
+    + CHROMA_BINS * 2
+    + SPECTRAL_CONTRAST_BANDS * 2
+    + TONNETZ_COMPONENTS * 2
+    + 6 * 2
+)
+
+
 def load_audio(path: str, sample_rate: int = 22050) -> tuple[np.ndarray, int]:
     """Load an audio file as a mono waveform at the requested sample rate."""
     import librosa
@@ -40,23 +53,58 @@ def segment_audio(
 def extract_mfcc(
     segment: np.ndarray,
     sample_rate: int,
-    n_mfcc: int = 20,
+    n_mfcc: int = DEFAULT_N_MFCC,
 ) -> np.ndarray:
-    """Extract one mean MFCC vector from an audio segment."""
+    """Extract MFCC, delta, and delta-delta statistics from a segment."""
     import librosa
 
     if n_mfcc <= 0:
         raise ValueError("n_mfcc must be positive")
-    values = librosa.feature.mfcc(y=segment, sr=sample_rate, n_mfcc=n_mfcc)
-    return values.mean(axis=1).astype(np.float32)
+    values = librosa.feature.mfcc(
+        y=segment, sr=sample_rate, n_mfcc=n_mfcc, n_fft=2048, hop_length=512
+    )
+    features = [values, librosa.feature.delta(values), librosa.feature.delta(values, order=2)]
+    return np.concatenate(
+        [np.concatenate([value.mean(axis=1), value.std(axis=1)]) for value in features]
+    ).astype(np.float32)
 
 
 def extract_chroma(segment: np.ndarray, sample_rate: int) -> np.ndarray:
-    """Extract one mean chroma vector from an audio segment."""
+    """Extract mean and variation of the pitch-class energy distribution."""
     import librosa
 
-    values = librosa.feature.chroma_stft(y=segment, sr=sample_rate)
-    return values.mean(axis=1).astype(np.float32)
+    values = librosa.feature.chroma_stft(
+        y=segment, sr=sample_rate, n_fft=2048, hop_length=512
+    )
+    return np.concatenate([values.mean(axis=1), values.std(axis=1)]).astype(np.float32)
+
+
+def extract_spectral_features(segment: np.ndarray, sample_rate: int) -> np.ndarray:
+    """Extract spectral shape, harmonic, rhythm, and energy statistics."""
+    import librosa
+
+    magnitude = np.abs(librosa.stft(segment, n_fft=2048, hop_length=512))
+    frame_kwargs = {"hop_length": 512}
+    chroma = librosa.feature.chroma_stft(
+        S=magnitude, sr=sample_rate, n_fft=2048, hop_length=512
+    )
+    features = [
+        librosa.feature.spectral_contrast(
+            S=magnitude, sr=sample_rate, n_fft=2048, hop_length=512
+        ),
+        librosa.feature.tonnetz(chroma=chroma, sr=sample_rate),
+        librosa.feature.spectral_centroid(S=magnitude, sr=sample_rate, **frame_kwargs),
+        librosa.feature.spectral_bandwidth(S=magnitude, sr=sample_rate, **frame_kwargs),
+        librosa.feature.spectral_rolloff(S=magnitude, sr=sample_rate, **frame_kwargs),
+        librosa.feature.zero_crossing_rate(
+            segment, frame_length=2048, **frame_kwargs
+        ),
+        librosa.feature.rms(S=magnitude, **frame_kwargs),
+        librosa.feature.spectral_flatness(S=magnitude, **frame_kwargs),
+    ]
+    return np.concatenate(
+        [np.concatenate([value.mean(axis=1), value.std(axis=1)]) for value in features]
+    ).astype(np.float32)
 
 
 def normalize_features(features: np.ndarray, epsilon: float = 1e-6) -> np.ndarray:
@@ -73,15 +121,27 @@ def normalize_features(features: np.ndarray, epsilon: float = 1e-6) -> np.ndarra
 def extract_segment_features(
     segments: list[np.ndarray],
     sample_rate: int,
-    n_mfcc: int = 20,
+    n_mfcc: int = DEFAULT_N_MFCC,
 ) -> np.ndarray:
-    """Create normalized MFCC+chroma vectors for graph nodes."""
+    """Create normalized, information-rich audio vectors for graph nodes.
+
+    Each segment contains MFCC means/stds and their first two deltas, chroma
+    means/stds, and statistics for spectral contrast, tonnetz, centroid,
+    bandwidth, rolloff, zero-crossing rate, RMS energy, and spectral flatness.
+    """
     if not segments:
-        return np.zeros((1, n_mfcc + 12), dtype=np.float32)
+        feature_count = (n_mfcc * 6) + (CHROMA_BINS * 2) + (
+            SPECTRAL_CONTRAST_BANDS * 2
+        ) + (TONNETZ_COMPONENTS * 2) + (6 * 2)
+        return np.zeros((1, feature_count), dtype=np.float32)
 
     features = [
         np.concatenate(
-            [extract_mfcc(segment, sample_rate, n_mfcc), extract_chroma(segment, sample_rate)]
+            [
+                extract_mfcc(segment, sample_rate, n_mfcc),
+                extract_chroma(segment, sample_rate),
+                extract_spectral_features(segment, sample_rate),
+            ]
         )
         for segment in segments
     ]

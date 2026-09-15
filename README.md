@@ -185,7 +185,10 @@ python -m src.compare_task2_models `
   --output results\task2\task2_model_comparison.json
 ```
 
-The comparison file contains test loss, Accuracy, Macro-F1, Micro-F1, and
+The graph nodes capture 182 normalized descriptors per 5-second segment:
+MFCC distribution and temporal coefficients, chroma, spectral contrast, tonnetz,
+spectral shape, energy, and zero-crossing statistics. The comparison file
+contains test loss, Accuracy, Macro-F1, Micro-F1, and
 one-vs-rest Macro PR-AUC for the GraphSAGE model and the mel-spectrogram CNN
 baseline. The CNN averages logits from every 5-second segment in each track,
 matching the full-track coverage of the graph model.
