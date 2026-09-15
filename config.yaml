@@ -15,14 +15,21 @@ data:
 model:
   text_model: distilbert-base-uncased
   text_hidden: 256
-  gnn_hidden: 128
-  gnn_layers: 2
+  gnn_hidden: 256
+  gnn_layers: 3
   num_labels: 8
   dropout: 0.2
 training:
   batch_size: 8
   cnn_batch_size: 8
-  epochs: 10
+  epochs: 50
   learning_rate: 0.0003
-  weight_decay: 0.00001
+  weight_decay: 0.0001
+  class_weighting: balanced
+  scheduler_factor: 0.5
+  scheduler_patience: 5
+  min_learning_rate: 0.000001
+  early_stopping_patience: 12
+  early_stopping_min_delta: 0.0001
+  gradient_clip_norm: 1.0
   freeze_text_encoder: false

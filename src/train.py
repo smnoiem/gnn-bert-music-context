@@ -322,10 +322,18 @@ def single_label_metrics(predictions: list[int], targets: list[int], num_classes
     }
 
 
-def run_genre_epoch(model, data, optimizer, device, num_classes: int) -> tuple[float, dict]:
+def run_genre_epoch(
+    model,
+    data,
+    optimizer,
+    device,
+    num_classes: int,
+    criterion: nn.Module | None = None,
+    gradient_clip_norm: float | None = None,
+) -> tuple[float, dict]:
     training = optimizer is not None
     model.train(training)
-    criterion = nn.CrossEntropyLoss()
+    criterion = criterion or nn.CrossEntropyLoss()
     losses: list[float] = []
     predictions: list[int] = []
     targets: list[int] = []
@@ -339,6 +347,8 @@ def run_genre_epoch(model, data, optimizer, device, num_classes: int) -> tuple[f
             if training:
                 optimizer.zero_grad()
                 loss.backward()
+                if gradient_clip_norm is not None:
+                    nn.utils.clip_grad_norm_(model.parameters(), gradient_clip_norm)
                 optimizer.step()
             losses.append(float(loss.item()))
             predictions.extend(logits.argmax(dim=1).detach().cpu().tolist())
@@ -432,12 +442,48 @@ def train_gnn(args, cfg) -> None:
         lr=cfg["training"]["learning_rate"],
         weight_decay=cfg["training"]["weight_decay"],
     )
+    class_weighting = str(cfg["training"].get("class_weighting", "none")).lower()
+    if class_weighting not in {"none", "balanced"}:
+        raise ValueError("training.class_weighting must be 'none' or 'balanced'")
+    class_weights = None
+    if class_weighting == "balanced":
+        targets = [int(encode_genre(row["genre"], train.vocabulary)) for row in train.rows]
+        counts = torch.bincount(
+            torch.tensor(targets, dtype=torch.long),
+            minlength=len(train.vocabulary),
+        ).float()
+        if (counts == 0).any():
+            missing = [
+                train.vocabulary[index]
+                for index, count in enumerate(counts.tolist())
+                if count == 0
+            ]
+            raise ValueError(f"Training split has no samples for genres: {missing}")
+        class_weights = counts.sum() / (len(counts) * counts)
+    criterion = nn.CrossEntropyLoss(
+        weight=class_weights.to(device) if class_weights is not None else None
+    )
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer,
+        mode="max",
+        factor=float(cfg["training"].get("scheduler_factor", 0.5)),
+        patience=int(cfg["training"].get("scheduler_patience", 5)),
+        min_lr=float(cfg["training"].get("min_learning_rate", 1e-6)),
+    )
     
     run_name = args.run_name or "graphsage_genre"
     results = ensure_dir(cfg["data"]["results_dir"])
     history = []
     best = -1.0
+    epochs_without_improvement = 0
     total_epochs = args.epochs or cfg["training"]["epochs"]
+    early_stopping_patience = int(
+        cfg["training"].get("early_stopping_patience", total_epochs)
+    )
+    min_delta = float(cfg["training"].get("early_stopping_min_delta", 0.0))
+    gradient_clip_norm = cfg["training"].get("gradient_clip_norm")
+    if gradient_clip_norm is not None:
+        gradient_clip_norm = float(gradient_clip_norm)
     batch_size = int(cfg["training"].get("graph_batch_size", cfg["training"]["batch_size"]))
     loader_kwargs = {
         "batch_size": batch_size,
@@ -466,11 +512,18 @@ def train_gnn(args, cfg) -> None:
     )
     for epoch in range(total_epochs):
         train_loss, train_metrics = run_genre_epoch(
-            model, train_loader, optimizer, device, len(train.vocabulary)
+            model,
+            train_loader,
+            optimizer,
+            device,
+            len(train.vocabulary),
+            criterion,
+            gradient_clip_norm,
         )
         val_loss, val_metrics = run_genre_epoch(
-            model, val_loader, None, device, len(train.vocabulary)
+            model, val_loader, None, device, len(train.vocabulary), criterion
         )
+        scheduler.step(val_metrics["macro_f1"])
         row = {
             "epoch": epoch + 1,
             "train_loss": train_loss,
@@ -480,25 +533,38 @@ def train_gnn(args, cfg) -> None:
         }
         history.append(row)
         LOGGER.info("Epoch %d/%d: %s", epoch + 1, total_epochs, row)
-        if val_metrics["macro_f1"] > best:
+        if val_metrics["macro_f1"] > best + min_delta:
             best = val_metrics["macro_f1"]
+            epochs_without_improvement = 0
             torch.save(
                 {
                     "model": model.state_dict(),
+                    "optimizer": optimizer.state_dict(),
+                    "scheduler": scheduler.state_dict(),
+                    "epoch": epoch + 1,
                     "vocabulary": train.vocabulary,
                     "input_dim": input_dim,
+                    "class_weighting": class_weighting,
                     "config": cfg,
                     "task": "gnn",
                 },
                 results / f"{run_name}_best.pt",
             )
+        else:
+            epochs_without_improvement += 1
+            if epochs_without_improvement >= early_stopping_patience:
+                LOGGER.info(
+                    "Early stopping after %d epochs without validation improvement",
+                    epochs_without_improvement,
+                )
+                break
 
     checkpoint = torch.load(
         results / f"{run_name}_best.pt", map_location=device, weights_only=False
     )
     model.load_state_dict(checkpoint["model"])
     test_loss, test_metrics = run_genre_epoch(
-        model, test_loader, None, device, len(train.vocabulary)
+        model, test_loader, None, device, len(train.vocabulary), criterion
     )
     save_json(
         {
