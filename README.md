@@ -192,6 +192,9 @@ contains test loss, Accuracy, Macro-F1, Micro-F1, and
 one-vs-rest Macro PR-AUC for the GraphSAGE model and the mel-spectrogram CNN
 baseline. The CNN averages logits from every 5-second segment in each track,
 matching the full-track coverage of the graph model.
+Graph feature scaling is fitted only on training-track segments and reused for
+validation and test tracks, so similarity edges remain comparable without
+leaking evaluation statistics.
 
 ## Task 2 complete pipeline
 
