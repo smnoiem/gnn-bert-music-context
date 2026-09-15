@@ -1,0 +1,25 @@
+{
+  "models": {
+    "cnn_melspectrogram": {
+      "description": "CNN baseline on 5-second log-mel spectrograms",
+      "metrics": {
+        "accuracy": 0.465,
+        "auc_pr": 0.4939350935060717,
+        "macro_f1": 0.4544333452639435,
+        "micro_f1": 0.465,
+        "test_loss": 1.4877307415008545
+      }
+    },
+    "graphsage": {
+      "description": "PyTorch Geometric GraphSAGE on rich spectral, harmonic, rhythm, and energy segment graphs",
+      "metrics": {
+        "accuracy": 0.43,
+        "auc_pr": 0.4533755946137668,
+        "macro_f1": 0.43227229832847686,
+        "micro_f1": 0.43,
+        "test_loss": 1.7489886283874512
+      }
+    }
+  },
+  "task": "task2_genre_classification"
+}

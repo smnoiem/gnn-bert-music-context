@@ -1,0 +1,4804 @@
+{
+  "predictions": [
+    {
+      "confidence": 0.657467782497406,
+      "predicted_genre": "Pop",
+      "track_id": 182,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.9060823321342468,
+      "predicted_genre": "Electronic",
+      "track_id": 704,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8789572715759277,
+      "predicted_genre": "International",
+      "track_id": 705,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.5583570003509521,
+      "predicted_genre": "Pop",
+      "track_id": 706,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8646562695503235,
+      "predicted_genre": "Rock",
+      "track_id": 707,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8730257153511047,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 708,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.35923999547958374,
+      "predicted_genre": "Pop",
+      "track_id": 709,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.7135270833969116,
+      "predicted_genre": "Instrumental",
+      "track_id": 890,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.2704579532146454,
+      "predicted_genre": "Instrumental",
+      "track_id": 892,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.44902774691581726,
+      "predicted_genre": "Experimental",
+      "track_id": 1066,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.3383878767490387,
+      "predicted_genre": "Instrumental",
+      "track_id": 1069,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.6845476627349854,
+      "predicted_genre": "Pop",
+      "track_id": 1073,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.45637047290802,
+      "predicted_genre": "Electronic",
+      "track_id": 1075,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.6213182806968689,
+      "predicted_genre": "Experimental",
+      "track_id": 1249,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.5434060096740723,
+      "predicted_genre": "Pop",
+      "track_id": 1259,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.5990151762962341,
+      "predicted_genre": "Rock",
+      "track_id": 3624,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.589061975479126,
+      "predicted_genre": "Pop",
+      "track_id": 4108,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.44903409481048584,
+      "predicted_genre": "Folk",
+      "track_id": 7373,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.26403456926345825,
+      "predicted_genre": "Experimental",
+      "track_id": 7374,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.4148443043231964,
+      "predicted_genre": "Experimental",
+      "track_id": 7375,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.7455795407295227,
+      "predicted_genre": "Folk",
+      "track_id": 7376,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.5942595601081848,
+      "predicted_genre": "Electronic",
+      "track_id": 7377,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.3765641748905182,
+      "predicted_genre": "Electronic",
+      "track_id": 7378,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.6194047927856445,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 7379,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.37663182616233826,
+      "predicted_genre": "Experimental",
+      "track_id": 7381,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.6456140279769897,
+      "predicted_genre": "Electronic",
+      "track_id": 7383,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.46685096621513367,
+      "predicted_genre": "Pop",
+      "track_id": 7385,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.7393873333930969,
+      "predicted_genre": "Electronic",
+      "track_id": 7386,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.686813473701477,
+      "predicted_genre": "Instrumental",
+      "track_id": 7388,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.6850637197494507,
+      "predicted_genre": "Electronic",
+      "track_id": 7391,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.5901228189468384,
+      "predicted_genre": "Experimental",
+      "track_id": 7393,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.707383394241333,
+      "predicted_genre": "Experimental",
+      "track_id": 9155,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.7755361199378967,
+      "predicted_genre": "Experimental",
+      "track_id": 10250,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7733423113822937,
+      "predicted_genre": "Experimental",
+      "track_id": 10381,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.8564729690551758,
+      "predicted_genre": "Experimental",
+      "track_id": 10382,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.33283647894859314,
+      "predicted_genre": "Experimental",
+      "track_id": 10383,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.43126553297042847,
+      "predicted_genre": "Experimental",
+      "track_id": 10384,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.7975584864616394,
+      "predicted_genre": "Instrumental",
+      "track_id": 10385,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.41846755146980286,
+      "predicted_genre": "International",
+      "track_id": 10386,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.677157461643219,
+      "predicted_genre": "International",
+      "track_id": 10387,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.6802495121955872,
+      "predicted_genre": "Folk",
+      "track_id": 10388,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.8287542462348938,
+      "predicted_genre": "Experimental",
+      "track_id": 10389,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.5437612533569336,
+      "predicted_genre": "Experimental",
+      "track_id": 10438,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.48494166135787964,
+      "predicted_genre": "Instrumental",
+      "track_id": 10439,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.37281012535095215,
+      "predicted_genre": "Experimental",
+      "track_id": 10440,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.6668234467506409,
+      "predicted_genre": "Folk",
+      "track_id": 10441,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.6451572179794312,
+      "predicted_genre": "Experimental",
+      "track_id": 10442,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.3662773370742798,
+      "predicted_genre": "Folk",
+      "track_id": 10443,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.5028296709060669,
+      "predicted_genre": "Experimental",
+      "track_id": 10444,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.3475685119628906,
+      "predicted_genre": "Pop",
+      "track_id": 10447,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.35207483172416687,
+      "predicted_genre": "Experimental",
+      "track_id": 10480,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.8691912293434143,
+      "predicted_genre": "International",
+      "track_id": 10481,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.31579944491386414,
+      "predicted_genre": "Pop",
+      "track_id": 10485,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.38364773988723755,
+      "predicted_genre": "International",
+      "track_id": 10678,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.4446861743927002,
+      "predicted_genre": "Experimental",
+      "track_id": 10679,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.8060041069984436,
+      "predicted_genre": "Folk",
+      "track_id": 10682,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.39222481846809387,
+      "predicted_genre": "Experimental",
+      "track_id": 10684,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.8571521639823914,
+      "predicted_genre": "International",
+      "track_id": 10992,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.267328679561615,
+      "predicted_genre": "Experimental",
+      "track_id": 10993,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.7904593348503113,
+      "predicted_genre": "Electronic",
+      "track_id": 11019,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.5065927505493164,
+      "predicted_genre": "International",
+      "track_id": 11020,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.5509356260299683,
+      "predicted_genre": "Experimental",
+      "track_id": 11059,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.36580875515937805,
+      "predicted_genre": "Folk",
+      "track_id": 11200,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.8237341046333313,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 11204,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.336260586977005,
+      "predicted_genre": "Folk",
+      "track_id": 11503,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.6878337264060974,
+      "predicted_genre": "Folk",
+      "track_id": 11504,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.8234135508537292,
+      "predicted_genre": "Experimental",
+      "track_id": 11505,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.38363754749298096,
+      "predicted_genre": "Folk",
+      "track_id": 11508,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.3645433783531189,
+      "predicted_genre": "Experimental",
+      "track_id": 12045,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.5440399050712585,
+      "predicted_genre": "Instrumental",
+      "track_id": 12046,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.9558143615722656,
+      "predicted_genre": "International",
+      "track_id": 12047,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.805665910243988,
+      "predicted_genre": "Folk",
+      "track_id": 12048,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.4578619599342346,
+      "predicted_genre": "Instrumental",
+      "track_id": 12049,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.6156774759292603,
+      "predicted_genre": "Pop",
+      "track_id": 12050,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.9621756076812744,
+      "predicted_genre": "International",
+      "track_id": 12051,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.38249891996383667,
+      "predicted_genre": "Folk",
+      "track_id": 12052,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.4079984724521637,
+      "predicted_genre": "Folk",
+      "track_id": 12053,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.2905585467815399,
+      "predicted_genre": "Instrumental",
+      "track_id": 12058,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.8572999238967896,
+      "predicted_genre": "Folk",
+      "track_id": 12059,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.2932596206665039,
+      "predicted_genre": "Pop",
+      "track_id": 12060,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.752595067024231,
+      "predicted_genre": "Experimental",
+      "track_id": 12061,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.610769510269165,
+      "predicted_genre": "Pop",
+      "track_id": 12062,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.40373891592025757,
+      "predicted_genre": "Experimental",
+      "track_id": 12064,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.3448282778263092,
+      "predicted_genre": "Folk",
+      "track_id": 12065,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.47066259384155273,
+      "predicted_genre": "Folk",
+      "track_id": 12066,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.686821699142456,
+      "predicted_genre": "Experimental",
+      "track_id": 12067,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.34342384338378906,
+      "predicted_genre": "Electronic",
+      "track_id": 12179,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.5568645596504211,
+      "predicted_genre": "Pop",
+      "track_id": 12387,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.3187101483345032,
+      "predicted_genre": "Experimental",
+      "track_id": 12390,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.7658475041389465,
+      "predicted_genre": "Folk",
+      "track_id": 12481,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.6285248398780823,
+      "predicted_genre": "Folk",
+      "track_id": 12482,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.7947700023651123,
+      "predicted_genre": "Folk",
+      "track_id": 12484,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.46509644389152527,
+      "predicted_genre": "Experimental",
+      "track_id": 12485,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.6434440016746521,
+      "predicted_genre": "Experimental",
+      "track_id": 12486,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.47994691133499146,
+      "predicted_genre": "International",
+      "track_id": 12487,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.9171197414398193,
+      "predicted_genre": "Folk",
+      "track_id": 12488,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.5030074715614319,
+      "predicted_genre": "Experimental",
+      "track_id": 12489,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.34224265813827515,
+      "predicted_genre": "Folk",
+      "track_id": 12490,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.30721515417099,
+      "predicted_genre": "Instrumental",
+      "track_id": 12508,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.30942055583000183,
+      "predicted_genre": "Instrumental",
+      "track_id": 12513,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.6260212063789368,
+      "predicted_genre": "International",
+      "track_id": 12514,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.4623904526233673,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 12518,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.6298576593399048,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 12521,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.5334537625312805,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 12690,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.41092225909233093,
+      "predicted_genre": "Pop",
+      "track_id": 12691,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.349929541349411,
+      "predicted_genre": "Experimental",
+      "track_id": 12692,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.6135300993919373,
+      "predicted_genre": "Pop",
+      "track_id": 13328,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.37176749110221863,
+      "predicted_genre": "Experimental",
+      "track_id": 13578,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.7736220359802246,
+      "predicted_genre": "Rock",
+      "track_id": 13666,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.6240105032920837,
+      "predicted_genre": "Electronic",
+      "track_id": 13706,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.9237035512924194,
+      "predicted_genre": "International",
+      "track_id": 13707,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.7881331443786621,
+      "predicted_genre": "Electronic",
+      "track_id": 13708,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.8212341070175171,
+      "predicted_genre": "Experimental",
+      "track_id": 13709,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.8164112567901611,
+      "predicted_genre": "Electronic",
+      "track_id": 13710,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5772596597671509,
+      "predicted_genre": "Electronic",
+      "track_id": 13711,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5649663805961609,
+      "predicted_genre": "Experimental",
+      "track_id": 14601,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.690588653087616,
+      "predicted_genre": "Folk",
+      "track_id": 14602,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.5581669807434082,
+      "predicted_genre": "Folk",
+      "track_id": 14603,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.552981972694397,
+      "predicted_genre": "Folk",
+      "track_id": 14604,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.5200501084327698,
+      "predicted_genre": "Folk",
+      "track_id": 14653,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.9066181778907776,
+      "predicted_genre": "Electronic",
+      "track_id": 14663,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.8212993741035461,
+      "predicted_genre": "Electronic",
+      "track_id": 14690,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.41909059882164,
+      "predicted_genre": "Pop",
+      "track_id": 14733,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.33417952060699463,
+      "predicted_genre": "Instrumental",
+      "track_id": 14734,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.8064000010490417,
+      "predicted_genre": "Folk",
+      "track_id": 14735,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.6376596093177795,
+      "predicted_genre": "Pop",
+      "track_id": 14736,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.7008297443389893,
+      "predicted_genre": "Instrumental",
+      "track_id": 14737,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.4492577910423279,
+      "predicted_genre": "Pop",
+      "track_id": 14738,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.690963864326477,
+      "predicted_genre": "Instrumental",
+      "track_id": 14739,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.44104471802711487,
+      "predicted_genre": "Folk",
+      "track_id": 14740,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.5647560954093933,
+      "predicted_genre": "Instrumental",
+      "track_id": 14741,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.3510982096195221,
+      "predicted_genre": "Pop",
+      "track_id": 14742,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.3491184413433075,
+      "predicted_genre": "Pop",
+      "track_id": 14743,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.3991709053516388,
+      "predicted_genre": "Pop",
+      "track_id": 14744,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.5520597696304321,
+      "predicted_genre": "Instrumental",
+      "track_id": 14745,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.3267824351787567,
+      "predicted_genre": "International",
+      "track_id": 15094,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.44503068923950195,
+      "predicted_genre": "Folk",
+      "track_id": 16337,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.36575523018836975,
+      "predicted_genre": "Instrumental",
+      "track_id": 16338,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.7415518164634705,
+      "predicted_genre": "Experimental",
+      "track_id": 16339,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.6445968151092529,
+      "predicted_genre": "International",
+      "track_id": 16340,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.7180730104446411,
+      "predicted_genre": "Instrumental",
+      "track_id": 16994,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.685835063457489,
+      "predicted_genre": "International",
+      "track_id": 16995,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.5122944116592407,
+      "predicted_genre": "Instrumental",
+      "track_id": 16997,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.29671338200569153,
+      "predicted_genre": "Rock",
+      "track_id": 18112,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.55120450258255,
+      "predicted_genre": "Folk",
+      "track_id": 18350,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.6385646462440491,
+      "predicted_genre": "Experimental",
+      "track_id": 19439,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.5320754647254944,
+      "predicted_genre": "Rock",
+      "track_id": 19685,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.8440504670143127,
+      "predicted_genre": "International",
+      "track_id": 20296,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.5169569253921509,
+      "predicted_genre": "Electronic",
+      "track_id": 20667,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5607755780220032,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 21995,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.7563602328300476,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 21996,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.5347328186035156,
+      "predicted_genre": "Electronic",
+      "track_id": 21997,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.5997483134269714,
+      "predicted_genre": "Experimental",
+      "track_id": 21998,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.5588714480400085,
+      "predicted_genre": "Pop",
+      "track_id": 21999,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.5096357464790344,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 22000,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.393744558095932,
+      "predicted_genre": "Pop",
+      "track_id": 22001,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.48199304938316345,
+      "predicted_genre": "Electronic",
+      "track_id": 23010,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.32555022835731506,
+      "predicted_genre": "Pop",
+      "track_id": 23041,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.6835285425186157,
+      "predicted_genre": "Pop",
+      "track_id": 23063,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.5650047063827515,
+      "predicted_genre": "Electronic",
+      "track_id": 23862,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.35107851028442383,
+      "predicted_genre": "Experimental",
+      "track_id": 25055,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.2603284418582916,
+      "predicted_genre": "Pop",
+      "track_id": 26859,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.628879964351654,
+      "predicted_genre": "Electronic",
+      "track_id": 26861,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5119149684906006,
+      "predicted_genre": "Pop",
+      "track_id": 26902,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.4531209468841553,
+      "predicted_genre": "Experimental",
+      "track_id": 26904,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5703904032707214,
+      "predicted_genre": "Experimental",
+      "track_id": 26905,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.4750218093395233,
+      "predicted_genre": "Electronic",
+      "track_id": 26906,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.4688510596752167,
+      "predicted_genre": "Pop",
+      "track_id": 28070,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.7658051252365112,
+      "predicted_genre": "Rock",
+      "track_id": 28072,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.6951143145561218,
+      "predicted_genre": "Electronic",
+      "track_id": 28179,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.31493136286735535,
+      "predicted_genre": "Pop",
+      "track_id": 28266,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.3198675811290741,
+      "predicted_genre": "Electronic",
+      "track_id": 28692,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.5687780976295471,
+      "predicted_genre": "Electronic",
+      "track_id": 28802,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.955372154712677,
+      "predicted_genre": "International",
+      "track_id": 29351,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.6138935089111328,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 30316,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.3709602653980255,
+      "predicted_genre": "Electronic",
+      "track_id": 32435,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.9066577553749084,
+      "predicted_genre": "Rock",
+      "track_id": 33992,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.34522026777267456,
+      "predicted_genre": "Pop",
+      "track_id": 35182,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.5408126711845398,
+      "predicted_genre": "Electronic",
+      "track_id": 35184,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.3650343716144562,
+      "predicted_genre": "Pop",
+      "track_id": 35198,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.6474589705467224,
+      "predicted_genre": "Folk",
+      "track_id": 35199,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.8298836946487427,
+      "predicted_genre": "Experimental",
+      "track_id": 35204,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.40640416741371155,
+      "predicted_genre": "Pop",
+      "track_id": 35544,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.4255342185497284,
+      "predicted_genre": "Pop",
+      "track_id": 35545,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.8021630644798279,
+      "predicted_genre": "International",
+      "track_id": 35549,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.3590489327907562,
+      "predicted_genre": "Pop",
+      "track_id": 35550,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.6136143803596497,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 35569,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.850419282913208,
+      "predicted_genre": "Folk",
+      "track_id": 35608,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.3503943681716919,
+      "predicted_genre": "Experimental",
+      "track_id": 36096,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.3162667155265808,
+      "predicted_genre": "Electronic",
+      "track_id": 36097,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.8462876677513123,
+      "predicted_genre": "Electronic",
+      "track_id": 36099,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.29828792810440063,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 36302,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.5105359554290771,
+      "predicted_genre": "Instrumental",
+      "track_id": 36799,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.3821381628513336,
+      "predicted_genre": "Pop",
+      "track_id": 36959,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.7320274114608765,
+      "predicted_genre": "Experimental",
+      "track_id": 36961,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.7187774777412415,
+      "predicted_genre": "Electronic",
+      "track_id": 36965,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.34142816066741943,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 36966,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.7286437153816223,
+      "predicted_genre": "Electronic",
+      "track_id": 36998,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.8497828245162964,
+      "predicted_genre": "International",
+      "track_id": 38775,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.7279601693153381,
+      "predicted_genre": "International",
+      "track_id": 38776,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.6474268436431885,
+      "predicted_genre": "Folk",
+      "track_id": 38777,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.892455518245697,
+      "predicted_genre": "International",
+      "track_id": 38778,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.7047334909439087,
+      "predicted_genre": "Folk",
+      "track_id": 38779,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.792163074016571,
+      "predicted_genre": "International",
+      "track_id": 38780,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9502406716346741,
+      "predicted_genre": "International",
+      "track_id": 38781,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9382314085960388,
+      "predicted_genre": "Folk",
+      "track_id": 38782,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.6936194896697998,
+      "predicted_genre": "International",
+      "track_id": 38783,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9425168037414551,
+      "predicted_genre": "International",
+      "track_id": 38784,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.5623721480369568,
+      "predicted_genre": "International",
+      "track_id": 38785,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8903573751449585,
+      "predicted_genre": "International",
+      "track_id": 38817,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.7811489105224609,
+      "predicted_genre": "Folk",
+      "track_id": 38818,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8666921854019165,
+      "predicted_genre": "International",
+      "track_id": 38819,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8677514791488647,
+      "predicted_genre": "Folk",
+      "track_id": 38820,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.3527202904224396,
+      "predicted_genre": "Experimental",
+      "track_id": 38821,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8559061884880066,
+      "predicted_genre": "Folk",
+      "track_id": 38822,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8333088755607605,
+      "predicted_genre": "International",
+      "track_id": 38823,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.861807107925415,
+      "predicted_genre": "Folk",
+      "track_id": 38824,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.3615882098674774,
+      "predicted_genre": "Folk",
+      "track_id": 38825,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9096879959106445,
+      "predicted_genre": "Folk",
+      "track_id": 38826,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.7749573588371277,
+      "predicted_genre": "International",
+      "track_id": 38827,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.6565796136856079,
+      "predicted_genre": "Folk",
+      "track_id": 38828,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.42260342836380005,
+      "predicted_genre": "Instrumental",
+      "track_id": 38829,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.3578926622867584,
+      "predicted_genre": "Instrumental",
+      "track_id": 38830,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8191599249839783,
+      "predicted_genre": "Folk",
+      "track_id": 38833,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.7352780699729919,
+      "predicted_genre": "Folk",
+      "track_id": 38834,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.6824120879173279,
+      "predicted_genre": "Experimental",
+      "track_id": 39316,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.5102184414863586,
+      "predicted_genre": "Experimental",
+      "track_id": 39317,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.6500584483146667,
+      "predicted_genre": "Experimental",
+      "track_id": 39318,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.651739776134491,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 39605,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5171399712562561,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 39607,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5387654304504395,
+      "predicted_genre": "Experimental",
+      "track_id": 40229,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.5869101285934448,
+      "predicted_genre": "Experimental",
+      "track_id": 40230,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.9770175218582153,
+      "predicted_genre": "International",
+      "track_id": 40231,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.4200822710990906,
+      "predicted_genre": "Experimental",
+      "track_id": 40232,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.4936152398586273,
+      "predicted_genre": "Experimental",
+      "track_id": 40233,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.5212724208831787,
+      "predicted_genre": "International",
+      "track_id": 40234,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.4938536584377289,
+      "predicted_genre": "Pop",
+      "track_id": 40235,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.4772559702396393,
+      "predicted_genre": "Experimental",
+      "track_id": 40236,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.7410933971405029,
+      "predicted_genre": "Experimental",
+      "track_id": 40237,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.5673443078994751,
+      "predicted_genre": "Experimental",
+      "track_id": 40238,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.5065597891807556,
+      "predicted_genre": "International",
+      "track_id": 40239,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.7493678331375122,
+      "predicted_genre": "Pop",
+      "track_id": 40240,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.6203193068504333,
+      "predicted_genre": "Pop",
+      "track_id": 40241,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.39219972491264343,
+      "predicted_genre": "Pop",
+      "track_id": 40242,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.43174469470977783,
+      "predicted_genre": "Folk",
+      "track_id": 40243,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.3796474039554596,
+      "predicted_genre": "Rock",
+      "track_id": 40244,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.44671276211738586,
+      "predicted_genre": "Pop",
+      "track_id": 40245,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.4936491847038269,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 40844,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.6345797777175903,
+      "predicted_genre": "Electronic",
+      "track_id": 40845,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.475982129573822,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 41019,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.26976412534713745,
+      "predicted_genre": "Instrumental",
+      "track_id": 41310,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.6471216082572937,
+      "predicted_genre": "Electronic",
+      "track_id": 42018,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.9262123703956604,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 42040,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.6429575681686401,
+      "predicted_genre": "International",
+      "track_id": 42129,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.5244041085243225,
+      "predicted_genre": "Folk",
+      "track_id": 42135,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.41614848375320435,
+      "predicted_genre": "Experimental",
+      "track_id": 42138,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.5097312927246094,
+      "predicted_genre": "International",
+      "track_id": 42139,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.740648627281189,
+      "predicted_genre": "Experimental",
+      "track_id": 42141,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.8741392493247986,
+      "predicted_genre": "Folk",
+      "track_id": 42146,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.8068079352378845,
+      "predicted_genre": "Electronic",
+      "track_id": 42372,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.8659170866012573,
+      "predicted_genre": "Electronic",
+      "track_id": 42373,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.6534679532051086,
+      "predicted_genre": "Electronic",
+      "track_id": 42374,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.7080516219139099,
+      "predicted_genre": "Electronic",
+      "track_id": 42375,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.6399038434028625,
+      "predicted_genre": "Electronic",
+      "track_id": 42376,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5524647235870361,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 42377,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.9608385562896729,
+      "predicted_genre": "Folk",
+      "track_id": 42463,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.5033962726593018,
+      "predicted_genre": "Pop",
+      "track_id": 43516,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9419773817062378,
+      "predicted_genre": "International",
+      "track_id": 43517,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9639657139778137,
+      "predicted_genre": "International",
+      "track_id": 43518,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.989891767501831,
+      "predicted_genre": "International",
+      "track_id": 43519,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.46671169996261597,
+      "predicted_genre": "Pop",
+      "track_id": 43520,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9121711850166321,
+      "predicted_genre": "International",
+      "track_id": 43521,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9602527022361755,
+      "predicted_genre": "International",
+      "track_id": 43765,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9870914220809937,
+      "predicted_genre": "International",
+      "track_id": 43766,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9318240284919739,
+      "predicted_genre": "International",
+      "track_id": 43767,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.932629406452179,
+      "predicted_genre": "International",
+      "track_id": 43768,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.5622103810310364,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 43859,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.4012609124183655,
+      "predicted_genre": "Instrumental",
+      "track_id": 44777,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.7764462232589722,
+      "predicted_genre": "Pop",
+      "track_id": 44800,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.6102952361106873,
+      "predicted_genre": "Electronic",
+      "track_id": 45149,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.9057193994522095,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 45152,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.4431003928184509,
+      "predicted_genre": "Instrumental",
+      "track_id": 45934,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.4532374143600464,
+      "predicted_genre": "Instrumental",
+      "track_id": 46717,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.8779783248901367,
+      "predicted_genre": "Instrumental",
+      "track_id": 46718,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.5749289393424988,
+      "predicted_genre": "Experimental",
+      "track_id": 46720,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.6867222189903259,
+      "predicted_genre": "Rock",
+      "track_id": 47471,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.6309707164764404,
+      "predicted_genre": "Pop",
+      "track_id": 47526,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.6581088900566101,
+      "predicted_genre": "Folk",
+      "track_id": 47628,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.7729230523109436,
+      "predicted_genre": "Electronic",
+      "track_id": 48293,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5712417364120483,
+      "predicted_genre": "Folk",
+      "track_id": 48990,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.2562553882598877,
+      "predicted_genre": "Pop",
+      "track_id": 48999,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.9371296167373657,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 49477,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.6678504943847656,
+      "predicted_genre": "Rock",
+      "track_id": 50752,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.5033396482467651,
+      "predicted_genre": "Rock",
+      "track_id": 50753,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.6767772436141968,
+      "predicted_genre": "Experimental",
+      "track_id": 50754,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.7153158783912659,
+      "predicted_genre": "Electronic",
+      "track_id": 51260,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.4973735511302948,
+      "predicted_genre": "Instrumental",
+      "track_id": 51272,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.557089626789093,
+      "predicted_genre": "Experimental",
+      "track_id": 51301,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.42618778347969055,
+      "predicted_genre": "Instrumental",
+      "track_id": 51305,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.3863053619861603,
+      "predicted_genre": "Experimental",
+      "track_id": 53228,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.4861435890197754,
+      "predicted_genre": "Pop",
+      "track_id": 53229,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.31880447268486023,
+      "predicted_genre": "Pop",
+      "track_id": 53586,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.37510737776756287,
+      "predicted_genre": "Experimental",
+      "track_id": 53587,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.300275057554245,
+      "predicted_genre": "Pop",
+      "track_id": 53588,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.605668306350708,
+      "predicted_genre": "Pop",
+      "track_id": 53589,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.8755239844322205,
+      "predicted_genre": "Folk",
+      "track_id": 54703,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.3936592638492584,
+      "predicted_genre": "Experimental",
+      "track_id": 56523,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.32444602251052856,
+      "predicted_genre": "Rock",
+      "track_id": 56895,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.8631481528282166,
+      "predicted_genre": "Rock",
+      "track_id": 56929,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.4276749789714813,
+      "predicted_genre": "Electronic",
+      "track_id": 57271,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.7716756463050842,
+      "predicted_genre": "Instrumental",
+      "track_id": 57272,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.7607240080833435,
+      "predicted_genre": "Instrumental",
+      "track_id": 57273,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.511108934879303,
+      "predicted_genre": "Instrumental",
+      "track_id": 57274,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.9315314888954163,
+      "predicted_genre": "Electronic",
+      "track_id": 57540,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5944821238517761,
+      "predicted_genre": "Rock",
+      "track_id": 59562,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.42832592129707336,
+      "predicted_genre": "Pop",
+      "track_id": 59581,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9460393786430359,
+      "predicted_genre": "International",
+      "track_id": 59695,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.47945281863212585,
+      "predicted_genre": "Electronic",
+      "track_id": 60476,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.598911702632904,
+      "predicted_genre": "International",
+      "track_id": 60533,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9151759743690491,
+      "predicted_genre": "International",
+      "track_id": 60534,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.33220070600509644,
+      "predicted_genre": "Folk",
+      "track_id": 60535,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.7315466403961182,
+      "predicted_genre": "Folk",
+      "track_id": 60536,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9774405360221863,
+      "predicted_genre": "International",
+      "track_id": 60537,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.5221309661865234,
+      "predicted_genre": "Folk",
+      "track_id": 60871,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8843634128570557,
+      "predicted_genre": "International",
+      "track_id": 60872,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.5422671437263489,
+      "predicted_genre": "International",
+      "track_id": 60873,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9888660311698914,
+      "predicted_genre": "International",
+      "track_id": 60874,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.4810848832130432,
+      "predicted_genre": "International",
+      "track_id": 60875,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8946929574012756,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 61820,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.6280831098556519,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 61821,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.39980748295783997,
+      "predicted_genre": "Electronic",
+      "track_id": 63064,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5045015215873718,
+      "predicted_genre": "Electronic",
+      "track_id": 63065,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.7001335024833679,
+      "predicted_genre": "Experimental",
+      "track_id": 63149,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.35360637307167053,
+      "predicted_genre": "Experimental",
+      "track_id": 63159,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.5987513065338135,
+      "predicted_genre": "Instrumental",
+      "track_id": 63161,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.4257967472076416,
+      "predicted_genre": "Rock",
+      "track_id": 63250,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.7599741220474243,
+      "predicted_genre": "Experimental",
+      "track_id": 63251,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.40196698904037476,
+      "predicted_genre": "Experimental",
+      "track_id": 63252,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.3915751874446869,
+      "predicted_genre": "Electronic",
+      "track_id": 63253,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.5647650361061096,
+      "predicted_genre": "Experimental",
+      "track_id": 63255,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.7118951678276062,
+      "predicted_genre": "Pop",
+      "track_id": 63257,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.294231653213501,
+      "predicted_genre": "Experimental",
+      "track_id": 63258,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.37742742896080017,
+      "predicted_genre": "Folk",
+      "track_id": 63456,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.3072678744792938,
+      "predicted_genre": "Experimental",
+      "track_id": 63457,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.48548465967178345,
+      "predicted_genre": "Electronic",
+      "track_id": 64618,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.40380582213401794,
+      "predicted_genre": "Experimental",
+      "track_id": 65265,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.614700198173523,
+      "predicted_genre": "Electronic",
+      "track_id": 65777,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.4491114616394043,
+      "predicted_genre": "Experimental",
+      "track_id": 65779,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.496187299489975,
+      "predicted_genre": "Experimental",
+      "track_id": 65780,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5132149457931519,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 66534,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.7573956251144409,
+      "predicted_genre": "Pop",
+      "track_id": 66535,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.7387168407440186,
+      "predicted_genre": "Experimental",
+      "track_id": 66536,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.28043174743652344,
+      "predicted_genre": "Pop",
+      "track_id": 66537,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.46903255581855774,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 66538,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.5126670002937317,
+      "predicted_genre": "Folk",
+      "track_id": 66539,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.7784072756767273,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 66717,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.7687734365463257,
+      "predicted_genre": "Folk",
+      "track_id": 67330,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.34410613775253296,
+      "predicted_genre": "Electronic",
+      "track_id": 67331,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.2888094186782837,
+      "predicted_genre": "Rock",
+      "track_id": 67332,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.4902086853981018,
+      "predicted_genre": "Electronic",
+      "track_id": 67333,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.907256007194519,
+      "predicted_genre": "Folk",
+      "track_id": 67334,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.387236088514328,
+      "predicted_genre": "Experimental",
+      "track_id": 67336,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.5282696485519409,
+      "predicted_genre": "Experimental",
+      "track_id": 67365,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.8121215105056763,
+      "predicted_genre": "Instrumental",
+      "track_id": 67457,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.9311113953590393,
+      "predicted_genre": "Rock",
+      "track_id": 68404,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.9000949859619141,
+      "predicted_genre": "Experimental",
+      "track_id": 68536,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.8725204467773438,
+      "predicted_genre": "Experimental",
+      "track_id": 68537,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.8141464591026306,
+      "predicted_genre": "Experimental",
+      "track_id": 68551,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.7504205703735352,
+      "predicted_genre": "Electronic",
+      "track_id": 68582,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.308921217918396,
+      "predicted_genre": "Pop",
+      "track_id": 68587,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.8751076459884644,
+      "predicted_genre": "Electronic",
+      "track_id": 68891,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5077908635139465,
+      "predicted_genre": "Electronic",
+      "track_id": 68892,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.37355148792266846,
+      "predicted_genre": "Electronic",
+      "track_id": 68893,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.2969851791858673,
+      "predicted_genre": "Electronic",
+      "track_id": 68894,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5551727414131165,
+      "predicted_genre": "Electronic",
+      "track_id": 68895,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.8789756894111633,
+      "predicted_genre": "Electronic",
+      "track_id": 68896,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.4522991180419922,
+      "predicted_genre": "Electronic",
+      "track_id": 68897,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.8059480786323547,
+      "predicted_genre": "Electronic",
+      "track_id": 68898,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.4676119089126587,
+      "predicted_genre": "Instrumental",
+      "track_id": 68899,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.7939381003379822,
+      "predicted_genre": "Electronic",
+      "track_id": 69221,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.8151440024375916,
+      "predicted_genre": "Electronic",
+      "track_id": 69222,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.4902637004852295,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 69223,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.7060654163360596,
+      "predicted_genre": "Experimental",
+      "track_id": 69303,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.929750382900238,
+      "predicted_genre": "Rock",
+      "track_id": 71371,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.90906822681427,
+      "predicted_genre": "Rock",
+      "track_id": 71372,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.30382460355758667,
+      "predicted_genre": "Experimental",
+      "track_id": 71420,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.9037047028541565,
+      "predicted_genre": "Electronic",
+      "track_id": 71503,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.2731839716434479,
+      "predicted_genre": "Rock",
+      "track_id": 71711,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.7856616377830505,
+      "predicted_genre": "Rock",
+      "track_id": 73494,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.9452729225158691,
+      "predicted_genre": "Rock",
+      "track_id": 73519,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.9270826578140259,
+      "predicted_genre": "Rock",
+      "track_id": 73520,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.9341298937797546,
+      "predicted_genre": "Rock",
+      "track_id": 73521,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.9158008694648743,
+      "predicted_genre": "Rock",
+      "track_id": 73522,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.3237646222114563,
+      "predicted_genre": "Pop",
+      "track_id": 73776,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9046968817710876,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 73777,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.6284958124160767,
+      "predicted_genre": "Electronic",
+      "track_id": 73779,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.3725551962852478,
+      "predicted_genre": "Pop",
+      "track_id": 74002,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.9091273546218872,
+      "predicted_genre": "Folk",
+      "track_id": 74374,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.910368800163269,
+      "predicted_genre": "Folk",
+      "track_id": 74393,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.6204374432563782,
+      "predicted_genre": "Electronic",
+      "track_id": 76128,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.45667150616645813,
+      "predicted_genre": "Electronic",
+      "track_id": 76129,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.6709521412849426,
+      "predicted_genre": "Pop",
+      "track_id": 76130,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.353353351354599,
+      "predicted_genre": "Rock",
+      "track_id": 76131,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.35947394371032715,
+      "predicted_genre": "Folk",
+      "track_id": 76363,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7876649498939514,
+      "predicted_genre": "Experimental",
+      "track_id": 81071,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.7756982445716858,
+      "predicted_genre": "Experimental",
+      "track_id": 82462,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.6520128846168518,
+      "predicted_genre": "International",
+      "track_id": 82464,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.7051613330841064,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 82778,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9819005131721497,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 82780,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.5208536982536316,
+      "predicted_genre": "Experimental",
+      "track_id": 83898,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.6356297731399536,
+      "predicted_genre": "Experimental",
+      "track_id": 83906,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.6827324628829956,
+      "predicted_genre": "Experimental",
+      "track_id": 84057,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.6545801162719727,
+      "predicted_genre": "Electronic",
+      "track_id": 84091,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.21980546414852142,
+      "predicted_genre": "Instrumental",
+      "track_id": 84152,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.4242746829986572,
+      "predicted_genre": "Instrumental",
+      "track_id": 84736,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.8789806365966797,
+      "predicted_genre": "International",
+      "track_id": 84777,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.42123910784721375,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 85307,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.7002884149551392,
+      "predicted_genre": "Electronic",
+      "track_id": 85308,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.6012576222419739,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 85309,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.4435344636440277,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 85310,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.6778900027275085,
+      "predicted_genre": "Electronic",
+      "track_id": 85311,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.40209171175956726,
+      "predicted_genre": "Pop",
+      "track_id": 85592,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.707593560218811,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 85593,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.39260587096214294,
+      "predicted_genre": "Experimental",
+      "track_id": 85594,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.4120333194732666,
+      "predicted_genre": "Pop",
+      "track_id": 85595,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.4201681315898895,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 85596,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.5389821529388428,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 85598,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.5288658142089844,
+      "predicted_genre": "Pop",
+      "track_id": 85599,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.45538318157196045,
+      "predicted_genre": "Electronic",
+      "track_id": 85600,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.8230908513069153,
+      "predicted_genre": "Experimental",
+      "track_id": 86037,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.8584862947463989,
+      "predicted_genre": "Experimental",
+      "track_id": 86038,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7276256680488586,
+      "predicted_genre": "Experimental",
+      "track_id": 86039,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.6440037488937378,
+      "predicted_genre": "Experimental",
+      "track_id": 86040,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.5079788565635681,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 86116,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.6708540916442871,
+      "predicted_genre": "Electronic",
+      "track_id": 86117,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.5807338356971741,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 86118,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.6564203500747681,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 86119,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.8386057615280151,
+      "predicted_genre": "Instrumental",
+      "track_id": 86256,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.9767457246780396,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 86415,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.7576812505722046,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 86416,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.3902330696582794,
+      "predicted_genre": "Pop",
+      "track_id": 86634,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.6270992159843445,
+      "predicted_genre": "Rock",
+      "track_id": 86788,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.6952841281890869,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 87069,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.9715884327888489,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 89445,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.7203493714332581,
+      "predicted_genre": "Experimental",
+      "track_id": 90526,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.3485162556171417,
+      "predicted_genre": "Experimental",
+      "track_id": 90527,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.31766173243522644,
+      "predicted_genre": "Instrumental",
+      "track_id": 90529,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.6704467535018921,
+      "predicted_genre": "Folk",
+      "track_id": 90530,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.6529470086097717,
+      "predicted_genre": "International",
+      "track_id": 90616,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.4633217453956604,
+      "predicted_genre": "Instrumental",
+      "track_id": 90617,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7967618703842163,
+      "predicted_genre": "International",
+      "track_id": 90618,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.4267743229866028,
+      "predicted_genre": "Pop",
+      "track_id": 91468,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.44742071628570557,
+      "predicted_genre": "Pop",
+      "track_id": 91471,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.7179049849510193,
+      "predicted_genre": "Experimental",
+      "track_id": 92366,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.7611186504364014,
+      "predicted_genre": "Folk",
+      "track_id": 93518,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5185738205909729,
+      "predicted_genre": "Folk",
+      "track_id": 93519,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.38769277930259705,
+      "predicted_genre": "Folk",
+      "track_id": 93520,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.3801044821739197,
+      "predicted_genre": "Experimental",
+      "track_id": 93521,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.43078088760375977,
+      "predicted_genre": "Folk",
+      "track_id": 93522,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5565946698188782,
+      "predicted_genre": "Folk",
+      "track_id": 93523,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.3952827453613281,
+      "predicted_genre": "Experimental",
+      "track_id": 94093,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.5305014252662659,
+      "predicted_genre": "Rock",
+      "track_id": 94099,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.4371630549430847,
+      "predicted_genre": "Instrumental",
+      "track_id": 94101,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.3195393979549408,
+      "predicted_genre": "Instrumental",
+      "track_id": 94102,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.892040491104126,
+      "predicted_genre": "Electronic",
+      "track_id": 94803,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.7344182133674622,
+      "predicted_genre": "Electronic",
+      "track_id": 95486,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.4868866503238678,
+      "predicted_genre": "Pop",
+      "track_id": 95535,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.6112298369407654,
+      "predicted_genre": "Rock",
+      "track_id": 97286,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.3829677999019623,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 98077,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.32312050461769104,
+      "predicted_genre": "Experimental",
+      "track_id": 98298,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.7336645722389221,
+      "predicted_genre": "Instrumental",
+      "track_id": 98299,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9339094161987305,
+      "predicted_genre": "International",
+      "track_id": 98300,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9341463446617126,
+      "predicted_genre": "International",
+      "track_id": 98301,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9077581167221069,
+      "predicted_genre": "International",
+      "track_id": 98302,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.7752281427383423,
+      "predicted_genre": "Folk",
+      "track_id": 98346,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.7839713096618652,
+      "predicted_genre": "Experimental",
+      "track_id": 98348,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9762776494026184,
+      "predicted_genre": "International",
+      "track_id": 98349,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9301749467849731,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 99093,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9622306823730469,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 99095,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9660000205039978,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 99096,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.6634607315063477,
+      "predicted_genre": "Pop",
+      "track_id": 101951,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.8187090158462524,
+      "predicted_genre": "Pop",
+      "track_id": 103518,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.5266748070716858,
+      "predicted_genre": "Pop",
+      "track_id": 103519,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.5711742639541626,
+      "predicted_genre": "Pop",
+      "track_id": 103520,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.6095165610313416,
+      "predicted_genre": "Pop",
+      "track_id": 103521,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.4527743458747864,
+      "predicted_genre": "Pop",
+      "track_id": 103522,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.5530087947845459,
+      "predicted_genre": "Pop",
+      "track_id": 103523,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.44328001141548157,
+      "predicted_genre": "Instrumental",
+      "track_id": 104434,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.6902700066566467,
+      "predicted_genre": "Rock",
+      "track_id": 105141,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.4297279715538025,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 105144,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.3988083004951477,
+      "predicted_genre": "Instrumental",
+      "track_id": 106629,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.4182121455669403,
+      "predicted_genre": "Instrumental",
+      "track_id": 106872,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.4134844243526459,
+      "predicted_genre": "Pop",
+      "track_id": 106876,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.4785921275615692,
+      "predicted_genre": "Pop",
+      "track_id": 106877,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.7640504240989685,
+      "predicted_genre": "Pop",
+      "track_id": 108456,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.763373613357544,
+      "predicted_genre": "Pop",
+      "track_id": 108457,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.6735528707504272,
+      "predicted_genre": "Pop",
+      "track_id": 108459,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.6187644004821777,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 108460,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.6680769324302673,
+      "predicted_genre": "Rock",
+      "track_id": 108461,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.9826593399047852,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 108493,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9764469861984253,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 108495,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.38748541474342346,
+      "predicted_genre": "International",
+      "track_id": 108524,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.899674654006958,
+      "predicted_genre": "Electronic",
+      "track_id": 108525,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.7829927802085876,
+      "predicted_genre": "Electronic",
+      "track_id": 108526,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.47662073373794556,
+      "predicted_genre": "International",
+      "track_id": 108527,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.8537794947624207,
+      "predicted_genre": "Electronic",
+      "track_id": 108528,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.31847497820854187,
+      "predicted_genre": "Experimental",
+      "track_id": 108529,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.9051530361175537,
+      "predicted_genre": "Electronic",
+      "track_id": 108530,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.8095979690551758,
+      "predicted_genre": "Electronic",
+      "track_id": 108531,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.8301258683204651,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 108532,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5063865780830383,
+      "predicted_genre": "Electronic",
+      "track_id": 108533,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.9003380537033081,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 108842,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9892815351486206,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 108843,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9906699657440186,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 108845,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9819044470787048,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 108846,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.951411783695221,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 108847,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9667735695838928,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 110070,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9677446484565735,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 110082,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.975583553314209,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 110084,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9683330059051514,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 110085,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9670936465263367,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 110086,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.388894259929657,
+      "predicted_genre": "Instrumental",
+      "track_id": 110204,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.44381624460220337,
+      "predicted_genre": "Experimental",
+      "track_id": 110205,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.376130074262619,
+      "predicted_genre": "Instrumental",
+      "track_id": 110206,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.43008357286453247,
+      "predicted_genre": "Experimental",
+      "track_id": 110207,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.3294597268104553,
+      "predicted_genre": "Experimental",
+      "track_id": 110208,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.326431542634964,
+      "predicted_genre": "Experimental",
+      "track_id": 110209,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.8265359997749329,
+      "predicted_genre": "Experimental",
+      "track_id": 110743,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9139710068702698,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 110744,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9094443321228027,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 110756,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9875850677490234,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 110764,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9843642115592957,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 110765,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9452921748161316,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 110768,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.6146514415740967,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 110771,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.5849932432174683,
+      "predicted_genre": "Electronic",
+      "track_id": 110772,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9526155591011047,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 110774,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9694925546646118,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 110775,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.950110673904419,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 110776,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.5127230286598206,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 110777,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.5589665770530701,
+      "predicted_genre": "Electronic",
+      "track_id": 110778,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.800743043422699,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 110779,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.669154703617096,
+      "predicted_genre": "Experimental",
+      "track_id": 111146,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.5790234208106995,
+      "predicted_genre": "Experimental",
+      "track_id": 111147,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.6995619535446167,
+      "predicted_genre": "Experimental",
+      "track_id": 111148,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.6372998952865601,
+      "predicted_genre": "Experimental",
+      "track_id": 111149,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7271838188171387,
+      "predicted_genre": "Experimental",
+      "track_id": 111150,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7810805439949036,
+      "predicted_genre": "Experimental",
+      "track_id": 111151,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7719161510467529,
+      "predicted_genre": "Experimental",
+      "track_id": 111153,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7003328204154968,
+      "predicted_genre": "Experimental",
+      "track_id": 111154,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.870737612247467,
+      "predicted_genre": "Electronic",
+      "track_id": 111216,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.5998572111129761,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 111934,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9530366659164429,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 111935,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.8284986615180969,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 111936,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9297739863395691,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 111937,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.4818495213985443,
+      "predicted_genre": "Electronic",
+      "track_id": 111938,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.7932438850402832,
+      "predicted_genre": "Experimental",
+      "track_id": 111994,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7512617707252502,
+      "predicted_genre": "Experimental",
+      "track_id": 112000,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.801671028137207,
+      "predicted_genre": "Experimental",
+      "track_id": 112001,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.9299171566963196,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 112468,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9450008273124695,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 112481,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.5021305680274963,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 112483,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9099363088607788,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 112484,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.554879903793335,
+      "predicted_genre": "Electronic",
+      "track_id": 112485,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.8904619812965393,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 112486,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.6209347248077393,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 112487,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9780199527740479,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 112488,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.41388410329818726,
+      "predicted_genre": "Folk",
+      "track_id": 112790,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.6296041011810303,
+      "predicted_genre": "International",
+      "track_id": 113262,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.32913026213645935,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 113273,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9396589398384094,
+      "predicted_genre": "Rock",
+      "track_id": 113274,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.689906120300293,
+      "predicted_genre": "Pop",
+      "track_id": 113275,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.46937036514282227,
+      "predicted_genre": "Instrumental",
+      "track_id": 113279,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.3710957467556,
+      "predicted_genre": "Pop",
+      "track_id": 114212,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.3521590232849121,
+      "predicted_genre": "Experimental",
+      "track_id": 114222,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.42023855447769165,
+      "predicted_genre": "Experimental",
+      "track_id": 114223,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.5725012421607971,
+      "predicted_genre": "Pop",
+      "track_id": 114974,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.42011862993240356,
+      "predicted_genre": "Electronic",
+      "track_id": 114976,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.835321307182312,
+      "predicted_genre": "Experimental",
+      "track_id": 115002,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.8287522792816162,
+      "predicted_genre": "Experimental",
+      "track_id": 115011,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.694413423538208,
+      "predicted_genre": "Instrumental",
+      "track_id": 115176,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.6780518293380737,
+      "predicted_genre": "Instrumental",
+      "track_id": 115288,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.3392045199871063,
+      "predicted_genre": "Experimental",
+      "track_id": 115289,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.4202386140823364,
+      "predicted_genre": "Experimental",
+      "track_id": 115290,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.3521590232849121,
+      "predicted_genre": "Experimental",
+      "track_id": 115292,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.4447295665740967,
+      "predicted_genre": "Pop",
+      "track_id": 115293,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.3710957467556,
+      "predicted_genre": "Pop",
+      "track_id": 115294,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.3969309329986572,
+      "predicted_genre": "Folk",
+      "track_id": 115926,
+      "true_genre": "Folk"
+    },
+    {
+      "confidence": 0.7492353916168213,
+      "predicted_genre": "Folk",
+      "track_id": 116175,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.2631703019142151,
+      "predicted_genre": "Rock",
+      "track_id": 116176,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.690272867679596,
+      "predicted_genre": "Folk",
+      "track_id": 116177,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.5578917264938354,
+      "predicted_genre": "Experimental",
+      "track_id": 116388,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.30518049001693726,
+      "predicted_genre": "Instrumental",
+      "track_id": 116389,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.42764556407928467,
+      "predicted_genre": "Experimental",
+      "track_id": 116390,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.7917057871818542,
+      "predicted_genre": "Experimental",
+      "track_id": 116407,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.7913169860839844,
+      "predicted_genre": "Rock",
+      "track_id": 116526,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7734240293502808,
+      "predicted_genre": "Folk",
+      "track_id": 116527,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.5546050071716309,
+      "predicted_genre": "Folk",
+      "track_id": 116528,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.5949322581291199,
+      "predicted_genre": "Instrumental",
+      "track_id": 117251,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.34012842178344727,
+      "predicted_genre": "Folk",
+      "track_id": 117252,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.6840751767158508,
+      "predicted_genre": "Instrumental",
+      "track_id": 117253,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7116067409515381,
+      "predicted_genre": "Instrumental",
+      "track_id": 117626,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7808584570884705,
+      "predicted_genre": "Pop",
+      "track_id": 117883,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.5384873747825623,
+      "predicted_genre": "Rock",
+      "track_id": 117884,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.8183193206787109,
+      "predicted_genre": "Rock",
+      "track_id": 117885,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.4699697196483612,
+      "predicted_genre": "Rock",
+      "track_id": 117886,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.811581015586853,
+      "predicted_genre": "Rock",
+      "track_id": 117887,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.7950187921524048,
+      "predicted_genre": "Electronic",
+      "track_id": 117943,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8290994763374329,
+      "predicted_genre": "Experimental",
+      "track_id": 117961,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.6555066108703613,
+      "predicted_genre": "Folk",
+      "track_id": 118505,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.4485626518726349,
+      "predicted_genre": "Pop",
+      "track_id": 119584,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.3859553039073944,
+      "predicted_genre": "Pop",
+      "track_id": 119592,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.6087366342544556,
+      "predicted_genre": "Folk",
+      "track_id": 119828,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.899878978729248,
+      "predicted_genre": "Folk",
+      "track_id": 119830,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7247067093849182,
+      "predicted_genre": "Folk",
+      "track_id": 119831,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.2802998721599579,
+      "predicted_genre": "Pop",
+      "track_id": 120206,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.8735798597335815,
+      "predicted_genre": "Rock",
+      "track_id": 121415,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.49823302030563354,
+      "predicted_genre": "Electronic",
+      "track_id": 121595,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.37330126762390137,
+      "predicted_genre": "Experimental",
+      "track_id": 121913,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8285617232322693,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 121915,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.4464420974254608,
+      "predicted_genre": "Pop",
+      "track_id": 121922,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8894015550613403,
+      "predicted_genre": "International",
+      "track_id": 121926,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8166546821594238,
+      "predicted_genre": "International",
+      "track_id": 121929,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.5900700688362122,
+      "predicted_genre": "International",
+      "track_id": 121930,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8145976066589355,
+      "predicted_genre": "Experimental",
+      "track_id": 121998,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.37107735872268677,
+      "predicted_genre": "Instrumental",
+      "track_id": 122106,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.49766042828559875,
+      "predicted_genre": "Pop",
+      "track_id": 122107,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.5554296970367432,
+      "predicted_genre": "Experimental",
+      "track_id": 122143,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.2878028154373169,
+      "predicted_genre": "Experimental",
+      "track_id": 122155,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.2571035623550415,
+      "predicted_genre": "Instrumental",
+      "track_id": 122168,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.2950934171676636,
+      "predicted_genre": "Instrumental",
+      "track_id": 122510,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.4352130889892578,
+      "predicted_genre": "Experimental",
+      "track_id": 122511,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7331986427307129,
+      "predicted_genre": "Rock",
+      "track_id": 124184,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.8065787553787231,
+      "predicted_genre": "Rock",
+      "track_id": 124185,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.8251810073852539,
+      "predicted_genre": "Rock",
+      "track_id": 124186,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.5652677416801453,
+      "predicted_genre": "Rock",
+      "track_id": 124391,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.7779382467269897,
+      "predicted_genre": "Rock",
+      "track_id": 124392,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.5662749409675598,
+      "predicted_genre": "Rock",
+      "track_id": 124393,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.4853847622871399,
+      "predicted_genre": "Experimental",
+      "track_id": 124394,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.3961244225502014,
+      "predicted_genre": "Instrumental",
+      "track_id": 126240,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.8265529274940491,
+      "predicted_genre": "Folk",
+      "track_id": 126241,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.30093687772750854,
+      "predicted_genre": "Instrumental",
+      "track_id": 126242,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.5124220252037048,
+      "predicted_genre": "Experimental",
+      "track_id": 126243,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.6207951903343201,
+      "predicted_genre": "Rock",
+      "track_id": 126507,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.7731194496154785,
+      "predicted_genre": "Folk",
+      "track_id": 127180,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.5311048030853271,
+      "predicted_genre": "Rock",
+      "track_id": 127181,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.7242834568023682,
+      "predicted_genre": "Pop",
+      "track_id": 127182,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.5951665639877319,
+      "predicted_genre": "Pop",
+      "track_id": 127183,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.5475937724113464,
+      "predicted_genre": "Pop",
+      "track_id": 127184,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.4689783751964569,
+      "predicted_genre": "Pop",
+      "track_id": 127185,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.48345747590065,
+      "predicted_genre": "Pop",
+      "track_id": 127186,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.5061299204826355,
+      "predicted_genre": "Pop",
+      "track_id": 127187,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.3381393253803253,
+      "predicted_genre": "Rock",
+      "track_id": 127188,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.8981518745422363,
+      "predicted_genre": "Folk",
+      "track_id": 127189,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.8582354784011841,
+      "predicted_genre": "Rock",
+      "track_id": 127330,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.965906023979187,
+      "predicted_genre": "Folk",
+      "track_id": 127331,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.5133569240570068,
+      "predicted_genre": "Experimental",
+      "track_id": 127484,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.49680617451667786,
+      "predicted_genre": "Instrumental",
+      "track_id": 127519,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.9456303119659424,
+      "predicted_genre": "Folk",
+      "track_id": 127520,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7367652058601379,
+      "predicted_genre": "Pop",
+      "track_id": 127559,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.9856671690940857,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 128441,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.44437485933303833,
+      "predicted_genre": "Instrumental",
+      "track_id": 128878,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.6108735203742981,
+      "predicted_genre": "Folk",
+      "track_id": 128879,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.5467748641967773,
+      "predicted_genre": "Folk",
+      "track_id": 128880,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.2704887390136719,
+      "predicted_genre": "Folk",
+      "track_id": 128881,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.5136978030204773,
+      "predicted_genre": "Folk",
+      "track_id": 128882,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.4759776294231415,
+      "predicted_genre": "Instrumental",
+      "track_id": 128885,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.48255395889282227,
+      "predicted_genre": "Instrumental",
+      "track_id": 128886,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7941668629646301,
+      "predicted_genre": "Folk",
+      "track_id": 128887,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.4879898428916931,
+      "predicted_genre": "Instrumental",
+      "track_id": 128888,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7727145552635193,
+      "predicted_genre": "Instrumental",
+      "track_id": 130752,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.3634806275367737,
+      "predicted_genre": "Instrumental",
+      "track_id": 131410,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.7766641974449158,
+      "predicted_genre": "Instrumental",
+      "track_id": 131476,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.4495258927345276,
+      "predicted_genre": "Experimental",
+      "track_id": 131932,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8936535716056824,
+      "predicted_genre": "International",
+      "track_id": 131933,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.34320884943008423,
+      "predicted_genre": "International",
+      "track_id": 131934,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.34763818979263306,
+      "predicted_genre": "Pop",
+      "track_id": 131935,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9682111144065857,
+      "predicted_genre": "International",
+      "track_id": 131936,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9554395079612732,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 132117,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.3161775767803192,
+      "predicted_genre": "Pop",
+      "track_id": 132171,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.6918291449546814,
+      "predicted_genre": "Instrumental",
+      "track_id": 132448,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.9282060861587524,
+      "predicted_genre": "Folk",
+      "track_id": 133102,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.49166539311408997,
+      "predicted_genre": "Instrumental",
+      "track_id": 133681,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.8362147808074951,
+      "predicted_genre": "Rock",
+      "track_id": 133772,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.5269914269447327,
+      "predicted_genre": "Instrumental",
+      "track_id": 134486,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.6149691343307495,
+      "predicted_genre": "Pop",
+      "track_id": 134790,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.5100348591804504,
+      "predicted_genre": "Instrumental",
+      "track_id": 134791,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.3955141007900238,
+      "predicted_genre": "Instrumental",
+      "track_id": 134792,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.6815348863601685,
+      "predicted_genre": "Instrumental",
+      "track_id": 134793,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.35782453417778015,
+      "predicted_genre": "Electronic",
+      "track_id": 134794,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.409862220287323,
+      "predicted_genre": "Folk",
+      "track_id": 134795,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.9429031014442444,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 134796,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.3139249384403229,
+      "predicted_genre": "Electronic",
+      "track_id": 134797,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.9081637859344482,
+      "predicted_genre": "Rock",
+      "track_id": 136054,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.8886552453041077,
+      "predicted_genre": "Rock",
+      "track_id": 137605,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.8861353397369385,
+      "predicted_genre": "Rock",
+      "track_id": 137624,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.4493921995162964,
+      "predicted_genre": "Instrumental",
+      "track_id": 137627,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.8242781758308411,
+      "predicted_genre": "Experimental",
+      "track_id": 137630,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.5035057663917542,
+      "predicted_genre": "Experimental",
+      "track_id": 137631,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.3670769929885864,
+      "predicted_genre": "Experimental",
+      "track_id": 137632,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.9068396687507629,
+      "predicted_genre": "Instrumental",
+      "track_id": 138018,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.6866509914398193,
+      "predicted_genre": "Instrumental",
+      "track_id": 138019,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.4830215871334076,
+      "predicted_genre": "Experimental",
+      "track_id": 138020,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.5402406454086304,
+      "predicted_genre": "Instrumental",
+      "track_id": 138021,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7703012228012085,
+      "predicted_genre": "Instrumental",
+      "track_id": 138022,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.4440980851650238,
+      "predicted_genre": "Instrumental",
+      "track_id": 138023,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.637500524520874,
+      "predicted_genre": "Instrumental",
+      "track_id": 138024,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.47646886110305786,
+      "predicted_genre": "Instrumental",
+      "track_id": 138025,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.48736029863357544,
+      "predicted_genre": "Pop",
+      "track_id": 138026,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7225651144981384,
+      "predicted_genre": "Electronic",
+      "track_id": 139933,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.4757688045501709,
+      "predicted_genre": "International",
+      "track_id": 139934,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.7829335927963257,
+      "predicted_genre": "Electronic",
+      "track_id": 139935,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5586275458335876,
+      "predicted_genre": "Electronic",
+      "track_id": 139936,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5407829284667969,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 139937,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.548952043056488,
+      "predicted_genre": "Instrumental",
+      "track_id": 140043,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.9854758381843567,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 140609,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.8580119013786316,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 140620,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9881972670555115,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 140621,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9846940040588379,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 140623,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.8303744792938232,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 140625,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9874898791313171,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 140626,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.37480977177619934,
+      "predicted_genre": "Pop",
+      "track_id": 140922,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.7870848178863525,
+      "predicted_genre": "Electronic",
+      "track_id": 140923,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.8670044541358948,
+      "predicted_genre": "Electronic",
+      "track_id": 140924,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5949657559394836,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 140925,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.7040828466415405,
+      "predicted_genre": "Electronic",
+      "track_id": 140926,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.360535591840744,
+      "predicted_genre": "Pop",
+      "track_id": 140933,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.898772120475769,
+      "predicted_genre": "Electronic",
+      "track_id": 140934,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.5877033472061157,
+      "predicted_genre": "Experimental",
+      "track_id": 141616,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.33973297476768494,
+      "predicted_genre": "Experimental",
+      "track_id": 141617,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.6024877429008484,
+      "predicted_genre": "Electronic",
+      "track_id": 141618,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.8701862096786499,
+      "predicted_genre": "Electronic",
+      "track_id": 141619,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.38506853580474854,
+      "predicted_genre": "Experimental",
+      "track_id": 141877,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.5571421384811401,
+      "predicted_genre": "Instrumental",
+      "track_id": 141878,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.9897816181182861,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 142358,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.953800618648529,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 142359,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9792630076408386,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 142360,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9820147752761841,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 142361,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.4472312331199646,
+      "predicted_genre": "Instrumental",
+      "track_id": 142362,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.8313779234886169,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 142533,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.5560073852539062,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 142534,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.49424630403518677,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 142535,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9308004379272461,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 142536,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8787387609481812,
+      "predicted_genre": "Pop",
+      "track_id": 142537,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.6161936521530151,
+      "predicted_genre": "Pop",
+      "track_id": 142538,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.8548510670661926,
+      "predicted_genre": "Folk",
+      "track_id": 142539,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.9792071580886841,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 144212,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9862890243530273,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 144213,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9650359749794006,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 144214,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.5491462349891663,
+      "predicted_genre": "Electronic",
+      "track_id": 144215,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9778324961662292,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 144216,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.4529740810394287,
+      "predicted_genre": "Experimental",
+      "track_id": 144592,
+      "true_genre": "Electronic"
+    },
+    {
+      "confidence": 0.7540973424911499,
+      "predicted_genre": "Experimental",
+      "track_id": 145067,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.8031677007675171,
+      "predicted_genre": "Experimental",
+      "track_id": 145068,
+      "true_genre": "Rock"
+    },
+    {
+      "confidence": 0.9835975766181946,
+      "predicted_genre": "Folk",
+      "track_id": 145457,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.9658626317977905,
+      "predicted_genre": "Folk",
+      "track_id": 145458,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.705642819404602,
+      "predicted_genre": "Experimental",
+      "track_id": 145475,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7305619716644287,
+      "predicted_genre": "Instrumental",
+      "track_id": 145476,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.6278079748153687,
+      "predicted_genre": "Experimental",
+      "track_id": 145477,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.9877772927284241,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 145747,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9876732230186462,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 145748,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.4760799705982208,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 145749,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9745921492576599,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 145750,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9723492860794067,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 145751,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.832992434501648,
+      "predicted_genre": "Folk",
+      "track_id": 145762,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.9673827290534973,
+      "predicted_genre": "Folk",
+      "track_id": 145777,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7430616021156311,
+      "predicted_genre": "Folk",
+      "track_id": 145887,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.7701914310455322,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 147020,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9694350957870483,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 147021,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9837430119514465,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 147022,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9584379196166992,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 147023,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.979154109954834,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 147024,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.8694770932197571,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 147261,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.5092310309410095,
+      "predicted_genre": "Folk",
+      "track_id": 148002,
+      "true_genre": "Instrumental"
+    },
+    {
+      "confidence": 0.8376205563545227,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 148028,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9681126475334167,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 148031,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.6617841124534607,
+      "predicted_genre": "Pop",
+      "track_id": 148032,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.609027624130249,
+      "predicted_genre": "Instrumental",
+      "track_id": 148082,
+      "true_genre": "Experimental"
+    },
+    {
+      "confidence": 0.5991330742835999,
+      "predicted_genre": "Folk",
+      "track_id": 148430,
+      "true_genre": "International"
+    },
+    {
+      "confidence": 0.6276788115501404,
+      "predicted_genre": "Pop",
+      "track_id": 148606,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.8230912685394287,
+      "predicted_genre": "Pop",
+      "track_id": 148607,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.7597044706344604,
+      "predicted_genre": "Pop",
+      "track_id": 148608,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.3937079906463623,
+      "predicted_genre": "Pop",
+      "track_id": 148609,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.782267153263092,
+      "predicted_genre": "Pop",
+      "track_id": 148610,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.6548555493354797,
+      "predicted_genre": "Pop",
+      "track_id": 148611,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.3989654779434204,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 148612,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.5540810227394104,
+      "predicted_genre": "Pop",
+      "track_id": 148613,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.5025684833526611,
+      "predicted_genre": "Pop",
+      "track_id": 149623,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.5193238854408264,
+      "predicted_genre": "Experimental",
+      "track_id": 149625,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.5927270650863647,
+      "predicted_genre": "Pop",
+      "track_id": 149626,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.5847059488296509,
+      "predicted_genre": "Folk",
+      "track_id": 150015,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.7260178327560425,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 150017,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.5429854393005371,
+      "predicted_genre": "Experimental",
+      "track_id": 150018,
+      "true_genre": "Pop"
+    },
+    {
+      "confidence": 0.96661376953125,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 150287,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.9883512854576111,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 150288,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.5223807096481323,
+      "predicted_genre": "Electronic",
+      "track_id": 154303,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.5542808175086975,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 154305,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.6278437376022339,
+      "predicted_genre": "Electronic",
+      "track_id": 154306,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.722431480884552,
+      "predicted_genre": "Hip-Hop",
+      "track_id": 154307,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.7819830775260925,
+      "predicted_genre": "Electronic",
+      "track_id": 154308,
+      "true_genre": "Hip-Hop"
+    },
+    {
+      "confidence": 0.39921191334724426,
+      "predicted_genre": "Experimental",
+      "track_id": 154309,
+      "true_genre": "Hip-Hop"
+    }
+  ]
+}
