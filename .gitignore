@@ -1,8 +1,15 @@
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
+
+data/raw/*
+data/processed/*
+data/splits/*
+
 !data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/splits/.gitkeep
+
 results/*.pt
 results/task2/*.pt
 .venv
-data/*
