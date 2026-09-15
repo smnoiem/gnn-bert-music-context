@@ -157,6 +157,7 @@ def evaluate_genre_cnn(
         sample_rate=config["data"]["sample_rate"],
         segment_seconds=config["data"]["segment_seconds"],
         n_mels=config["data"]["n_mels"],
+        mel_dir=config["data"]["mel_dir"],
     )
     predictions, targets, probability_rows, cases = [], [], [], []
     with torch.no_grad():

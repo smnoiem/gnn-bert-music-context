@@ -224,6 +224,7 @@ class GenreMelDataset(Dataset):
         sample_rate: int = 22050,
         segment_seconds: float = 5.0,
         n_mels: int = 128,
+        mel_dir: str | Path | None = None,
     ):
         rows = load_manifest(manifest)
         assert_no_artist_leakage(rows)
@@ -236,6 +237,9 @@ class GenreMelDataset(Dataset):
         self.sample_rate = sample_rate
         self.segment_samples = round(sample_rate * segment_seconds)
         self.n_mels = n_mels
+        self.mel_dir = Path(mel_dir) if mel_dir is not None else None
+        if self.mel_dir is None:
+            raise ValueError("Task 2 CNN training requires a preprocessed mel_dir")
         for row in self.rows:
             track_id = int(row["track_id"])
             if track_id not in self.audio_metadata:
@@ -247,27 +251,15 @@ class GenreMelDataset(Dataset):
     def __getitem__(self, index: int) -> dict:
         row = self.rows[index]
         track_id = int(row["track_id"])
-        audio_path = self.audio_root / self.audio_metadata[track_id]["path"]
-        waveform, _ = load_audio(str(audio_path), self.sample_rate)
-        segments = segment_audio(
-            waveform,
-            self.sample_rate,
-            segment_seconds=self.segment_samples / self.sample_rate,
-            minimum_seconds=1.0,
-        )
-        if not segments:
-            raise ValueError(f"Audio file contains no valid segments: {audio_path}")
-        mel_segments = []
-        for segment in segments:
-            if len(segment) < self.segment_samples:
-                segment = np.pad(segment, (0, self.segment_samples - len(segment)))
-            mel_segments.append(
-                torch.from_numpy(
-                    mel_spectrogram(segment, self.sample_rate, self.n_mels)
-                ).unsqueeze(0)
+        mel_path = self.mel_dir / f"{track_id:06d}.pt"
+        if not mel_path.is_file():
+            raise FileNotFoundError(
+                f"Cached mel input was not found: {mel_path}. "
+                "Run python -m src.prepare_task2 first."
             )
+        cached = torch.load(mel_path, weights_only=False)
         return {
-            "x": torch.stack(mel_segments),
+            "x": cached["x"],
             "y": encode_genre(row["genre"], self.vocabulary),
             "track_id": track_id,
         }
@@ -499,6 +491,7 @@ def train_genre_cnn(args, cfg) -> None:
         sample_rate=cfg["data"]["sample_rate"],
         segment_seconds=cfg["data"]["segment_seconds"],
         n_mels=cfg["data"]["n_mels"],
+        mel_dir=cfg["data"]["mel_dir"],
     )
     dataset_args = {
         "manifest": args.manifest,
@@ -508,6 +501,7 @@ def train_genre_cnn(args, cfg) -> None:
         "sample_rate": cfg["data"]["sample_rate"],
         "segment_seconds": cfg["data"]["segment_seconds"],
         "n_mels": cfg["data"]["n_mels"],
+        "mel_dir": cfg["data"]["mel_dir"],
     }
     val = GenreMelDataset(split="val", **dataset_args)
     test = GenreMelDataset(split="test", **dataset_args)

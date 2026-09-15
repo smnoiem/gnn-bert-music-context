@@ -3,6 +3,7 @@ data:
   audio_root: data/raw/fma/fma_small
   metadata_csv: data/processed/task2/fma_metadata.csv
   processed_dir: data/processed/task2/graphs
+  mel_dir: data/processed/task2/mels
   manifest: data/processed/task2/task2_graph_manifest.jsonl
   split_dir: data/splits/task2
   results_dir: results/task2
