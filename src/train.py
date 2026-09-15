@@ -413,7 +413,13 @@ def train_gnn(args, cfg) -> None:
     train = GenreGraphDataset(args.manifest, "train")
     val = GenreGraphDataset(args.manifest, "val", train.vocabulary)
     test = GenreGraphDataset(args.manifest, "test", train.vocabulary)
+    
+    print(f"vocabulary: {train.vocabulary}")
+    print(f"Training on {len(train)} samples, validating on {len(val)}, testing on {len(test)}")
+    return
+    
     input_dim = train.input_dim
+    
     model = GenreGraphSAGEClassifier(
         num_genres=len(train.vocabulary),
         input_dim=input_dim,
@@ -421,13 +427,16 @@ def train_gnn(args, cfg) -> None:
         layers=cfg["model"]["gnn_layers"],
         dropout=cfg["model"]["dropout"],
     )
+    
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
+    
     optimizer = torch.optim.AdamW(
         model.parameters(),
         lr=cfg["training"]["learning_rate"],
         weight_decay=cfg["training"]["weight_decay"],
     )
+    
     run_name = args.run_name or "graphsage_genre"
     results = ensure_dir(cfg["data"]["results_dir"])
     history = []
