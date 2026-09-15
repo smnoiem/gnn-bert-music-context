@@ -35,7 +35,7 @@ class GraphSAGEEncoder(nn.Module):
         for layer in self.layers:
             x = F.relu(layer(x, edge_index))
             x = F.dropout(x, p=self.dropout, training=self.training)
-        return global_mean_pool(x, batch).squeeze(0)
+        return global_mean_pool(x, batch)
 
 
 

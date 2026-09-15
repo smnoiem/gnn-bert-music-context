@@ -114,14 +114,33 @@ class GenreGraphDataset(Dataset):
         if not self.rows:
             raise ValueError(f"No graph samples found for split {split!r}")
         self.vocabulary = vocabulary or genre_vocabulary(rows)
+        manifest_parent = Path(manifest).resolve().parent
+        self.graph_paths = {
+            index: self._resolve_graph_path(row["graph"], manifest_parent)
+            for index, row in enumerate(self.rows)
+        }
         self._cache: dict[int, dict] = {}
+
+    @staticmethod
+    def _resolve_graph_path(graph: str | Path, manifest_parent: Path) -> Path:
+        graph_path = Path(graph)
+        if graph_path.is_absolute():
+            return graph_path
+        if graph_path.is_file():
+            return graph_path
+        return manifest_parent / graph_path
+
+    @property
+    def input_dim(self) -> int:
+        graph = self[0]
+        return int(graph["x"].shape[1])
 
     def __len__(self) -> int:
         return len(self.rows)
 
     def __getitem__(self, index: int) -> dict:
         row = self.rows[index]
-        graph_path = Path(row["graph"])
+        graph_path = self.graph_paths[index]
         if not graph_path.is_file():
             raise FileNotFoundError(f"Graph file was not found: {graph_path}")
         graph = self._cache.get(index)
@@ -371,9 +390,10 @@ def train_gnn(args, cfg) -> None:
     train = GenreGraphDataset(args.manifest, "train")
     val = GenreGraphDataset(args.manifest, "val", train.vocabulary)
     test = GenreGraphDataset(args.manifest, "test", train.vocabulary)
+    input_dim = train.input_dim
     model = GenreGraphSAGEClassifier(
         num_genres=len(train.vocabulary),
-        input_dim=32,
+        input_dim=input_dim,
         hidden_dim=cfg["model"]["gnn_hidden"],
         layers=cfg["model"]["gnn_layers"],
         dropout=cfg["model"]["dropout"],
@@ -386,7 +406,7 @@ def train_gnn(args, cfg) -> None:
         weight_decay=cfg["training"]["weight_decay"],
     )
     run_name = args.run_name or "graphsage_genre"
-    results = ensure_dir("results/task2")
+    results = ensure_dir(cfg["data"]["results_dir"])
     history = []
     best = -1.0
     total_epochs = args.epochs or cfg["training"]["epochs"]
@@ -438,6 +458,7 @@ def train_gnn(args, cfg) -> None:
                 {
                     "model": model.state_dict(),
                     "vocabulary": train.vocabulary,
+                    "input_dim": input_dim,
                     "config": cfg,
                     "task": "gnn",
                 },
@@ -499,7 +520,7 @@ def train_genre_cnn(args, cfg) -> None:
         weight_decay=cfg["training"]["weight_decay"],
     )
     run_name = args.run_name or "cnn_melspectrogram_genre"
-    results = ensure_dir("results/task2")
+    results = ensure_dir(cfg["data"]["results_dir"])
     history = []
     best = -1.0
     total_epochs = args.epochs or cfg["training"]["epochs"]
@@ -559,12 +580,26 @@ def train_genre_cnn(args, cfg) -> None:
 
 def main():
     configure_logging()
-    ap=argparse.ArgumentParser(); ap.add_argument("--task", choices=["bert","gnn","fusion","genre_cnn"], required=True); ap.add_argument("--config", default="config.yaml"); ap.add_argument("--manifest", default="data/processed/task2/task2_graph_manifest.jsonl"); ap.add_argument("--metadata", default="data/processed/task2/fma_metadata.csv"); ap.add_argument("--audio-root", default="data/raw/fma/fma_small"); ap.add_argument("--synthetic", action="store_true"); ap.add_argument("--epochs", type=int); ap.add_argument("--early-concat", action="store_true"); ap.add_argument("--run-name"); args=ap.parse_args()
+    ap=argparse.ArgumentParser(); ap.add_argument("--task", choices=["bert","gnn","fusion","genre_cnn"], required=True); ap.add_argument("--config", default="config.yaml"); ap.add_argument("--manifest"); ap.add_argument("--metadata"); ap.add_argument("--audio-root"); ap.add_argument("--synthetic", action="store_true"); ap.add_argument("--epochs", type=int); ap.add_argument("--early-concat", action="store_true"); ap.add_argument("--run-name"); args=ap.parse_args()
     with open(args.config, encoding="utf-8") as stream:
         cfg = yaml.safe_load(stream)
     seed_everything(cfg["seed"])
     LOGGER.info("Task=%s, seed=%s, synthetic=%s", args.task, cfg["seed"], args.synthetic)
-    if args.synthetic: args.manifest="data/processed/manifest.jsonl"
+    task2 = args.task in {"gnn", "genre_cnn"}
+    if task2 and args.synthetic:
+        raise ValueError(
+            "Synthetic data uses the legacy multilabel labels contract and cannot "
+            "be used for Task 2 single-label genre training. Build the FMA Task 2 "
+            "manifest and omit --synthetic."
+        )
+    if task2:
+        args.manifest = args.manifest or cfg["data"]["manifest"]
+        args.metadata = args.metadata or cfg["data"]["metadata_csv"]
+        args.audio_root = args.audio_root or cfg["data"]["audio_root"]
+    elif args.synthetic:
+        args.manifest = args.manifest or "data/processed/manifest.jsonl"
+    elif not args.manifest:
+        ap.error("--manifest is required for non-Task-2 training")
     if args.task == "gnn":
         train_gnn(args, cfg)
         return

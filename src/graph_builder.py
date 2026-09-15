@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import logging
 import json
+import os
 from pathlib import Path
 
 import numpy as np
@@ -127,13 +128,13 @@ def build_segment_graph(features: np.ndarray, threshold: float = 0.75) -> dict[s
     return {"x": x, "edge_index": edge_index}
 
 
-def _write_split_files(metadata: pd.DataFrame, split_dir: Path) -> None:
+def _write_split_files(rows: list[dict[str, object]], split_dir: Path) -> None:
     ensure_dir(split_dir)
     for split in ("train", "val", "test"):
-        rows = metadata[metadata["split"] == split].to_dict(orient="records")
-        if not rows:
+        split_rows = [row for row in rows if row["split"] == split]
+        if not split_rows:
             raise ValueError(f"Split {split!r} is empty")
-        (split_dir / f"{split}.json").write_text(json.dumps(rows, indent=2))
+        (split_dir / f"{split}.json").write_text(json.dumps(split_rows, indent=2))
 
 
 def build_graph_dataset(
@@ -158,7 +159,6 @@ def build_graph_dataset(
     if missing:
         raise ValueError(f"metadata missing columns: {sorted(missing)}")
     _validate_artist_splits(metadata)
-    _write_split_files(metadata, split_dir)
 
     manifest: list[dict[str, object]] = []
     failures: list[dict[str, object]] = []
@@ -181,10 +181,11 @@ def build_graph_dataset(
             )
             graph_path = graph_dir / f"{int(row.track_id):06d}.pt"
             torch.save(graph, graph_path)
+            manifest_graph = Path(os.path.relpath(graph_path, manifest_path.parent))
             manifest.append(
                 {
                     "track_id": int(row.track_id),
-                    "graph": str(graph_path),
+                    "graph": str(manifest_graph),
                     "genre": str(row.genre),
                     "split": str(row.split),
                     "artist_id": int(row.artist_id),
@@ -208,6 +209,7 @@ def build_graph_dataset(
     with manifest_path.open("w", encoding="utf-8") as stream:
         for item in manifest:
             stream.write(json.dumps(item) + "\n")
+    _write_split_files(manifest, split_dir)
     failure_path = manifest_path.with_name(f"{manifest_path.stem}_failures.jsonl")
     with failure_path.open("w", encoding="utf-8") as stream:
         for failure in failures:
