@@ -139,9 +139,16 @@ python -m src.prepare_task2 --manifest data\processed\task2\task2_graph_manifest
 Train the real-data models:
 
 ```powershell
-python -m src.train --task gnn --config config.yaml --manifest data\processed\task2\task2_graph_manifest.jsonl --run-name graphsage_genre --epochs 10
+python -m src.train --task gnn --config config.yaml --manifest data\processed\task2\task2_graph_manifest.jsonl --run-name graphsage_genre
 python -m src.train --task genre_cnn --config config.yaml --manifest data\processed\task2\task2_graph_manifest.jsonl --metadata data\processed\task2\fma_metadata.csv --audio-root data\raw\fma\fma_small --run-name cnn_melspectrogram_genre --epochs 10
 ```
+
+The mature GraphSAGE path uses a learned input projection, three residual
+GraphSAGE blocks, and mean/max/standard-deviation graph pooling before its
+classifier head. Training uses configurable balanced class weights, AdamW,
+validation Macro-F1 learning-rate reduction, gradient clipping, best-checkpoint
+restoration, and early stopping. The defaults are configured in `config.yaml`;
+pass `--epochs` to cap a run explicitly.
 
 Evaluate the best Task 2 checkpoint:
 
