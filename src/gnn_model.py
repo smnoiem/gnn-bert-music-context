@@ -38,9 +38,6 @@ class GraphSAGEEncoder(nn.Module):
         return global_mean_pool(x, batch).squeeze(0)
 
 
-class GNNClassifier(nn.Module):
-    def __init__(self, num_labels: int, **kwargs): super().__init__(); self.encoder = GraphSAGEEncoder(**kwargs); self.head = nn.Linear(self.encoder.hidden_size, num_labels)
-    def forward(self, graph: dict): return self.head(self.encoder(graph))
 
 
 class GenreGraphSAGEClassifier(nn.Module):

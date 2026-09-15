@@ -137,14 +137,14 @@ python -m src.graph_builder --metadata data\processed\task2\fma_metadata.csv --a
 Train the real-data models:
 
 ```powershell
-python -m src.train --task genre_gnn --config config.yaml --manifest data\processed\task2\task2_graph_manifest.jsonl --run-name graphsage_genre --epochs 10
+python -m src.train --task gnn --config config.yaml --manifest data\processed\task2\task2_graph_manifest.jsonl --run-name graphsage_genre --epochs 10
 python -m src.train --task genre_cnn --config config.yaml --manifest data\processed\task2\task2_graph_manifest.jsonl --metadata data\processed\task2\fma_metadata.csv --audio-root data\raw\fma\fma_small --run-name cnn_melspectrogram_genre --epochs 10
 ```
 
 Evaluate the best Task 2 checkpoint:
 
 ```powershell
-python -m src.evaluate --task genre_gnn --checkpoint results\task2\graphsage_genre_best.pt --manifest data\processed\task2\task2_graph_manifest.jsonl --output-dir results\task2
+python -m src.evaluate --task gnn --checkpoint results\task2\graphsage_genre_best.pt --manifest data\processed\task2\task2_graph_manifest.jsonl --output-dir results\task2
 ```
 
 Task 2 evaluation writes `task2_graphsage_test_metrics.json`,
@@ -221,7 +221,7 @@ python -m src.graph_builder `
 
 ```powershell
 python -m src.train `
-  --task genre_gnn `
+  --task gnn `
   --config config.yaml `
   --manifest data\processed\task2\task2_graph_manifest.jsonl `
   --run-name graphsage_genre `
@@ -245,7 +245,7 @@ python -m src.train `
 
 ```powershell
 python -m src.evaluate `
-  --task genre_gnn `
+  --task gnn `
   --checkpoint results\task2\graphsage_genre_best.pt `
   --manifest data\processed\task2\task2_graph_manifest.jsonl `
   --output-dir results\task2
