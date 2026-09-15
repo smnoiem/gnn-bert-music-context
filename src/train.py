@@ -414,10 +414,6 @@ def train_gnn(args, cfg) -> None:
     val = GenreGraphDataset(args.manifest, "val", train.vocabulary)
     test = GenreGraphDataset(args.manifest, "test", train.vocabulary)
     
-    print(f"vocabulary: {train.vocabulary}")
-    print(f"Training on {len(train)} samples, validating on {len(val)}, testing on {len(test)}")
-    return
-    
     input_dim = train.input_dim
     
     model = GenreGraphSAGEClassifier(
