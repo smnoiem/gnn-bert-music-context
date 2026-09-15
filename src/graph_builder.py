@@ -161,13 +161,37 @@ def build_graph_dataset(
     _validate_artist_splits(metadata)
 
     training_features = []
-    for row in metadata.itertuples(index=False):
-        if str(row.split) != "train":
-            continue
-        waveform, actual_rate = load_audio(str(audio_root / str(row.path)), sample_rate)
-        training_features.append(
-            segment_features(waveform, actual_rate, segment_seconds)
-        )
+    failures: list[dict[str, object]] = []
+    failed_track_ids: set[int] = set()
+    training_rows = [
+        row for row in metadata.itertuples(index=False) if str(row.split) == "train"
+    ]
+    for row in progress(
+        training_rows,
+        desc="Fitting feature normalization",
+        total=len(training_rows),
+    ):
+        audio_path = audio_root / str(row.path)
+        try:
+            waveform, actual_rate = load_audio(str(audio_path), sample_rate)
+            training_features.append(
+                segment_features(waveform, actual_rate, segment_seconds)
+            )
+        except Exception as exc:
+            failed_track_ids.add(int(row.track_id))
+            failures.append(
+                {
+                    "track_id": int(row.track_id),
+                    "path": str(audio_path),
+                    "error_type": type(exc).__name__,
+                    "error": str(exc),
+                }
+            )
+            logging.getLogger("music-context").exception(
+                "Skipping track_id=%s while fitting feature normalization: %s",
+                row.track_id,
+                audio_path,
+            )
     if not training_features:
         raise ValueError("No training audio was available to fit feature normalization")
     feature_mean, feature_std = feature_normalizer(
@@ -175,12 +199,13 @@ def build_graph_dataset(
     )
 
     manifest: list[dict[str, object]] = []
-    failures: list[dict[str, object]] = []
     for row in progress(
         metadata.itertuples(index=False),
         desc="Building graph samples",
         total=len(metadata),
     ):
+        if int(row.track_id) in failed_track_ids:
+            continue
         audio_path = audio_root / str(row.path)
         try:
             waveform, actual_rate = load_audio(str(audio_path), sample_rate)
