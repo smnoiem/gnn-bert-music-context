@@ -113,6 +113,7 @@ data\
     task2\
       fma_metadata.csv
       graphs\
+      mels\
       task2_graph_manifest.jsonl
   splits\
     task2\
@@ -132,6 +133,7 @@ Build the segment graphs:
 ```powershell
 python -m src.graph_builder --prepare-metadata --tracks-csv data\raw\fma\fma_metadata\tracks.csv --audio-root data\raw\fma\fma_small --metadata-output data\processed\task2\fma_metadata.csv
 python -m src.graph_builder --metadata data\processed\task2\fma_metadata.csv --audio-root data\raw\fma\fma_small --output data\processed\task2\graphs --manifest data\processed\task2\task2_graph_manifest.jsonl --split-dir data\splits\task2 --sample-rate 22050 --segment-seconds 5 --threshold 0.75
+python -m src.prepare_task2 --manifest data\processed\task2\task2_graph_manifest.jsonl --metadata data\processed\task2\fma_metadata.csv --audio-root data\raw\fma\fma_small --output data\processed\task2\mels --sample-rate 22050 --segment-seconds 5 --n-mels 128
 ```
 
 Train the real-data models:
@@ -228,7 +230,24 @@ python -m src.train `
   --epochs 10
 ```
 
-### 4. Train the mel-spectrogram CNN baseline
+### 4. Cache mel-spectrogram inputs for the CNN baseline
+
+```powershell
+python -m src.prepare_task2 `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --metadata data\processed\task2\fma_metadata.csv `
+  --audio-root data\raw\fma\fma_small `
+  --output data\processed\task2\mels `
+  --sample-rate 22050 `
+  --segment-seconds 5 `
+  --n-mels 128
+```
+
+This phase opens each successful Task 2 audio file once and stores its
+5-second log-mel segments under `data\processed\task2\mels`. CNN training and
+evaluation then load those cached tensors instead of decoding audio again.
+
+### 5. Train the mel-spectrogram CNN baseline
 
 ```powershell
 python -m src.train `
@@ -241,7 +260,7 @@ python -m src.train `
   --epochs 10
 ```
 
-### 5. Evaluate GraphSAGE on the held-out test split
+### 6. Evaluate GraphSAGE on the held-out test split
 
 ```powershell
 python -m src.evaluate `
@@ -251,7 +270,7 @@ python -m src.evaluate `
   --output-dir results\task2
 ```
 
-### 6. Evaluate the CNN baseline on the held-out test split
+### 7. Evaluate the CNN baseline on the held-out test split
 
 ```powershell
 python -m src.evaluate `
@@ -263,7 +282,7 @@ python -m src.evaluate `
   --output-dir results\task2
 ```
 
-### 7. Compare GraphSAGE and CNN results
+### 8. Compare GraphSAGE and CNN results
 
 ```powershell
 python -m src.compare_task2_models `
