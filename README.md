@@ -246,6 +246,8 @@ python -m src.prepare_task2 `
 This phase opens each successful Task 2 audio file once and stores its
 5-second log-mel segments under `data\processed\task2\mels`. CNN training and
 evaluation then load those cached tensors instead of decoding audio again.
+Training batches segments from multiple tracks together on the accelerator and
+averages the segment logits per track before computing the loss.
 
 ### 5. Train the mel-spectrogram CNN baseline
 
