@@ -3,5 +3,6 @@ __pycache__/
 .ipynb_checkpoints/
 !data/raw/.gitkeep
 results/*.pt
+results/task2/*.pt
 .venv
 data/*

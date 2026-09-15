@@ -5,6 +5,7 @@ data:
   processed_dir: data/processed/task2/graphs
   manifest: data/processed/task2/task2_graph_manifest.jsonl
   split_dir: data/splits/task2
+  results_dir: results/task2
   sample_rate: 22050
   n_mels: 128
   segment_seconds: 5.0

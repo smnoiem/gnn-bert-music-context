@@ -83,9 +83,10 @@ def evaluate_gnn(checkpoint_path: Path, manifest: Path, output_dir: Path) -> dic
     state = torch.load(checkpoint_path, map_location=device, weights_only=False)
     genres = state["vocabulary"]
     config = state["config"]
+    input_dim = int(state.get("input_dim", 32))
     model = GenreGraphSAGEClassifier(
         num_genres=len(genres),
-        input_dim=32,
+        input_dim=input_dim,
         hidden_dim=config["model"]["gnn_hidden"],
         layers=config["model"]["gnn_layers"],
         dropout=config["model"]["dropout"],
@@ -97,7 +98,7 @@ def evaluate_gnn(checkpoint_path: Path, manifest: Path, output_dir: Path) -> dic
     with torch.no_grad():
         for graph in dataset:
             graph = device_graph(graph, device)
-            probability_tensor = torch.softmax(model(graph), dim=0)
+            probability_tensor = torch.softmax(model(graph)[0], dim=0)
             prediction = int(probability_tensor.argmax().item())
             target = int(graph["y"].item())
             predictions.append(prediction)
