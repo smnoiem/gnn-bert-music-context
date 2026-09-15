@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import torch
 
-from .audio_features import load_audio, segment_features
+from .audio_features import feature_normalizer, load_audio, segment_features
 from .utils import configure_logging, progress
 from .utils import ensure_dir
 
@@ -160,6 +160,20 @@ def build_graph_dataset(
         raise ValueError(f"metadata missing columns: {sorted(missing)}")
     _validate_artist_splits(metadata)
 
+    training_features = []
+    for row in metadata.itertuples(index=False):
+        if str(row.split) != "train":
+            continue
+        waveform, actual_rate = load_audio(str(audio_root / str(row.path)), sample_rate)
+        training_features.append(
+            segment_features(waveform, actual_rate, segment_seconds)
+        )
+    if not training_features:
+        raise ValueError("No training audio was available to fit feature normalization")
+    feature_mean, feature_std = feature_normalizer(
+        np.concatenate(training_features, axis=0)
+    )
+
     manifest: list[dict[str, object]] = []
     failures: list[dict[str, object]] = []
     for row in progress(
@@ -170,7 +184,13 @@ def build_graph_dataset(
         audio_path = audio_root / str(row.path)
         try:
             waveform, actual_rate = load_audio(str(audio_path), sample_rate)
-            features = segment_features(waveform, actual_rate, segment_seconds)
+            features = segment_features(
+                waveform,
+                actual_rate,
+                segment_seconds,
+                mean=feature_mean,
+                standard_deviation=feature_std,
+            )
             graph = build_segment_graph(features, threshold)
             graph.update(
                 {

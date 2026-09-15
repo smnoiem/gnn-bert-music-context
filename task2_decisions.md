@@ -13,6 +13,7 @@ sessions. Only confirmed decisions are recorded here.
    zero-crossing rate, RMS energy, and spectral flatness statistics.
 5. **Similarity edges:** Add cosine-similarity edges for the complete audio feature
    vectors when similarity is at least 0.75, in addition to temporal-adjacency edges.
+   Feature scaling is fitted on training segments only and shared across splits.
 6. **Segment duration:** 5 seconds.
 7. **Audio sample rate:** 22050 Hz.
 8. **Baseline:** CNN on mel-spectrograms.

@@ -107,14 +107,33 @@ def extract_spectral_features(segment: np.ndarray, sample_rate: int) -> np.ndarr
     ).astype(np.float32)
 
 
-def normalize_features(features: np.ndarray, epsilon: float = 1e-6) -> np.ndarray:
-    """Normalize feature columns while avoiding division by zero."""
+def feature_normalizer(features: np.ndarray, epsilon: float = 1e-6) -> tuple[np.ndarray, np.ndarray]:
+    """Fit column statistics for applying one scaler across graph samples."""
     if features.ndim != 2:
         raise ValueError("features must be a two-dimensional matrix")
     if epsilon <= 0:
         raise ValueError("epsilon must be positive")
-    mean = features.mean(axis=0, keepdims=True)
-    standard_deviation = features.std(axis=0, keepdims=True)
+    return (
+        features.mean(axis=0, keepdims=True).astype(np.float32),
+        features.std(axis=0, keepdims=True).astype(np.float32),
+    )
+
+
+def normalize_features(
+    features: np.ndarray,
+    mean: np.ndarray | None = None,
+    standard_deviation: np.ndarray | None = None,
+    epsilon: float = 1e-6,
+) -> np.ndarray:
+    """Apply shared feature statistics while avoiding division by zero."""
+    if features.ndim != 2:
+        raise ValueError("features must be a two-dimensional matrix")
+    if epsilon <= 0:
+        raise ValueError("epsilon must be positive")
+    if (mean is None) != (standard_deviation is None):
+        raise ValueError("mean and standard_deviation must be provided together")
+    if mean is None:
+        mean, standard_deviation = feature_normalizer(features, epsilon)
     return ((features - mean) / (standard_deviation + epsilon)).astype(np.float32)
 
 
@@ -122,12 +141,15 @@ def extract_segment_features(
     segments: list[np.ndarray],
     sample_rate: int,
     n_mfcc: int = DEFAULT_N_MFCC,
+    mean: np.ndarray | None = None,
+    standard_deviation: np.ndarray | None = None,
 ) -> np.ndarray:
-    """Create normalized, information-rich audio vectors for graph nodes.
+    """Create information-rich audio vectors for graph nodes.
 
     Each segment contains MFCC means/stds and their first two deltas, chroma
     means/stds, and statistics for spectral contrast, tonnetz, centroid,
     bandwidth, rolloff, zero-crossing rate, RMS energy, and spectral flatness.
+    If shared statistics are supplied, they are applied across tracks.
     """
     if not segments:
         feature_count = (n_mfcc * 6) + (CHROMA_BINS * 2) + (
@@ -145,7 +167,10 @@ def extract_segment_features(
         )
         for segment in segments
     ]
-    return normalize_features(np.asarray(features, dtype=np.float32))
+    raw_features = np.asarray(features, dtype=np.float32)
+    if mean is None and standard_deviation is None:
+        return raw_features
+    return normalize_features(raw_features, mean, standard_deviation)
 
 
 def mel_spectrogram(
@@ -166,7 +191,11 @@ def segment_features(
     waveform: np.ndarray,
     sample_rate: int,
     seconds: float = 5.0,
+    mean: np.ndarray | None = None,
+    standard_deviation: np.ndarray | None = None,
 ) -> np.ndarray:
-    """Compatibility wrapper returning normalized MFCC+chroma segment features."""
+    """Return audio segment features, optionally using shared normalization."""
     segments = segment_audio(waveform, sample_rate, seconds)
-    return extract_segment_features(segments, sample_rate)
+    return extract_segment_features(
+        segments, sample_rate, mean=mean, standard_deviation=standard_deviation
+    )
