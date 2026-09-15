@@ -9,7 +9,7 @@ import torch
 from sklearn.metrics import average_precision_score
 
 from .gnn_model import GenreGraphSAGEClassifier, MelCNN
-from .train import GenreGraphDataset, GenreMelDataset, device_graph
+from .train import GenreGraphDataset, GenreMelDataset, collate_mels, device_graph
 from .utils import configure_logging, ensure_dir, save_json
 
 
@@ -159,27 +159,41 @@ def evaluate_genre_cnn(
         n_mels=config["data"]["n_mels"],
         mel_dir=config["data"]["mel_dir"],
     )
+    loader = torch.utils.data.DataLoader(
+        dataset,
+        batch_size=int(config["training"].get("cnn_batch_size", config["training"]["batch_size"])),
+        shuffle=False,
+        collate_fn=collate_mels,
+        pin_memory=torch.cuda.is_available(),
+    )
     predictions, targets, probability_rows, cases = [], [], [], []
     with torch.no_grad():
-        for sample in dataset:
-            segment_logits = model(sample["x"].to(device))
-            probability_tensor = torch.softmax(
-                segment_logits.mean(dim=0), dim=0
+        for sample in loader:
+            segment_logits = model(sample["x"].to(device, non_blocking=True))
+            track_index = sample["track_index"].to(device, non_blocking=True)
+            logits = torch.zeros(
+                len(sample["y"]), len(genres), device=device, dtype=segment_logits.dtype
             )
-            prediction = int(probability_tensor.argmax().item())
-            target = int(sample["y"].item())
-            probabilities_array = probability_tensor.cpu().numpy()
-            predictions.append(prediction)
-            targets.append(target)
-            probability_rows.append(probabilities_array)
-            cases.append(
-                {
-                    "track_id": int(sample["track_id"]),
-                    "true_genre": genres[target],
-                    "predicted_genre": genres[prediction],
-                    "confidence": float(probabilities_array[prediction]),
-                }
+            logits.index_add_(0, track_index, segment_logits)
+            counts = torch.bincount(track_index, minlength=len(sample["y"])).to(
+                device=device, dtype=segment_logits.dtype
             )
+            probability_tensor = torch.softmax(logits / counts.unsqueeze(1), dim=1)
+            for index, probabilities in enumerate(probability_tensor):
+                prediction = int(probabilities.argmax().item())
+                target = int(sample["y"][index].item())
+                probabilities_array = probabilities.cpu().numpy()
+                predictions.append(prediction)
+                targets.append(target)
+                probability_rows.append(probabilities_array)
+                cases.append(
+                    {
+                        "track_id": int(sample["track_id"][index]),
+                        "true_genre": genres[target],
+                        "predicted_genre": genres[prediction],
+                        "confidence": float(probabilities_array[prediction]),
+                    }
+                )
     predictions_array = np.asarray(predictions)
     targets_array = np.asarray(targets)
     metrics = single_label_metrics(

@@ -240,6 +240,7 @@ class GenreMelDataset(Dataset):
         self.mel_dir = Path(mel_dir) if mel_dir is not None else None
         if self.mel_dir is None:
             raise ValueError("Task 2 CNN training requires a preprocessed mel_dir")
+        self._cache: dict[int, torch.Tensor] = {}
         for row in self.rows:
             track_id = int(row["track_id"])
             if track_id not in self.audio_metadata:
@@ -257,12 +258,34 @@ class GenreMelDataset(Dataset):
                 f"Cached mel input was not found: {mel_path}. "
                 "Run python -m src.prepare_task2 first."
             )
-        cached = torch.load(mel_path, weights_only=False)
+        cached = self._cache.get(track_id)
+        if cached is None:
+            cached = torch.load(mel_path, weights_only=False)["x"]
+            self._cache[track_id] = cached
         return {
-            "x": cached["x"],
+            "x": cached,
             "y": encode_genre(row["genre"], self.vocabulary),
             "track_id": track_id,
         }
+
+
+def collate_mels(samples: list[dict]) -> dict:
+    """Flatten variable-length track segments while retaining track ownership."""
+    if not samples:
+        raise ValueError("Cannot collate an empty mel batch")
+    inputs = torch.cat([sample["x"] for sample in samples], dim=0)
+    track_index = torch.cat(
+        [
+            torch.full((sample["x"].size(0),), index, dtype=torch.long)
+            for index, sample in enumerate(samples)
+        ]
+    )
+    return {
+        "x": inputs,
+        "track_index": track_index,
+        "y": torch.stack([sample["y"] for sample in samples]),
+        "track_id": [sample["track_id"] for sample in samples],
+    }
 
 
 def device_graph(graph, device): return {k: (v.to(device) if torch.is_tensor(v) else v) for k, v in graph.items()}
@@ -332,18 +355,26 @@ def run_cnn_epoch(model, data, optimizer, device, num_classes: int) -> tuple[flo
     targets: list[int] = []
     phase = "train" if training else "validation"
     for sample in progress(data, desc=f"{phase} batches", total=len(data)):
-        inputs = sample["x"].to(device)
-        target = sample["y"].reshape(1).to(device)
+        inputs = sample["x"].to(device, non_blocking=True)
+        track_index = sample["track_index"].to(device, non_blocking=True)
+        target = sample["y"].to(device, non_blocking=True)
         segment_logits = model(inputs)
-        logits = segment_logits.mean(dim=0, keepdim=True)
+        logits = torch.zeros(
+            target.size(0), num_classes, device=device, dtype=segment_logits.dtype
+        )
+        logits.index_add_(0, track_index, segment_logits)
+        counts = torch.bincount(track_index, minlength=target.size(0)).to(
+            device=device, dtype=segment_logits.dtype
+        )
+        logits = logits / counts.unsqueeze(1)
         loss = criterion(logits, target)
         if training:
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
         losses.append(float(loss.item()))
-        predictions.append(int(logits.argmax(dim=1).item()))
-        targets.append(int(target.item()))
+        predictions.extend(logits.argmax(dim=1).detach().cpu().tolist())
+        targets.extend(target.detach().cpu().tolist())
     return float(np.mean(losses)), single_label_metrics(predictions, targets, num_classes)
 
 
@@ -505,6 +536,15 @@ def train_genre_cnn(args, cfg) -> None:
     }
     val = GenreMelDataset(split="val", **dataset_args)
     test = GenreMelDataset(split="test", **dataset_args)
+    batch_size = int(cfg["training"].get("cnn_batch_size", cfg["training"]["batch_size"]))
+    loader_kwargs = {
+        "batch_size": batch_size,
+        "collate_fn": collate_mels,
+        "pin_memory": torch.cuda.is_available(),
+    }
+    train_loader = DataLoader(train, shuffle=True, **loader_kwargs)
+    val_loader = DataLoader(val, shuffle=False, **loader_kwargs)
+    test_loader = DataLoader(test, shuffle=False, **loader_kwargs)
     model = MelCNN(num_labels=len(train.vocabulary))
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -521,10 +561,10 @@ def train_genre_cnn(args, cfg) -> None:
     LOGGER.info("Starting %s for %d epochs on %s", run_name, total_epochs, device)
     for epoch in range(total_epochs):
         train_loss, train_metrics = run_cnn_epoch(
-            model, train, optimizer, device, len(train.vocabulary)
+            model, train_loader, optimizer, device, len(train.vocabulary)
         )
         val_loss, val_metrics = run_cnn_epoch(
-            model, val, None, device, len(train.vocabulary)
+            model, val_loader, None, device, len(train.vocabulary)
         )
         row = {
             "epoch": epoch + 1,
@@ -552,7 +592,7 @@ def train_genre_cnn(args, cfg) -> None:
     )
     model.load_state_dict(checkpoint["model"])
     test_loss, test_metrics = run_cnn_epoch(
-        model, test, None, device, len(train.vocabulary)
+        model, test_loader, None, device, len(train.vocabulary)
     )
     save_json(
         {
