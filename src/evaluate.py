@@ -78,7 +78,7 @@ def cross_entropy_loss(probabilities: np.ndarray, targets: np.ndarray) -> float:
     return float(-np.log(np.clip(selected, 1e-12, 1.0)).mean())
 
 
-def evaluate_genre_gnn(checkpoint_path: Path, manifest: Path, output_dir: Path) -> dict:
+def evaluate_gnn(checkpoint_path: Path, manifest: Path, output_dir: Path) -> dict:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     state = torch.load(checkpoint_path, map_location=device, weights_only=False)
     genres = state["vocabulary"]
@@ -209,13 +209,13 @@ def main() -> None:
     parser.add_argument("--metadata", default="data/processed/task2/fma_metadata.csv")
     parser.add_argument("--audio-root", default="data/raw/fma/fma_small")
     parser.add_argument(
-        "--task", choices=["genre_gnn", "genre_cnn", "bert", "gnn", "fusion"], required=True
+        "--task", choices=["gnn", "genre_cnn", "bert", "fusion"], required=True
     )
     parser.add_argument("--output-dir", default="results/task2")
     args = parser.parse_args()
     output_dir = ensure_dir(args.output_dir)
-    if args.task == "genre_gnn":
-        metrics = evaluate_genre_gnn(args.checkpoint, args.manifest, output_dir)
+    if args.task == "gnn":
+        metrics = evaluate_gnn(args.checkpoint, args.manifest, output_dir)
         logger.info("Evaluation complete: %s", metrics)
         print(metrics, flush=True)
         return
@@ -230,7 +230,7 @@ def main() -> None:
         logger.info("Evaluation complete: %s", metrics)
         print(metrics, flush=True)
         return
-    raise NotImplementedError("Only Task 2 genre_gnn and genre_cnn evaluation is currently implemented.")
+    raise NotImplementedError("Only Task 2 gnn and genre_cnn evaluation is currently implemented.")
 
 
 if __name__ == "__main__":

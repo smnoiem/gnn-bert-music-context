@@ -6,13 +6,13 @@ from pathlib import Path
 import numpy as np
 import torch
 from torch import nn
-from torch.utils.data import Dataset
+from torch.utils.data import DataLoader, Dataset
 import yaml
 
 from .audio_features import load_audio, mel_spectrogram, segment_audio
 from .bert_encoder import BertTagClassifier
 from .fusion_model import FusionModel
-from .gnn_model import GNNClassifier, GenreGraphSAGEClassifier, MelCNN
+from .gnn_model import GenreGraphSAGEClassifier, MelCNN
 from .metrics import multilabel_metrics
 from .utils import configure_logging, ensure_dir, progress, save_json, seed_everything
 
@@ -114,6 +114,7 @@ class GenreGraphDataset(Dataset):
         if not self.rows:
             raise ValueError(f"No graph samples found for split {split!r}")
         self.vocabulary = vocabulary or genre_vocabulary(rows)
+        self._cache: dict[int, dict] = {}
 
     def __len__(self) -> int:
         return len(self.rows)
@@ -123,13 +124,55 @@ class GenreGraphDataset(Dataset):
         graph_path = Path(row["graph"])
         if not graph_path.is_file():
             raise FileNotFoundError(f"Graph file was not found: {graph_path}")
-        graph = torch.load(graph_path, weights_only=False)
-        if "x" not in graph or "edge_index" not in graph:
-            raise ValueError(f"Graph is missing x or edge_index: {graph_path}")
-        graph["y"] = encode_genre(row["genre"], self.vocabulary)
-        graph["track_id"] = int(row["track_id"])
-        graph["genre"] = str(row["genre"])
-        return graph
+        graph = self._cache.get(index)
+        if graph is None:
+            graph = torch.load(graph_path, weights_only=False)
+            if "x" not in graph or "edge_index" not in graph:
+                raise ValueError(f"Graph is missing x or edge_index: {graph_path}")
+            self._cache[index] = graph
+        return {
+            **graph,
+            "y": encode_genre(row["genre"], self.vocabulary),
+            "track_id": int(row["track_id"]),
+            "genre": str(row["genre"]),
+        }
+
+
+def collate_graphs(graphs: list[dict]) -> dict:
+    """Batch graph dictionaries by concatenating nodes and offsetting edges."""
+    if not graphs:
+        raise ValueError("Cannot collate an empty graph batch")
+    node_offsets = []
+    offset = 0
+    for graph in graphs:
+        node_offsets.append(offset)
+        offset += graph["x"].size(0)
+    x = torch.cat([graph["x"] for graph in graphs], dim=0)
+    edge_index = torch.cat(
+        [
+            graph["edge_index"] + node_offset
+            for graph, node_offset in zip(graphs, node_offsets)
+        ],
+        dim=1,
+    )
+    batch = torch.cat(
+        [
+            torch.full(
+                (graph["x"].size(0),),
+                index,
+                dtype=torch.long,
+            )
+            for index, graph in enumerate(graphs)
+        ]
+    )
+    return {
+        "x": x,
+        "edge_index": edge_index,
+        "batch": batch,
+        "y": torch.stack([graph["y"] for graph in graphs]),
+        "track_id": [graph["track_id"] for graph in graphs],
+        "genre": [graph["genre"] for graph in graphs],
+    }
 
 
 def load_audio_metadata(metadata_path: str | Path) -> dict[int, dict[str, str]]:
@@ -219,7 +262,6 @@ def run_epoch(model, data, optimizer, task, device):
     for graph in progress(data, desc=f"{phase} batches", total=len(data)):
         graph = device_graph(graph, device); y = graph["y"].unsqueeze(0).to(device)
         if task == "bert": prediction = model([graph["text"]])
-        elif task == "gnn": prediction = model(graph).unsqueeze(0)
         else: prediction = model(graph, graph["text"])["logits"]
         loss = criterion(prediction, y)
         if task == "fusion" and "emotion" in graph:
@@ -254,18 +296,19 @@ def run_genre_epoch(model, data, optimizer, device, num_classes: int) -> tuple[f
     predictions: list[int] = []
     targets: list[int] = []
     phase = "train" if training else "validation"
-    for graph in progress(data, desc=f"{phase} batches", total=len(data)):
-        graph = device_graph(graph, device)
-        target = graph["y"].reshape(1).to(device)
-        logits = model(graph).reshape(1, num_classes)
-        loss = criterion(logits, target)
-        if training:
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-        losses.append(float(loss.item()))
-        predictions.append(int(logits.argmax(dim=1).item()))
-        targets.append(int(target.item()))
+    with torch.set_grad_enabled(training):
+        for graph in progress(data, desc=f"{phase} batches", total=len(data)):
+            graph = device_graph(graph, device)
+            target = graph["y"].reshape(-1)
+            logits = model(graph).reshape(-1, num_classes)
+            loss = criterion(logits, target)
+            if training:
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+            losses.append(float(loss.item()))
+            predictions.extend(logits.argmax(dim=1).detach().cpu().tolist())
+            targets.extend(target.detach().cpu().tolist())
     return float(np.mean(losses)), single_label_metrics(predictions, targets, num_classes)
 
 
@@ -324,7 +367,7 @@ def save_genre_learning_curves(
     plt.close(figure)
 
 
-def train_genre_gnn(args, cfg) -> None:
+def train_gnn(args, cfg) -> None:
     train = GenreGraphDataset(args.manifest, "train")
     val = GenreGraphDataset(args.manifest, "val", train.vocabulary)
     test = GenreGraphDataset(args.manifest, "test", train.vocabulary)
@@ -347,13 +390,38 @@ def train_genre_gnn(args, cfg) -> None:
     history = []
     best = -1.0
     total_epochs = args.epochs or cfg["training"]["epochs"]
-    LOGGER.info("Starting %s for %d epochs on %s", run_name, total_epochs, device)
+    batch_size = int(cfg["training"].get("graph_batch_size", cfg["training"]["batch_size"]))
+    loader_kwargs = {
+        "batch_size": batch_size,
+        "shuffle": True,
+        "collate_fn": collate_graphs,
+    }
+    train_loader = DataLoader(train, **loader_kwargs)
+    val_loader = DataLoader(
+        val,
+        batch_size=batch_size,
+        shuffle=False,
+        collate_fn=collate_graphs,
+    )
+    test_loader = DataLoader(
+        test,
+        batch_size=batch_size,
+        shuffle=False,
+        collate_fn=collate_graphs,
+    )
+    LOGGER.info(
+        "Starting %s for %d epochs on %s (graph batch size=%d)",
+        run_name,
+        total_epochs,
+        device,
+        batch_size,
+    )
     for epoch in range(total_epochs):
         train_loss, train_metrics = run_genre_epoch(
-            model, train, optimizer, device, len(train.vocabulary)
+            model, train_loader, optimizer, device, len(train.vocabulary)
         )
         val_loss, val_metrics = run_genre_epoch(
-            model, val, None, device, len(train.vocabulary)
+            model, val_loader, None, device, len(train.vocabulary)
         )
         row = {
             "epoch": epoch + 1,
@@ -371,7 +439,7 @@ def train_genre_gnn(args, cfg) -> None:
                     "model": model.state_dict(),
                     "vocabulary": train.vocabulary,
                     "config": cfg,
-                    "task": "genre_gnn",
+                    "task": "gnn",
                 },
                 results / f"{run_name}_best.pt",
             )
@@ -381,11 +449,11 @@ def train_genre_gnn(args, cfg) -> None:
     )
     model.load_state_dict(checkpoint["model"])
     test_loss, test_metrics = run_genre_epoch(
-        model, test, None, device, len(train.vocabulary)
+        model, test_loader, None, device, len(train.vocabulary)
     )
     save_json(
         {
-            "task": "genre_gnn",
+            "task": "gnn",
             "genres": train.vocabulary,
             "history": history,
             "test_loss": test_loss,
@@ -491,14 +559,14 @@ def train_genre_cnn(args, cfg) -> None:
 
 def main():
     configure_logging()
-    ap=argparse.ArgumentParser(); ap.add_argument("--task", choices=["bert","gnn","fusion","genre_gnn","genre_cnn"], required=True); ap.add_argument("--config", default="config.yaml"); ap.add_argument("--manifest", default="data/processed/task2/task2_graph_manifest.jsonl"); ap.add_argument("--metadata", default="data/processed/task2/fma_metadata.csv"); ap.add_argument("--audio-root", default="data/raw/fma/fma_small"); ap.add_argument("--synthetic", action="store_true"); ap.add_argument("--epochs", type=int); ap.add_argument("--early-concat", action="store_true"); ap.add_argument("--run-name"); args=ap.parse_args()
+    ap=argparse.ArgumentParser(); ap.add_argument("--task", choices=["bert","gnn","fusion","genre_cnn"], required=True); ap.add_argument("--config", default="config.yaml"); ap.add_argument("--manifest", default="data/processed/task2/task2_graph_manifest.jsonl"); ap.add_argument("--metadata", default="data/processed/task2/fma_metadata.csv"); ap.add_argument("--audio-root", default="data/raw/fma/fma_small"); ap.add_argument("--synthetic", action="store_true"); ap.add_argument("--epochs", type=int); ap.add_argument("--early-concat", action="store_true"); ap.add_argument("--run-name"); args=ap.parse_args()
     with open(args.config, encoding="utf-8") as stream:
         cfg = yaml.safe_load(stream)
     seed_everything(cfg["seed"])
     LOGGER.info("Task=%s, seed=%s, synthetic=%s", args.task, cfg["seed"], args.synthetic)
     if args.synthetic: args.manifest="data/processed/manifest.jsonl"
-    if args.task == "genre_gnn":
-        train_genre_gnn(args, cfg)
+    if args.task == "gnn":
+        train_gnn(args, cfg)
         return
     if args.task == "genre_cnn":
         train_genre_cnn(args, cfg)
@@ -506,7 +574,6 @@ def main():
     train=MusicGraphDataset(args.manifest, "train"); val=MusicGraphDataset(args.manifest, "val", train.vocab)
     num_labels=len(train.vocab); model_args=dict(num_labels=num_labels, text_hidden=cfg["model"]["text_hidden"], graph_hidden=cfg["model"]["gnn_hidden"], layers=cfg["model"]["gnn_layers"], dropout=cfg["model"]["dropout"], model_name=cfg["model"]["text_model"], freeze=cfg["training"]["freeze_text_encoder"])
     if args.task == "bert": model=BertTagClassifier(num_labels, hidden_size=cfg["model"]["text_hidden"], model_name=cfg["model"]["text_model"], freeze=cfg["training"]["freeze_text_encoder"], local_files_only=args.synthetic)
-    elif args.task == "gnn": model=GNNClassifier(num_labels, hidden_dim=cfg["model"]["gnn_hidden"], layers=cfg["model"]["gnn_layers"])
     else: model=FusionModel(**model_args, cross_attention=not args.early_concat, local_files_only=args.synthetic)
     device=torch.device("cuda" if torch.cuda.is_available() else "cpu"); model.to(device); opt=torch.optim.AdamW(filter(lambda p:p.requires_grad, model.parameters()), lr=cfg["training"]["learning_rate"], weight_decay=cfg["training"]["weight_decay"])
     results=ensure_dir("results"); run_name=args.run_name or args.task; history=[]; best=-1
