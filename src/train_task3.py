@@ -33,6 +33,91 @@ from .task3_training import (
 )
 
 
+def _write_task3_artifacts(
+    output: Path,
+    run_name: str,
+    history: list[dict[str, Any]],
+    predictions: list[dict[str, Any]],
+    embeddings: np.ndarray | None,
+    labels: list[str],
+) -> None:
+    """Write the plots and qualitative outputs produced by every real run."""
+    plots = output / "plots"
+    plots.mkdir(parents=True, exist_ok=True)
+    (output / f"{run_name}_predictions.json").write_text(
+        json.dumps(predictions, indent=2, allow_nan=True), encoding="utf-8"
+    )
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        from sklearn.metrics import average_precision_score, precision_recall_curve
+
+        epochs = [item["epoch"] for item in history]
+        fig, axes = plt.subplots(1, 2, figsize=(11, 4))
+        axes[0].plot(epochs, [item["train_loss"] for item in history], label="train")
+        axes[0].plot(epochs, [item["val_loss"] for item in history], label="validation")
+        axes[0].set(title="Task 3 loss", xlabel="epoch", ylabel="BCE loss")
+        axes[1].plot(epochs, [item["train"]["macro_f1"] for item in history], label="train")
+        axes[1].plot(epochs, [item["val"]["macro_f1"] for item in history], label="validation")
+        axes[1].set(title="Task 3 macro-F1", xlabel="epoch", ylabel="macro-F1")
+        for axis in axes:
+            axis.legend()
+            axis.grid(alpha=0.25)
+        fig.tight_layout()
+        fig.savefig(plots / f"{run_name}_learning_curves.png", dpi=150)
+        plt.close(fig)
+
+        y_true = np.asarray([row["target"] for row in predictions])
+        y_score = np.asarray([row["probabilities"] for row in predictions])
+        fig, axis = plt.subplots(figsize=(6, 5))
+        for index, label in enumerate(labels):
+            if y_true[:, index].sum() == 0:
+                continue
+            precision, recall, _ = precision_recall_curve(y_true[:, index], y_score[:, index])
+            ap = average_precision_score(y_true[:, index], y_score[:, index])
+            axis.plot(recall, precision, label=f"{label} (AP={ap:.3f})")
+        axis.set(title="Task 3 precision-recall curves", xlabel="recall", ylabel="precision")
+        axis.legend(fontsize=8)
+        axis.grid(alpha=0.25)
+        fig.tight_layout()
+        fig.savefig(plots / f"{run_name}_pr_curve.png", dpi=150)
+        plt.close(fig)
+
+        if embeddings is not None and len(embeddings) >= 2:
+            from sklearn.manifold import TSNE
+            perplexity = min(30, max(1, len(embeddings) - 1))
+            points = TSNE(n_components=2, random_state=42, perplexity=perplexity).fit_transform(embeddings)
+            colors = [int(np.argmax(row["target"])) if any(row["target"]) else -1 for row in predictions]
+            fig, axis = plt.subplots(figsize=(7, 5))
+            scatter = axis.scatter(points[:, 0], points[:, 1], c=colors, cmap="tab20", alpha=0.85)
+            axis.set(title="Task 3 fused embedding t-SNE", xlabel="t-SNE 1", ylabel="t-SNE 2")
+            fig.colorbar(scatter, ax=axis, label="dominant label index")
+            fig.tight_layout()
+            fig.savefig(plots / f"{run_name}_fused_tsne.png", dpi=150)
+            plt.close(fig)
+    except (ImportError, ValueError):
+        # Training and JSON deliverables remain usable in minimal environments.
+        pass
+
+    ranked = sorted(predictions, key=lambda row: row["confidence"], reverse=True)
+    case_studies = []
+    for row in ranked[: min(3, len(ranked))]:
+        case_studies.append({
+            "track_id": row["track_id"],
+            "text": row["text"],
+            "graph": row["graph"],
+            "true_labels": [label for label, value in zip(labels, row["target"]) if value],
+            "predicted_labels": [
+                label for label, value in zip(labels, row["probabilities"]) if value >= 0.5
+            ],
+            "probabilities": dict(zip(labels, row["probabilities"])),
+        })
+    (output / f"{run_name}_case_studies.json").write_text(
+        json.dumps(case_studies, indent=2), encoding="utf-8"
+    )
+
+
 def _seed_everything(seed: int) -> None:
     random.seed(seed)
     np.random.seed(seed)
@@ -312,6 +397,46 @@ def train_task3(
             split=split,
             macro_f1=f"{result[split]['macro_f1']:.4f}",
         )
+    predictions: list[dict[str, Any]] = []
+    embedding_rows: list[np.ndarray] = []
+    model.eval()
+    with torch.no_grad():
+        for batch in loaders["test"]:
+            graph = {key: value.to(device) for key, value in batch["graph"].items()}
+            logits = model(graph, batch["texts"])
+            probabilities = torch.sigmoid(logits).cpu().numpy()
+            if hasattr(model, "fused_embedding"):
+                embedding_rows.append(model.fused_embedding(graph, batch["texts"]).cpu().numpy())
+            else:
+                embedding_rows.append(logits.detach().cpu().numpy())
+            for index, track_id in enumerate(batch["track_ids"]):
+                row = next(item for item in datasets["test"].rows if item["track_id"] == track_id)
+                predictions.append({
+                    "track_id": track_id,
+                    "text": batch["texts"][index],
+                    "graph": str(datasets["test"]._resolve_graph(row["graph"])),
+                    "target": batch["targets"][index].tolist(),
+                    "probabilities": probabilities[index].tolist(),
+                    "true_labels": [
+                        label
+                        for label, value in zip(labels, batch["targets"][index].tolist())
+                        if value
+                    ],
+                    "predicted_labels": [
+                        label
+                        for label, value in zip(labels, probabilities[index])
+                        if value >= 0.5
+                    ],
+                    "confidence": float(np.max(probabilities[index])),
+                })
+    _write_task3_artifacts(
+        output,
+        run_name,
+        history,
+        predictions,
+        np.concatenate(embedding_rows) if embedding_rows else None,
+        labels,
+    )
     result["best_epoch"] = {"epoch": checkpoint["epoch"]}
     metrics_path = output / f"{run_name}_metrics.json"
     metrics_path.write_text(
@@ -345,6 +470,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--freeze-text", action="store_true", default=None)
     parser.add_argument("--local-files-only", action="store_true", default=None)
     parser.add_argument("--device")
+    parser.add_argument("--seed", type=int)
     return parser
 
 
