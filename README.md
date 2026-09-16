@@ -154,16 +154,6 @@ Run the metadata inventory stage:
 python -m src.prepare_task3_labels scan `
   --tracks-csv data\raw\fma\fma_metadata\tracks.csv `
   --output data\processed\task3\task3_metadata_scan.json
-python -m src.prepare_task3_labels select `
-  --scan data\processed\task3\task3_metadata_scan.json `
-  --output data\processed\task3\labels.json `
-  --max-labels 100
-```
-```
-python -m src.prepare_task3_labels prepare `
-  --tracks-csv data\raw\fma\fma_metadata\tracks.csv `
-  --labels data\processed\task3\labels.json `
-  --output data\processed\task3\fma_task3_labels.csv
 ```
 
 The scan output contains every unique normalized genre and tag and their
@@ -175,7 +165,9 @@ python -m src.prepare_task3_labels select `
   --scan data\processed\task3\task3_metadata_scan.json `
   --output data\processed\task3\labels.json `
   --max-labels 100
+```
 
+```
 python -m src.prepare_task3_labels prepare `
   --tracks-csv data\raw\fma\fma_metadata\tracks.csv `
   --labels data\processed\task3\labels.json `
