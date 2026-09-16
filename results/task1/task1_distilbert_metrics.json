@@ -1,0 +1,138 @@
+{
+  "backend": "transformers",
+  "dataset": "musiccaps",
+  "history": [
+    {
+      "epoch": 1,
+      "train_auc_pr": 0.6083253333619633,
+      "train_loss": 0.21923077942466174,
+      "train_macro_f1": 0.5022862865932491,
+      "train_micro_f1": 0.6802057947468183,
+      "val_auc_pr": 0.9901919345356571,
+      "val_loss": 0.07158375508151948,
+      "val_macro_f1": 0.9500079787334245,
+      "val_micro_f1": 0.9812286689419796
+    },
+    {
+      "epoch": 2,
+      "train_auc_pr": 0.9929514742451501,
+      "train_loss": 0.05011878124489559,
+      "train_macro_f1": 0.9637571597978484,
+      "train_micro_f1": 0.9856510950480095,
+      "val_auc_pr": 0.995843932953016,
+      "val_loss": 0.028306346755319584,
+      "val_macro_f1": 0.986199264033233,
+      "val_micro_f1": 0.9940928270042194
+    },
+    {
+      "epoch": 3,
+      "train_auc_pr": 0.9982961013213784,
+      "train_loss": 0.02278043123407001,
+      "train_macro_f1": 0.9904521169049699,
+      "train_micro_f1": 0.9958319974350753,
+      "val_auc_pr": 0.9985470577119736,
+      "val_loss": 0.01502065064657169,
+      "val_macro_f1": 0.9911667651694248,
+      "val_micro_f1": 0.995787700084246
+    },
+    {
+      "epoch": 4,
+      "train_auc_pr": 0.9993377052261505,
+      "train_loss": 0.012865782881600493,
+      "train_macro_f1": 0.9966376490581991,
+      "train_micro_f1": 0.9982931512694687,
+      "val_auc_pr": 0.9991956534935955,
+      "val_loss": 0.009884739042414973,
+      "val_macro_f1": 0.9887993409270005,
+      "val_micro_f1": 0.9949494949494949
+    },
+    {
+      "epoch": 5,
+      "train_auc_pr": 0.999879954338387,
+      "train_loss": 0.008304416789279718,
+      "train_macro_f1": 0.9982314497409751,
+      "train_micro_f1": 0.9987209550202516,
+      "val_auc_pr": 0.9994393182109444,
+      "val_loss": 0.006398058028329008,
+      "val_macro_f1": 0.9906511927788523,
+      "val_micro_f1": 0.9957947855340622
+    },
+    {
+      "epoch": 6,
+      "train_auc_pr": 0.999951037885133,
+      "train_loss": 0.005799253431473935,
+      "train_macro_f1": 0.9980285320806609,
+      "train_micro_f1": 0.9990410229088972,
+      "val_auc_pr": 0.9947303921568628,
+      "val_loss": 0.0062101383761425195,
+      "val_macro_f1": 0.9947916666666666,
+      "val_micro_f1": 0.9983193277310924
+    },
+    {
+      "epoch": 7,
+      "train_auc_pr": 0.9999439684194891,
+      "train_loss": 0.003893667883655237,
+      "train_macro_f1": 0.998936170212766,
+      "train_micro_f1": 0.9996804090763822,
+      "val_auc_pr": 0.9994393182109444,
+      "val_loss": 0.0031188514706930923,
+      "val_macro_f1": 0.9950980392156863,
+      "val_micro_f1": 0.9983221476510067
+    },
+    {
+      "epoch": 8,
+      "train_auc_pr": 1.0,
+      "train_loss": 0.0025005324116084246,
+      "train_macro_f1": 1.0,
+      "train_micro_f1": 1.0,
+      "val_auc_pr": 1.0,
+      "val_loss": 0.0020880672988520623,
+      "val_macro_f1": 0.9976190476190476,
+      "val_micro_f1": 0.9991617770326907
+    },
+    {
+      "epoch": 9,
+      "train_auc_pr": 1.0,
+      "train_loss": 0.0018737648491224572,
+      "train_macro_f1": 1.0,
+      "train_micro_f1": 1.0,
+      "val_auc_pr": 0.9997276688453159,
+      "val_loss": 0.0019113032073316087,
+      "val_macro_f1": 0.9976190476190476,
+      "val_micro_f1": 0.9991617770326907
+    },
+    {
+      "epoch": 10,
+      "train_auc_pr": 1.0,
+      "train_loss": 0.0013503135663818988,
+      "train_macro_f1": 1.0,
+      "train_micro_f1": 1.0,
+      "val_auc_pr": 0.9997276688453159,
+      "val_loss": 0.0015369164363316183,
+      "val_macro_f1": 0.9976190476190476,
+      "val_micro_f1": 0.9991617770326907
+    }
+  ],
+  "input": "data\\raw\\musiccaps\\musiccaps_public.csv",
+  "labels": [
+    "acoustic",
+    "ambient",
+    "blues",
+    "classical",
+    "electronic",
+    "folk",
+    "hip hop",
+    "jazz",
+    "metal",
+    "piano",
+    "pop",
+    "rock"
+  ],
+  "model_name": "distilbert-base-uncased",
+  "proxy_task": true,
+  "split_sizes": {
+    "test": 380,
+    "train": 3045,
+    "val": 380
+  }
+}
