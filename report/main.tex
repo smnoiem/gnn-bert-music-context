@@ -6,9 +6,9 @@
 \usepackage{microtype}
 \usepackage{xcolor}
 \usepackage{url}
-\usepackage{placeins}
 
 \graphicspath{{figures/}}
+\raggedbottom
 
 \title{GNN--BERT for Understanding Context from Music}
 
@@ -185,6 +185,7 @@ summarized in Table~\ref{tab:milestones}.
 \caption{Development milestones and preserved evidence.}
 \label{tab:milestones}
 \centering
+\small
 \begin{tabular}{p{0.17\textwidth}p{0.27\textwidth}p{0.46\textwidth}}
 \toprule
 Stage & Research question & Preserved evidence\\
@@ -220,7 +221,7 @@ The primary Task 3 fusion run uses positive weighting and every ablation
 uses the same fixed label order. The consolidated settings are listed in
 Table~\ref{tab:hyperparameters}.
 
-\begin{table}[t]
+\begin{table}[!ht]
 \caption{Core experimental hyperparameters.}
 \label{tab:hyperparameters}
 \centering
@@ -253,7 +254,7 @@ high validation score quickly, consistent with the proxy nature of the target
 rather than difficult semantic generalization. The held-out values are
 reported in Table~\ref{tab:task1}.
 
-\begin{table}[t]
+\begin{table}[!ht]
 \caption{Task 1 test performance on the MusicCaps proxy task.}
 \label{tab:task1}
 \centering
@@ -266,15 +267,13 @@ DistilBERT & 0.9976 & 0.9991 & 1.0000\\
 \end{tabular}
 \end{table}
 
-\begin{figure}[t]
+\begin{figure}[!ht]
 \centering
 \includegraphics[width=\columnwidth]{task1_distilbert_f1_curve.png}
 \caption{Task 1 DistilBERT training and validation F1 curves on the
 MusicCaps caption-to-tag proxy task.}
 \label{fig:task1-curve}
 \end{figure}
-
-\FloatBarrier
 
 \subsection{Task 2: Audio graph classification}
 Table~\ref{tab:task2} compares the audio graph model with the mel-CNN.
@@ -283,7 +282,7 @@ models achieve their best per-class F1 on Hip-Hop. GraphSAGE is stronger on
 International, whereas the CNN is stronger on Experimental, Folk, Hip-Hop,
 Instrumental, Pop, and Rock.
 
-\begin{table}[t]
+\begin{table}[!ht]
 \caption{Task 2 FMA-small genre classification test results.}
 \label{tab:task2}
 \centering
@@ -297,11 +296,12 @@ GraphSAGE & 0.4300 & 0.4323 & 0.4300 & 0.4534 & 1.7490\\
 \end{tabular}
 \end{table}
 
-\begin{table*}[t]
+\begin{table}[!ht]
 \caption{Task 2 per-genre test F1. Bold values indicate the stronger model
 for each genre; the final column is CNN minus GraphSAGE.}
 \label{tab:task2-perclass}
 \centering
+\scriptsize
 \begin{tabular}{lccc}
 \toprule
 Genre & Mel-CNN & GraphSAGE & $\Delta$\\
@@ -318,7 +318,7 @@ Rock & \textbf{0.5809} & 0.4967 & +0.0842\\
 Macro-F1 & \textbf{0.4544} & 0.4323 & +0.0222\\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
 
 \noindent
 The per-genre breakdown in Table~\ref{tab:task2-perclass} is more informative
@@ -331,35 +331,33 @@ Fig.~\ref{fig:task2-curves} show the optimization behavior behind the final
 comparison, while the confusion matrices in Fig.~\ref{fig:task2-confusion}
 make class-specific errors visible.
 
-\begin{figure}[!t]
+\begin{figure}[!ht]
 \centering
 \includegraphics[width=\columnwidth]{task2_cnn_learning_curves.png}
 \caption{Task 2 mel-CNN learning curves.}
 \label{fig:task2-curves}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[!ht]
 \centering
 \includegraphics[width=\columnwidth]{task2_graphsage_learning_curves.png}
 \caption{Task 2 GraphSAGE learning curves.}
 \label{fig:task2-graph-curves}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[!ht]
 \centering
 \includegraphics[width=\columnwidth]{task2_cnn_confusion_matrix.png}
 \caption{Task 2 mel-CNN test confusion matrix.}
 \label{fig:task2-confusion}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[!ht]
 \centering
 \includegraphics[width=\columnwidth]{task2_graphsage_confusion_matrix.png}
 \caption{Task 2 GraphSAGE test confusion matrix.}
 \label{fig:task2-graph-confusion}
 \end{figure}
-
-\FloatBarrier
 
 \subsection{Task 3: Fusion ablation}
 The four-condition results are shown in Table~\ref{tab:task3}. GNN-only
@@ -370,7 +368,7 @@ macro-F1 remains low, indicating that performance is concentrated in a
 subset of labels. The gap between training and test metrics in the exported
 histories also indicates overfitting.
 
-\begin{table}[t]
+\begin{table}[!ht]
 \caption{Task 3 FMA multi-label ablation test results.}
 \label{tab:task3}
 \centering
@@ -386,7 +384,7 @@ Cross-attention & 0.0393 & \textbf{0.3546} & 0.1308\\
 \end{tabular}
 \end{table}
 
-\begin{table*}[t]
+\begin{table}[!ht]
 \caption{Task 3 improvement over the BERT-only test baseline. Positive
 values are improvements for F1 and PR-AUC; for loss, negative values would
 be improvements.}
@@ -402,7 +400,7 @@ Early concat. & +0.0292 & +0.1512 & +0.0889 & +0.4578\\
 Cross-attention & +0.0281 & \textbf{+0.1516} & +0.0942 & +0.6663\\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
 
 \noindent
 This delta table is included because the absolute Task 3 scores alone hide
@@ -414,14 +412,12 @@ baseline-relative changes are reported in Table~\ref{tab:task3-deltas}. The visu
 comparison in Fig.~\ref{fig:task3-comparison} reinforces this
 metric-dependent ranking.
 
-\begin{figure}[t]
+\begin{figure}[!ht]
 \centering
 \includegraphics[width=\columnwidth]{task3_ablation_comparison.png}
 \caption{Task 3 ablation comparison across Macro-F1, Micro-F1, and PR-AUC.}
 \label{fig:task3-comparison}
 \end{figure}
-
-\FloatBarrier
 
 \subsection{Training histories and post-ablation comparison}
 The exported histories provide evidence beyond the final test row. Task 1
@@ -445,7 +441,7 @@ overfitting and imbalance interpretation; Table~\ref{tab:task3} remains the
 primary cross-model evidence. The corresponding checkpoint epochs and test
 Macro-F1 values are summarized in Table~\ref{tab:epochs}.
 
-\begin{table}[t]
+\begin{table}[!ht]
 \caption{Best validation epochs recorded in exported histories.}
 \label{tab:epochs}
 \centering
@@ -462,7 +458,7 @@ Task 3 cross-attention & 5 & 0.0393\\
 \end{tabular}
 \end{table}
 
-\begin{figure}[t]
+\begin{figure}[!ht]
 \centering
 \includegraphics[width=\columnwidth]{task3_cross_attention_learning_curves.png}
 \caption{Cross-attention training and validation history. The widening
@@ -470,14 +466,12 @@ training--validation gap motivates the overfitting interpretation.}
 \label{fig:task3-crossattn-curves}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[!ht]
 \centering
 \includegraphics[width=\columnwidth]{task3_cross_attention_pr_curve.png}
 \caption{Cross-attention test precision--recall curves across valid labels.}
 \label{fig:task3-crossattn-pr}
 \end{figure}
-
-\FloatBarrier
 
 \section{Qualitative Analysis}
 The selected cross-attention t-SNE visualization is shown in
@@ -495,15 +489,13 @@ support inspection of graph/text agreement and failure modes. In particular,
 the low macro-F1 of all Task 3 conditions motivates checking rare-label
 misses rather than presenting only successful examples.
 
-\begin{figure}[t]
+\begin{figure}[!ht]
 \centering
 \includegraphics[width=\columnwidth]{task3_cross_attention_fused_tsne.png}
 \caption{t-SNE projection of cross-attention fused test embeddings, shown
 as a qualitative diagnostic rather than a performance metric.}
 \label{fig:task3-tsne}
 \end{figure}
-
-\FloatBarrier
 
 \section{Discussion}
 The results provide three practical conclusions. First, the text pipeline is
