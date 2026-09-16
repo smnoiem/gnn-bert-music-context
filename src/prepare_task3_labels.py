@@ -8,10 +8,12 @@ import json
 import re
 from collections import Counter
 from pathlib import Path
-from typing import Iterable
 
 import pandas as pd
 from .utils import progress
+
+FMA_GENRE_COLUMN = "track_genre_top"
+FMA_TAG_COLUMN = "track_tags"
 
 
 def _flatten_columns(columns: pd.MultiIndex) -> list[str]:
@@ -22,20 +24,8 @@ def _flatten_columns(columns: pd.MultiIndex) -> list[str]:
 
 
 def _read_tracks(path: Path) -> pd.DataFrame:
-    """Read either the FMA two-row-header export or a normal CSV."""
-    normal = pd.read_csv(path, low_memory=False)
-    expected = {
-        "track_genre_top",
-        "genre",
-        "genres",
-        "track_genre",
-        "track_tags",
-        "tags",
-        "tag",
-        "track_tag",
-    }
-    if expected.intersection(str(column).strip().lower() for column in normal.columns):
-        return normal
+    """Read official FMA metadata or a normal one-row-header CSV."""
+    expected = {FMA_GENRE_COLUMN, FMA_TAG_COLUMN}
     try:
         tracks = pd.read_csv(path, header=[0, 1], index_col=0, low_memory=False)
         if isinstance(tracks.columns, pd.MultiIndex):
@@ -46,22 +36,17 @@ def _read_tracks(path: Path) -> pd.DataFrame:
                 return tracks.reset_index()
     except (pd.errors.ParserError, UnicodeDecodeError):
         pass
-    return normal
+    normal = pd.read_csv(path, low_memory=False)
+    if expected.intersection(str(column).strip().lower() for column in normal.columns):
+        return normal
+    raise ValueError(
+        f"Expected fixed FMA columns {FMA_GENRE_COLUMN!r} and "
+        f"{FMA_TAG_COLUMN!r}; found: {list(normal.columns)}"
+    )
 
 
 def normalize_label(value: object) -> str:
     return re.sub(r"\s+", " ", str(value).strip().lower())
-
-
-def _find_column(columns: Iterable[str], candidates: tuple[str, ...]) -> str:
-    normalized = {str(column).strip().lower(): str(column) for column in columns}
-    for candidate in candidates:
-        if candidate in normalized:
-            return normalized[candidate]
-    raise ValueError(
-        f"Could not find any of {list(candidates)} in tracks.csv columns: "
-        f"{sorted(normalized.values())}"
-    )
 
 
 def parse_array_cell(value: object) -> list[str]:
@@ -95,23 +80,19 @@ def parse_array_cell(value: object) -> list[str]:
 def scan_task3_metadata(tracks_csv: str | Path, output: str | Path) -> dict:
     """Scan all tracks and persist complete genre/tag frequencies."""
     tracks = _read_tracks(Path(tracks_csv))
-    genre_column = _find_column(
-        tracks.columns, ("track_genre_top", "genre", "genres", "track_genre")
-    )
-    tag_column = _find_column(
-        tracks.columns, ("track_tags", "tags", "tag", "track_tag")
-    )
+    genre_column = FMA_GENRE_COLUMN
+    tag_column = FMA_TAG_COLUMN
     genre_counts = Counter()
     tag_counts = Counter()
-    for _, row in progress(
+    for genre_value, tag_value in progress(
         tracks[[genre_column, tag_column]].itertuples(index=False, name=None),
         desc="Scanning genres and tags",
         total=len(tracks),
     ):
-        genre = normalize_label(row[0])
+        genre = normalize_label(genre_value)
         if genre and genre != "nan":
             genre_counts[genre] += 1
-        tag_counts.update(parse_array_cell(row[1]))
+        tag_counts.update(parse_array_cell(tag_value))
     result = {
         "tracks_scanned": len(tracks),
         "genre_column": genre_column,
@@ -190,7 +171,7 @@ def prepare_task3_genre_dataset(
     """Add scalar genre labels and indices for multi-class training."""
     tracks = _read_tracks(Path(tracks_csv))
     genre_spec = json.loads(Path(genres_path).read_text(encoding="utf-8"))
-    genre_column = genre_spec["genre_column"]
+    genre_column = FMA_GENRE_COLUMN
     genres = list(genre_spec["genres"])
     index_by_genre = {genre: index for index, genre in enumerate(genres)}
     normalized = tracks[genre_column].map(normalize_label)
@@ -276,8 +257,8 @@ def prepare_task3_dataset(
     """Add one binary target column per selected label and write a CSV."""
     tracks = _read_tracks(Path(tracks_csv))
     label_spec = json.loads(Path(labels_path).read_text(encoding="utf-8"))
-    genre_column = label_spec["genre_column"]
-    tag_column = label_spec["tag_column"]
+    genre_column = FMA_GENRE_COLUMN
+    tag_column = FMA_TAG_COLUMN
     missing = {genre_column, tag_column} - set(tracks.columns)
     if missing:
         raise ValueError(f"Input tracks.csv is missing columns: {sorted(missing)}")
