@@ -141,6 +141,103 @@ accuracy and test loss. Checkpoints are selected using the validation
 procedure in the training scripts; the tables below contain held-out test
 metrics from the exported JSON artifacts.
 
+\section{Experimental Evolution and Reproducibility}
+\subsection{From smoke tests to real experiments}
+The project was developed in stages rather than by training a single final
+model. The initial scaffold included a synthetic graph generator and a
+smoke-test workflow. Synthetic samples used six controlled labels, small
+random node features, deterministic splits, and serialized graph manifests.
+This stage verified tensor shapes, checkpointing, evaluation, and
+case-study export. Synthetic outputs were deliberately excluded from the
+scientific results reported here.
+
+The next stage established the real text baseline. A MusicCaps download and
+preparation path was added, followed by stable hashing into 80/10/10
+train/validation/test partitions and DistilBERT fine-tuning. The project
+requirements then motivated the dataset decision: FMA-small was selected for
+the audio graph and fusion tasks, while MusicCaps was retained for the
+text-only proxy task. The repository was reorganized so raw data, processed
+features, split files, source modules, and task-specific results were
+separate and reproducible.
+
+Task 2 progressed through several engineering iterations. The pipeline first
+prepared FMA metadata and segment graphs, then separated mel-spectrogram
+caching from training, added batched CNN segment processing, expanded node
+features beyond MFCCs, corrected feature normalization before similarity
+construction, added per-file failure reports, and upgraded the GraphSAGE
+encoder and readout. Learning curves, confusion matrices, predictions, and
+an explicit CNN/GraphSAGE comparison were added after the held-out
+evaluation path was established.
+
+Task 3 was then isolated from the Task 2 trainer. Its development introduced
+a scan--select--prepare label workflow, explicit parsing of array-valued FMA
+tags, deterministic vocabulary selection, labeled text construction, an
+inner graph/text manifest join, leakage checks, positive class weighting,
+progress reporting, and separate training commands for all ablation
+conditions. The final analytics command reads completed runs without
+retraining and produces rankings, metric deltas, plots, predictions, and
+case studies.
+
+\begin{table*}[t]
+\caption{Development milestones and preserved evidence.}
+\label{tab:milestones}
+\centering
+\begin{tabular}{p{0.17\textwidth}p{0.27\textwidth}p{0.46\textwidth}}
+\toprule
+Stage & Research question & Preserved evidence\\
+\midrule
+Synthetic smoke test & Can graph/text training and evaluation run end to end? &
+\texttt{src/make\_synthetic\_data.py}, synthetic manifest, checkpoint and case-study workflow\\
+Task 1 baseline & Can contextual text encode the documented proxy labels? &
+MusicCaps preparation, DistilBERT checkpoint, metric history, predictions, F1 curve\\
+Dataset/layout decisions & Which datasets and directory contracts are valid? &
+Requirements PDF, README, Task 2/3 decision records, task-specific processed/results paths\\
+Task 2 preprocessing & Can real audio become leakage-controlled graphs and cached mels? &
+FMA metadata, audio features, scaling, graph manifest, split files, failure report, mel cache\\
+Task 2 modeling & Does graph structure beat a standard spectrogram baseline? &
+GraphSAGE/CNN checkpoints, learning curves, confusion matrices, predictions, comparison JSON\\
+Task 3 preparation & Can labels and text be built without target leakage? &
+Scan/select/prepare commands, fixed vocabulary, prepared text, inner-join manifest, validators\\
+Task 3 ablation & Which modality and fusion mechanism contributes? &
+Four checkpoints, histories, predictions, PR curves, t-SNE plots, case studies, comparison analysis\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Configuration and reproducibility}
+Unless overridden by a task command, experiments use seed 42, batch size 8,
+learning rate $3\times10^{-4}$, weight decay $10^{-4}$, dropout 0.2, three
+GraphSAGE layers, 256-dimensional graph and text projections, gradient
+clipping at 1.0, a factor-0.5 learning-rate scheduler, and early stopping
+with patience 12. Task 1 uses DistilBERT, maximum sequence length 128,
+batch size 8, learning rate $2\times10^{-5}$, and the documented real run.
+Task 2 and Task 3 use the same seed/configuration contract; Task 3 runs are
+capped at 20 epochs and select the best validation Macro-F1 checkpoint.
+The primary Task 3 fusion run uses positive weighting and every ablation
+uses the same fixed label order.
+
+\begin{table}[t]
+\caption{Core experimental hyperparameters.}
+\label{tab:hyperparameters}
+\centering
+\begin{tabular}{ll}
+\toprule
+Parameter & Value\\
+\midrule
+Seed & 42\\
+Audio sample rate / segment & 22,050 Hz / 5 s\\
+Mel bins / similarity threshold & 128 / 0.75\\
+Graph layers / hidden size & 3 / 256\\
+Text model / max length & DistilBERT / 128\\
+Dropout / batch size & 0.2 / 8\\
+Learning rate / weight decay & $3\times10^{-4}$ / $10^{-4}$\\
+Scheduler / early stopping & factor 0.5 / patience 12\\
+Gradient clipping & 1.0\\
+Task 3 loss & BCEWithLogitsLoss\\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Experiments and Results}
 \subsection{Task 1: DistilBERT proxy baseline}
 The exported Task 1 test artifact reports macro-F1 $0.9976$, micro-F1
@@ -222,6 +319,39 @@ Cross-attention & 0.0393 & \textbf{0.3546} & 0.1308\\
 \label{fig:ablation}
 \end{figure}
 
+\subsection{Training histories and post-ablation comparison}
+The exported histories provide evidence beyond the final test row. Task 1
+reaches its best validation Macro-F1 of 0.0438 at epoch 4 in the stored
+history. In Task 3, all three non-BERT conditions reach their best stored
+validation Macro-F1 at epoch 5, while BERT-only reaches its best at epoch 2.
+The large train/test gaps, especially for GNN-only and fusion, indicate
+overfitting and label imbalance rather than a lack of optimization alone.
+
+Relative to BERT-only, the post-ablation analysis reports the following
+cross-attention changes: Macro-F1 +0.0281, micro-F1 +0.1516, PR-AUC
++0.0942, and test loss +0.6663. Thus adding audio improves micro-level
+decisions and ranking quality, but the improvement is not uniform over
+labels. The ranking is metric-dependent: GNN-only is best for Macro-F1 and
+PR-AUC, cross-attention is best for micro-F1, and BERT-only has the lowest
+test loss.
+
+\begin{table}[t]
+\caption{Best validation epochs recorded in exported histories.}
+\label{tab:epochs}
+\centering
+\begin{tabular}{lcc}
+\toprule
+Run & Best epoch & Test Macro-F1\\
+\midrule
+Task 1 DistilBERT & 4 & 0.0409\\
+Task 3 BERT-only & 2 & 0.0111\\
+Task 3 GNN-only & 5 & 0.0427\\
+Task 3 early concat. & 5 & 0.0403\\
+Task 3 cross-attention & 5 & 0.0393\\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Qualitative Analysis}
 The repository exports t-SNE projections of fused embeddings, learning
 curves, and precision--recall curves for each ablation. These plots are
@@ -251,14 +381,53 @@ optimization difficulty.
 
 \section{Limitations and Future Work}
 This study does not report the optional emotion head or the advanced
-MusicCaps contrastive retrieval task. Task 1 and Tasks 2--3 also use
-different supervision and should not be compared directly. Future work
-should use a human-annotated multi-label benchmark, tune thresholds per
-label on validation data, report confidence intervals over repeated seeds,
-and investigate class-balanced objectives and calibration. Additional
-experiments should compare the similarity threshold and graph readout,
-include explicit graph-path explanations in the case studies, and evaluate
-the planned caption--audio retrieval objective.
+MusicCaps contrastive retrieval task. The original requirements also describe
+DEAM valence/arousal regression and cross-modal retrieval; these remain
+planned extensions rather than completed experiments. Task 1 and Tasks 2--3
+use different supervision and should not be compared directly. The repository
+also does not commit a full-data inventory table for exact track counts, so
+those counts should be inserted from the local preparation logs before final
+submission.
+
+The project has additional practical limitations. The Task 1 target is a
+caption-derived proxy, FMA metadata text is sparse and heterogeneous, and
+the selected Task 3 labels are imbalanced. The 0.5 threshold is global rather
+than label-calibrated. The graph contains rich handcrafted statistics, but
+the current study does not isolate each feature family or compare multiple
+similarity thresholds. Finally, the reported runs use one seed; repeated-seed
+confidence intervals are needed before claiming robust ranking differences.
+
+\subsection{Future-work roadmap}
+The next experiments follow directly from the preserved findings:
+\begin{enumerate}
+\item add per-label validation threshold tuning, calibrated probabilities,
+and repeated seeds with confidence intervals;
+\item compare class-balanced, focal, and asymmetric multi-label losses and
+report rare-label versus frequent-label performance;
+\item sweep graph similarity thresholds, adjacency variants, pooling
+strategies, and feature ablations;
+\item improve text coverage while maintaining strict exclusion of genre/tag
+targets and artist identity shortcuts;
+\item add the optional DEAM emotion head as a genuinely multi-task objective;
+\item implement paired graph--caption contrastive learning and report
+Caption-to-Audio and Audio-to-Caption Recall@1/5/10;
+\item expand qualitative analysis with graph paths, attention maps, and
+failure cases from all four ablations; and
+\item package exact dataset counts, vocabulary frequencies, split summaries,
+and preprocessing logs as supplementary reproducibility tables.
+\end{enumerate}
+
+\section{Artifact Map for Reproduction}
+The report is backed by task-specific artifacts rather than screenshots alone.
+Task 1 uses the metrics, test-metrics, predictions, and F1-curve files under
+\texttt{results/task1}. Task 2 uses both model metric files, predictions,
+learning curves, confusion matrices, and
+\texttt{task2\_model\_comparison.json}. Task 3 uses one metrics, prediction,
+case-study, learning-curve, PR-curve, and t-SNE bundle per condition, plus
+\texttt{task3\_ablation\_comparison.json} and
+\texttt{task3\_ablation\_analysis.txt}. Source modules under \texttt{src/}
+define the preprocessing and training contracts, while \texttt{README.md}
+contains the sequential commands needed to regenerate the pipeline.
 
 \section{Conclusion}
 We implemented a reproducible BERT, GraphSAGE, and graph--text fusion
@@ -268,6 +437,50 @@ are the strongest Task 3 source of macro-level multi-label signal. The
 ablation results support multimodal fusion as a useful direction, but also
 make clear that future gains require stronger supervision and improved
 generalization to rare labels.
+
+\appendices
+\section{Complete Plot Archive}
+The following figures are included so that the experimental work is retained
+in the Overleaf project rather than reduced to the summary tables. The
+learning curves show optimization histories, the precision--recall figures
+show per-label ranking behavior, the t-SNE figures show test embedding
+geometry, and the confusion matrices show class-specific Task 2 errors.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=.48\textwidth]{task1_distilbert_f1_curve.png}
+\includegraphics[width=.48\textwidth]{task2_cnn_confusion_matrix.png}
+\includegraphics[width=.48\textwidth]{task2_graphsage_confusion_matrix.png}
+\includegraphics[width=.48\textwidth]{task2_cnn_learning_curves.png}
+\includegraphics[width=.48\textwidth]{task2_graphsage_learning_curves.png}
+\includegraphics[width=.48\textwidth]{task3_ablation_comparison.png}
+\caption{Task 1, Task 2, and post-ablation comparison plots.}
+\label{fig:archive-overview}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=.48\textwidth]{task3_bert_only_learning_curves.png}
+\includegraphics[width=.48\textwidth]{task3_bert_only_pr_curve.png}
+\includegraphics[width=.48\textwidth]{task3_bert_only_fused_tsne.png}
+\includegraphics[width=.48\textwidth]{task3_gnn_only_learning_curves.png}
+\includegraphics[width=.48\textwidth]{task3_gnn_only_pr_curve.png}
+\includegraphics[width=.48\textwidth]{task3_gnn_only_fused_tsne.png}
+\caption{BERT-only and GNN-only ablation diagnostics.}
+\label{fig:archive-single}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=.48\textwidth]{task3_early_concat_learning_curves.png}
+\includegraphics[width=.48\textwidth]{task3_early_concat_pr_curve.png}
+\includegraphics[width=.48\textwidth]{task3_early_concat_fused_tsne.png}
+\includegraphics[width=.48\textwidth]{task3_cross_attention_learning_curves.png}
+\includegraphics[width=.48\textwidth]{task3_cross_attention_pr_curve.png}
+\includegraphics[width=.48\textwidth]{task3_cross_attention_fused_tsne.png}
+\caption{Early-concatenation and cross-attention diagnostics.}
+\label{fig:archive-fusion}
+\end{figure*}
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
