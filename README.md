@@ -136,14 +136,17 @@ Task 3 uses **FMA-small only**. Each example is an FMA track represented by:
 - its FMA genre and tag metadata;
 - one top-level genre target.
 
-Task 3 is a **single-label multi-class genre-classification** task. The target
-is `track_genre_top`, so each track has exactly one class and training uses
-`CrossEntropyLoss`. Tags are scanned and retained for descriptive statistics,
-but are not combined with genres as primary target classes. The earlier
-genre-plus-tag 100-label multihot format is not the main Task 3 target.
+Task 3 is a **multilabel genre/tag prediction** task. The target is the union
+of the normalized `track_genre_top` value and normalized values in the
+`track_tags` array, so a track may have multiple positive labels. Training uses
+`BCEWithLogitsLoss` with a fixed-length multihot target.
 
 The complete decision record is in
 [`task3_decisions.md`](C:/Users/user5/projects/gnn-bert-music-context.worktrees/task3-gnn-bert-fusion-implementation/task3_decisions.md).
+
+The fixed vocabulary contains at most 100 labels: all normalized genres first,
+then the most frequent normalized tags, excluding tags already present as
+genres. Frequency ties must be resolved deterministically.
 
 Run the metadata inventory stage:
 
@@ -151,9 +154,6 @@ Run the metadata inventory stage:
 python -m src.prepare_task3_labels scan `
   --tracks-csv data\raw\fma\fma_metadata\tracks.csv `
   --output data\processed\task3\task3_metadata_scan.json
-<<<<<<< Updated upstream
-```
-```
 python -m src.prepare_task3_labels select `
   --scan data\processed\task3\task3_metadata_scan.json `
   --output data\processed\task3\labels.json `
@@ -164,33 +164,104 @@ python -m src.prepare_task3_labels prepare `
   --tracks-csv data\raw\fma\fma_metadata\tracks.csv `
   --labels data\processed\task3\labels.json `
   --output data\processed\task3\fma_task3_labels.csv
-=======
->>>>>>> Stashed changes
 ```
 
-The scan output contains every unique genre and tag and their frequencies.
-Create the fixed primary genre vocabulary and the derived training CSV:
+The scan output contains every unique normalized genre and tag and their
+frequencies. Create the fixed genre-plus-tag vocabulary and the derived
+multilabel training CSV:
 
 ```powershell
-python -m src.prepare_task3_labels select-genres `
+python -m src.prepare_task3_labels select `
   --scan data\processed\task3\task3_metadata_scan.json `
-  --output data\processed\task3\genre_vocabulary.json
+  --output data\processed\task3\labels.json `
+  --max-labels 100
 
-python -m src.prepare_task3_labels prepare-genre `
+python -m src.prepare_task3_labels prepare `
   --tracks-csv data\raw\fma\fma_metadata\tracks.csv `
-  --genres data\processed\task3\genre_vocabulary.json `
-  --output data\processed\task3\fma_task3_genre.csv
+  --labels data\processed\task3\labels.json `
+  --output data\processed\task3\fma_task3_labels.csv
 ```
 
-The derived CSV contains the original metadata plus:
+The derived CSV contains the original metadata plus one binary
+`label_<normalized_label>` column per selected label and a pipe-delimited
+`task3_labels` convenience column. The source `tracks.csv` is never modified.
 
-```text
-track_genre_top,genre_label,genre_index
-Rock,Rock,4
+Generate the BERT text copy:
+
+```powershell
+python -m src.prepare_task3_labels prepare-text `
+  --input data\processed\task3\fma_task3_labels.csv `
+  --output data\processed\task3\fma_task3_text.csv
 ```
 
-`genre_index` is the scalar target for `CrossEntropyLoss`; it is not a
-one-hot or multihot vector.
+This appends `bert_text` from safe string metadata while excluding genres,
+tags, target columns, IDs, paths, and split fields. To control the text
+columns explicitly:
+
+```powershell
+python -m src.prepare_task3_labels prepare-text `
+  --input data\processed\task3\fma_task3_labels.csv `
+  --output data\processed\task3\fma_task3_text.csv `
+  --columns album track artist
+```
+
+After the Task 2 graph manifest exists, create the verified Task 3 manifest:
+
+```powershell
+python -m src.prepare_task3_manifest `
+  --graph-manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --metadata data\processed\task3\fma_task3_text.csv `
+  --labels data\processed\task3\labels.json `
+  --output data\processed\task3\task3_fusion_manifest.jsonl
+```
+
+This joins graph, text, labels, split, and artist identity by `track_id`, then
+rejects duplicate tracks, missing metadata, non-binary targets, and artist
+leakage.
+
+## Task 3 training stages
+
+After the verified Task 3 manifest is available, run the primary fusion
+condition with graph-guided cross-attention:
+
+```powershell
+python -m src.train `
+  --task fusion `
+  --config config.yaml `
+  --manifest data\processed\task3\task3_fusion_manifest.jsonl `
+  --labels data\processed\task3\labels.json `
+  --run-name task3_fusion_cross_attention `
+  --epochs 10
+```
+
+Run the early-concatenation ablation with the same manifest and vocabulary:
+
+```powershell
+python -m src.train `
+  --task fusion `
+  --config config.yaml `
+  --manifest data\processed\task3\task3_fusion_manifest.jsonl `
+  --labels data\processed\task3\labels.json `
+  --run-name task3_fusion_early_concat `
+  --early-concat `
+  --epochs 10
+```
+
+Evaluate a fusion checkpoint:
+
+```powershell
+python -m src.evaluate `
+  --task fusion `
+  --checkpoint results\task3_fusion_cross_attention_best.pt `
+  --manifest data\processed\task3\task3_fusion_manifest.jsonl `
+  --output-dir results
+```
+
+The fusion trainer uses the fixed vocabulary order from `labels.json`, creates
+one logit per selected label, and trains with `BCEWithLogitsLoss`. The
+cross-attention and early-concat runs must use identical manifests and
+splits.
+
 
 The source `tracks.csv` is never modified. Artist-level train/validation/test
 splits must be created after validation and preserved in the derived dataset.

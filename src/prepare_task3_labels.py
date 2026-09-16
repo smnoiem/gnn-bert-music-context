@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import re
 from collections import Counter
 from pathlib import Path
 from typing import Iterable
@@ -21,7 +22,7 @@ def _flatten_columns(columns: pd.MultiIndex) -> list[str]:
 
 def _read_tracks(path: Path) -> pd.DataFrame:
     """Read either the FMA two-row-header export or a normal CSV."""
-    normal = pd.read_csv(path)
+    normal = pd.read_csv(path, low_memory=False)
     expected = {
         "track_genre_top",
         "genre",
@@ -35,7 +36,7 @@ def _read_tracks(path: Path) -> pd.DataFrame:
     if expected.intersection(str(column).strip().lower() for column in normal.columns):
         return normal
     try:
-        tracks = pd.read_csv(path, header=[0, 1], index_col=0)
+        tracks = pd.read_csv(path, header=[0, 1], index_col=0, low_memory=False)
         if isinstance(tracks.columns, pd.MultiIndex):
             tracks.columns = _flatten_columns(tracks.columns)
             if expected.intersection(
@@ -45,6 +46,10 @@ def _read_tracks(path: Path) -> pd.DataFrame:
     except (pd.errors.ParserError, UnicodeDecodeError):
         pass
     return normal
+
+
+def normalize_label(value: object) -> str:
+    return re.sub(r"\s+", " ", str(value).strip().lower())
 
 
 def _find_column(columns: Iterable[str], candidates: tuple[str, ...]) -> str:
@@ -59,10 +64,10 @@ def _find_column(columns: Iterable[str], candidates: tuple[str, ...]) -> str:
 
 
 def parse_array_cell(value: object) -> list[str]:
-    """Parse list-like CSV cells while accepting JSON and Python list syntax."""
+    """Parse plain tag arrays and skip malformed entries."""
     if value is None or (isinstance(value, float) and pd.isna(value)):
         return []
-    if isinstance(value, (list, tuple, set)):
+    if isinstance(value, list):
         values = value
     else:
         text = str(value).strip()
@@ -74,14 +79,14 @@ def parse_array_cell(value: object) -> list[str]:
             try:
                 values = ast.literal_eval(text)
             except (SyntaxError, ValueError):
-                values = [part.strip() for part in text.split(",")]
-        if not isinstance(values, (list, tuple, set)):
-            values = [values]
+                return []
+        if not isinstance(values, list):
+            return []
     return sorted(
         {
-            str(item).strip()
+            normalize_label(item)
             for item in values
-            if str(item).strip() and str(item).strip().lower() != "nan"
+            if isinstance(item, str) and normalize_label(item) != "nan"
         }
     )
 
@@ -96,9 +101,9 @@ def scan_task3_metadata(tracks_csv: str | Path, output: str | Path) -> dict:
         tracks.columns, ("track_tags", "tags", "tag", "track_tag")
     )
     genre_counts = Counter(
-        str(value).strip()
+        normalize_label(value)
         for value in tracks[genre_column]
-        if str(value).strip() and str(value).strip().lower() != "nan"
+        if normalize_label(value) and normalize_label(value) != "nan"
     )
     tag_counts = Counter(
         tag for value in tracks[tag_column] for tag in parse_array_cell(value)
@@ -184,7 +189,7 @@ def prepare_task3_genre_dataset(
     genre_column = genre_spec["genre_column"]
     genres = list(genre_spec["genres"])
     index_by_genre = {genre: index for index, genre in enumerate(genres)}
-    normalized = tracks[genre_column].map(lambda value: str(value).strip())
+    normalized = tracks[genre_column].map(normalize_label)
     unknown = sorted(set(normalized) - set(index_by_genre))
     if unknown:
         raise ValueError(f"Unknown or invalid genres found: {unknown[:10]}")
@@ -269,20 +274,24 @@ def prepare_task3_dataset(
     labels = list(label_spec["labels"])
     track_genres = tracks[genre_column].map(
         lambda value: (
-            {str(value).strip()}
-            if str(value).strip() and str(value).strip().lower() != "nan"
+            {normalize_label(value)}
+            if normalize_label(value) and normalize_label(value) != "nan"
             else set()
         )
     )
     track_tags = tracks[tag_column].map(parse_array_cell).map(set)
-    for label in labels:
-        tracks[f"label_{label}"] = [
+    label_values = {
+        f"label_{label}": [
             int(label in genres or label in tags)
             for genres, tags in zip(track_genres, track_tags)
         ]
+        for label in labels
+    }
+    label_frame = pd.DataFrame(label_values, index=tracks.index, dtype="int8")
+    tracks = pd.concat([tracks, label_frame], axis=1)
     tracks["task3_labels"] = [
-        "|".join(label for label in labels if row[f"label_{label}"])
-        for _, row in tracks.iterrows()
+        "|".join(label for label, value in zip(labels, row) if value)
+        for row in label_frame.to_numpy()
     ]
     output_path = Path(output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
