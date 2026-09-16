@@ -19,7 +19,6 @@ from .utils import configure_logging, ensure_dir, progress, save_json, seed_ever
 
 LOGGER = logging.getLogger("music-context")
 
-
 def load_manifest(manifest: str | Path) -> list[dict]:
     with open(manifest, encoding="utf-8") as stream:
         rows = [json.loads(line) for line in stream if line.strip()]
@@ -83,6 +82,12 @@ class MusicGraphDataset(Dataset):
         self.rows = [row for row in rows if split is None or row.get("split") == split]
         self.vocab = vocab or label_vocabulary(rows)
         self.manifest_parent = Path(manifest).resolve().parent
+        if not self.rows:
+            available = sorted({str(row.get("split", "")) for row in rows})
+            raise ValueError(
+                f"No graph samples found for split {split!r} in {manifest}; "
+                f"available splits: {available}"
+            )
 
     def __len__(self) -> int:
         return len(self.rows)

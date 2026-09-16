@@ -90,7 +90,9 @@ represented by placeholder text.
 The Task 3 fusion manifest is an inner join on `track_id` between the Task 2
 graph manifest and this prepared metadata. Tracks skipped during graph
 construction and tracks removed during text preparation therefore do not enter
-the fusion dataset.
+the fusion dataset. The split is inherited from the Task 2 graph manifest and
+must already be one of `train`, `val`, or `test`; Task 3 does not introduce a
+second split contract.
 
 The current helper is:
 

@@ -36,12 +36,6 @@ def build_task3_manifest(
     missing = required - set(metadata.columns)
     if missing:
         raise ValueError(f"Prepared metadata is missing columns: {sorted(missing)}")
-    split_column = "split" if "split" in metadata.columns else "set_split"
-    if split_column not in metadata.columns:
-        raise ValueError(
-            "Prepared metadata is missing the split column: expected 'split' "
-            "or the official FMA source column 'set_split'"
-        )
     label_columns = [f"label_{label}" for label in labels]
     missing_labels = set(label_columns) - set(metadata.columns)
     if missing_labels:
@@ -76,9 +70,12 @@ def build_task3_manifest(
         target = [int(metadata_row[column]) for column in label_columns]
         if any(value not in {0, 1} for value in target):
             raise ValueError(f"Non-binary target for track_id {track_id}")
-        split = str(metadata_row[split_column]).strip()
-        if not split or split.lower() == "nan":
-            raise ValueError(f"Empty split for track_id {track_id}")
+        split = str(graph_row.get("split", "")).strip()
+        if split not in {"train", "val", "test"}:
+            raise ValueError(
+                f"Graph manifest has invalid split {split!r} for track_id {track_id}; "
+                "expected only train, val, or test"
+            )
         artist_id = int(metadata_row["artist_id"])
         if artist_id in artists and artists[artist_id] != split:
             raise ValueError(f"Artist leakage detected for artist_id {artist_id}")

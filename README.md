@@ -224,8 +224,9 @@ This joins graph, text, labels, split, and artist identity by `track_id`. It
 keeps only the intersection of tracks present in both the graph manifest and
 the prepared metadata CSV: graph tracks skipped during graph construction and
 metadata tracks removed because they have no usable BERT text are excluded.
-The official FMA `set_split` column is accepted as the source for the normalized
-manifest `split` field.
+The split is taken from the Task 2 graph manifest, whose canonical values are
+only `train`, `val`, and `test`. The prepared text metadata does not define a
+second split contract.
 The command reports how many graph tracks had no metadata match. It still
 rejects duplicate tracks, non-binary targets, invalid graph files, and artist
 leakage.
