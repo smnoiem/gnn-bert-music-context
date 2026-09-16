@@ -50,6 +50,7 @@ def build_task3_manifest(
     output_rows = []
     seen_tracks: set[int] = set()
     artists: dict[int, str] = {}
+    skipped_missing_metadata = 0
     for graph_row in progress(
         rows,
         desc="Joining Task 3 graph/text/labels",
@@ -61,7 +62,8 @@ def build_task3_manifest(
         seen_tracks.add(track_id)
         metadata_row = by_track.get(track_id)
         if metadata_row is None:
-            raise ValueError(f"No prepared metadata exists for track_id {track_id}")
+            skipped_missing_metadata += 1
+            continue
         text = str(metadata_row["bert_text"]).strip()
         if not text or text.lower() == "nan":
             raise ValueError(f"Empty bert_text for track_id {track_id}")
@@ -93,6 +95,11 @@ def build_task3_manifest(
     with output_path.open("w", encoding="utf-8") as stream:
         for row in output_rows:
             stream.write(json.dumps(row) + "\n")
+    if skipped_missing_metadata:
+        print(
+            f"Skipped {skipped_missing_metadata} graph tracks without prepared "
+            "metadata; output contains only the graph/text intersection."
+        )
     return output_rows
 
 

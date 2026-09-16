@@ -87,6 +87,11 @@ Null/NaN fields are omitted from each row's text. If all nine selected fields
 are missing, the row is excluded from the BERT/fusion dataset rather than
 represented by placeholder text.
 
+The Task 3 fusion manifest is an inner join on `track_id` between the Task 2
+graph manifest and this prepared metadata. Tracks skipped during graph
+construction and tracks removed during text preparation therefore do not enter
+the fusion dataset.
+
 The current helper is:
 
 ```text

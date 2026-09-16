@@ -220,8 +220,12 @@ python -m src.prepare_task3_manifest `
   --output data\processed\task3\task3_fusion_manifest.jsonl
 ```
 
-This joins graph, text, labels, split, and artist identity by `track_id`, then
-rejects duplicate tracks, missing metadata, non-binary targets, and artist
+This joins graph, text, labels, split, and artist identity by `track_id`. It
+keeps only the intersection of tracks present in both the graph manifest and
+the prepared metadata CSV: graph tracks skipped during graph construction and
+metadata tracks removed because they have no usable BERT text are excluded.
+The command reports how many graph tracks had no metadata match. It still
+rejects duplicate tracks, non-binary targets, invalid graph files, and artist
 leakage.
 
 ## Task 3 training stages
