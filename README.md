@@ -195,6 +195,33 @@ one-hot or multihot vector.
 The source `tracks.csv` is never modified. Artist-level train/validation/test
 splits must be created after validation and preserved in the derived dataset.
 
+Build the BERT input text as a separate final preparation stage:
+
+```powershell
+python -m src.prepare_task3_labels prepare-text `
+  --input data\processed\task3\fma_task3_genre.csv `
+  --output data\processed\task3\fma_task3_text.csv
+```
+
+This appends a `bert_text` column by combining safe text-valued metadata
+columns in deterministic CSV order, for example:
+
+```text
+album: Ambient Sessions. track: Sunrise
+```
+
+The automatic mode excludes genre and tag fields, `genre_label`,
+`genre_index`, existing `label_*` columns, IDs, paths, and split fields. This
+prevents the target from leaking into BERT input. Use `--columns` to provide
+an explicit safe list when the FMA export has known title/album column names:
+
+```powershell
+python -m src.prepare_task3_labels prepare-text `
+  --input data\processed\task3\fma_task3_genre.csv `
+  --output data\processed\task3\fma_task3_text.csv `
+  --columns album_title track_title
+```
+
 The Task 3 architecture is:
 
 ```text

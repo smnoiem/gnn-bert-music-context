@@ -44,6 +44,23 @@ The preparation process is intentionally split into reproducible stages:
    a deterministic integer `genre_index` target, and a `genre_label` display
    column. The source `tracks.csv` is never modified.
 
+   ## BERT text preparation
+
+   The `prepare-text` command appends a `bert_text` column to a derived copy of
+   the genre dataset. Automatic column selection combines object/string metadata
+   columns while excluding genre fields, tag fields, target columns, IDs, paths,
+   and split fields. This avoids target leakage. The selected columns can be
+   overridden with an explicit safe `--columns` list after inspecting the scan.
+
+   The resulting text uses labeled fields, for example:
+
+   ```text
+   album: Ambient Sessions. track: Sunrise
+   ```
+
+   The fallback text for a row with no usable metadata is
+   `no track metadata available`; genre and tags are never used as fallback text.
+
 The current helper is:
 
 ```text
