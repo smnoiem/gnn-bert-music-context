@@ -10,7 +10,12 @@ from typing import Any
 from .utils import progress
 
 
-DEFAULT_RUNS = ("bert_only", "gnn_only", "early_concat", "cross_attention")
+DEFAULT_RUNS = (
+    "task3_bert_only",
+    "task3_gnn_only",
+    "task3_early_concat",
+    "task3_cross_attention",
+)
 METRICS = ("macro_f1", "micro_f1", "auc_pr", "loss")
 HIGHER_IS_BETTER = {"macro_f1", "micro_f1", "auc_pr"}
 
@@ -47,7 +52,7 @@ def compare_task3_runs(
     if len(set(run_names)) != len(run_names) or not run_names:
         raise ValueError("run_names must be a non-empty sequence of unique names")
     runs = _load_metrics(input_path, run_names)
-    baseline = runs.get("bert_only")
+    baseline = runs.get("task3_bert_only")
     deltas = {}
     if baseline is not None:
         deltas = {
@@ -69,8 +74,8 @@ def compare_task3_runs(
         f"Best PR-AUC: {best['auc_pr']} ({runs[best['auc_pr']]['auc_pr']:.4f})",
         f"Lowest test loss: {best['loss']} ({runs[best['loss']]['loss']:.4f})",
     ]
-    if "cross_attention" in deltas:
-        delta = deltas["cross_attention"]
+    if "task3_cross_attention" in deltas:
+        delta = deltas["task3_cross_attention"]
         analysis.append(
             "Cross-attention vs BERT-only: "
             f"Macro-F1 {delta['macro_f1']:+.4f}, "
@@ -80,7 +85,7 @@ def compare_task3_runs(
         )
     result = {
         "runs": runs,
-        "baseline": "bert_only" if baseline is not None else None,
+        "baseline": "task3_bert_only" if baseline is not None else None,
         "deltas_vs_baseline": deltas,
         "rankings": rankings,
         "best_by_metric": best,

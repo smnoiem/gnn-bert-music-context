@@ -438,6 +438,13 @@ python -m src.compare_task3_runs `
   --input-dir results\task3\ablation `
   --output-dir results\task3\ablation
 ```
+c
+By default, the command looks for the four standard files:
+`task3_bert_only_metrics.json`, `task3_gnn_only_metrics.json`,
+`task3_early_concat_metrics.json`, and
+`task3_cross_attention_metrics.json`. These names match the individual
+training commands in Phase 5. Use `--runs` only when custom run names were
+used.
 
 Each completed model run writes a checkpoint, metrics history, predictions,
 and qualitative case studies. Plots are kept in the `plots` subdirectory so
