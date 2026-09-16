@@ -279,6 +279,36 @@ GraphSAGE & 0.4300 & 0.4323 & 0.4300 & 0.4534 & 1.7490\\
 \end{tabular}
 \end{table}
 
+\begin{table*}[t]
+\caption{Task 2 per-genre test F1. Bold values indicate the stronger model
+for each genre; the final column is CNN minus GraphSAGE.}
+\label{tab:task2-perclass}
+\centering
+\begin{tabular}{lccc}
+\toprule
+Genre & Mel-CNN & GraphSAGE & $\Delta$\\
+\midrule
+Electronic & 0.5510 & \textbf{0.5771} & -0.0261\\
+Experimental & \textbf{0.3814} & 0.2880 & +0.0934\\
+Folk & \textbf{0.2647} & 0.2513 & +0.0134\\
+Hip-Hop & \textbf{0.7444} & 0.6900 & +0.0544\\
+Instrumental & \textbf{0.4330} & 0.3209 & +0.1121\\
+International & 0.3467 & \textbf{0.4852} & -0.1385\\
+Pop & 0.3333 & \textbf{0.3491} & -0.0157\\
+Rock & \textbf{0.5809} & 0.4967 & +0.0842\\
+\midrule
+Macro-F1 & \textbf{0.4544} & 0.4323 & +0.0222\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\noindent
+The per-class table is more informative than accuracy alone: GraphSAGE
+improves Electronic, International, and Pop, while the CNN has larger gains
+on Experimental, Instrumental, and Rock. Both models are strongest on
+Hip-Hop, suggesting that class separability and class frequency are not
+uniform across the eight genres.
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{task2_cnn_learning_curves.png}
@@ -311,6 +341,31 @@ Cross-attention & 0.0393 & \textbf{0.3546} & 0.1308\\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{table*}[t]
+\caption{Task 3 improvement over the BERT-only test baseline. Positive
+values are improvements for F1 and PR-AUC; for loss, negative values would
+be improvements.}
+\label{tab:task3-deltas}
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+Condition & $\Delta$ Macro-F1 & $\Delta$ Micro-F1 & $\Delta$ PR-AUC & $\Delta$ Loss\\
+\midrule
+BERT-only & 0.0000 & 0.0000 & 0.0000 & 0.0000\\
+GNN-only & +0.0315 & +0.1323 & +0.0974 & +1.3756\\
+Early concat. & +0.0292 & +0.1512 & +0.0889 & +0.4578\\
+Cross-attention & +0.0281 & \textbf{+0.1516} & +0.0942 & +0.6663\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\noindent
+This delta table is included because the absolute Task 3 scores alone hide
+the practical effect of adding audio. Cross-attention gives the largest
+micro-F1 improvement, while GNN-only gives the largest macro-F1 and PR-AUC
+improvements. None of the audio-containing conditions minimizes BCE test
+loss, so the result is not a uniformly dominant fusion model.
 
 \begin{figure}[t]
 \centering
