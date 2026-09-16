@@ -39,77 +39,13 @@ For later sessions, run these commands from the project directory:
 .\.venv\Scripts\Activate.ps1
 ```
 
-The first training run downloads `distilbert-base-uncased` from Hugging Face.
-An internet connection is required unless the model has already been cached.
-
-## Logs and progress
-
-Command-line workflows emit timestamped `INFO` logs for setup, phase changes,
-epoch summaries, output files, and failures. Dataset and graph-building loops
-also show live progress bars. Progress is written to stderr so JSON metrics and
-other structured output on stdout remain usable. Ablation child processes inherit
-unbuffered output, so each command's logs appear as it runs rather than only
-after the process exits.
-
-Graph construction handles failures per audio file: the failing track and full
-exception are logged, later files continue processing, and skipped rows are
-written to a `<manifest>_failures.jsonl` report next to the graph manifest.
-
-
-The relevant layout is:
-
-```text
-data\
-  raw\
-    fma\
-      fma_metadata\
-      fma_small\
-  processed\
-    task2\
-      fma_metadata.csv
-      graphs\
-      mels\
-      task2_graph_manifest.jsonl
-  splits\
-    task2\
-      train.json
-      val.json
-      test.json
-results\
-  task1\
-    task1_distilbert_best.pt
-    task1_distilbert_metrics.json
-    task1_distilbert_test_metrics.json
-    task1_distilbert_predictions.json
-    plots\
-      task1_distilbert_f1_curve.png
-  task2\
-    graphsage_genre_best.pt
-    graphsage_genre_metrics.json
-    cnn_melspectrogram_genre_best.pt
-    cnn_melspectrogram_genre_metrics.json
-```
-
-
 ## Task 1: train the DistilBERT text classifier
 
 ### 1. Export the MusicCaps captions
 
-Create the raw-data directory and export only the caption and identifier
-columns needed by the Task 1 runner:
+The `google/MusicCaps` dataset to be imported and stored in the `/data/raw` directory.
 
-```powershell
-New-Item -ItemType Directory -Force data\raw | Out-Null
-python -c "from datasets import load_dataset; ds=load_dataset('google/MusicCaps', split='train'); ds.select_columns(['ytid','caption','start_s','end_s']).to_csv('data/raw/musiccaps.csv', index=False)"
-```
-
-The runner also accepts a local CSV, JSON, JSONL, or parquet file. A CSV must
-contain a caption/text/description column and either a `tags`, `labels`, or
-`label` column. When those label columns are absent, the runner creates the
-documented proxy tags by matching music phrases in each caption. These are
-proxy-task labels, not human-annotated MusicCaps tags.
-
-### 2. Run the actual Task 1 DistilBERT training command
+### 2. DistilBERT training command
 
 Run this from the repository root:
 
@@ -427,18 +363,12 @@ python -m src.train_task3 `
   --seed 42
 ```
 
-Live terminal output includes batch loss, epoch
-train/validation loss, validation Macro-F1, and the current best-checkpoint
-status. After each run, the filesystem contains the full metrics history,
-checkpoint, predictions, case studies, learning curves, PR curves, and (for
-fusion runs) the fused-embedding t-SNE plot. These individual commands store
-the files under `results\task3\ablation`.
+The full metrics history, checkpoint, predictions, case studies, learning curves, PR curves, and (for
+fusion runs) the fused-embedding t-SNE plot are stored under `results\task3\ablation`.
 
 ### Phase 6: Review generated metrics and plots
 
-After all four individual ablation runs are complete, run the comparison-only
-analytics command. It reads existing metrics files; it does not start
-training, load the dataset, or modify any model checkpoint.
+Run the comparison-only analytics command. It reads existing metrics files that are generated during ablation choices; it does not start training, load the dataset, or modify any model checkpoint.
 
 ```powershell
 python -m src.compare_task3_runs `
@@ -508,18 +438,3 @@ because those columns define the prediction target and would leak the labels.
 If no usable text fields are available, use the GNN-only baseline instead of
 creating synthetic or randomly paired text.
 
-## Project directories
-
-- `data\raw\`: FMA, MagnaTagATune, MusicCaps, audio, and metadata downloads.
-- `data\processed\`: serialized graphs, mel-spectrograms, and BERT caches.
-- `data\splits\`: train/validation/test split files.
-- `notebooks\`: exploratory analysis and the end-to-end demo notebook.
-- `src\`: preprocessing, graph, model, training, evaluation, and metric code.
-- `results\task1\`: Task 1 checkpoints, metrics, predictions, and plots.
-- `results\task2\`: Task 2 checkpoints, metrics, predictions, and plots.
-- `results\task3\`: Task 3 checkpoints, metrics, predictions, and plots.
-- `report\`: final report PDF and related report assets.
-- `config.yaml`: default model and training settings.
-
-Do not use illustrative scores from the assignment PDF. Report only metrics
-generated from the real dataset and record whether Task 1 uses proxy labels.
