@@ -11,8 +11,11 @@ data/splits/*
 !data/splits/.gitkeep
 
 results/*.pt
+
 results/task1/*.pt
-results/task3/*.pt
 results/task2/*.pt
+results/task3/*.pt
+
+results/task3/ablation/*.pt
 
 .venv
