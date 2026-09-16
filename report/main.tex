@@ -244,6 +244,9 @@ The exported Task 1 test artifact reports macro-F1 $0.9976$, micro-F1
 $0.9991$, and PR-AUC $1.0000$. Because the experiment uses caption-derived
 proxy labels, these values should be interpreted as a verification of the
 text pipeline and not as evidence of general MusicCaps tag understanding.
+The training trajectory in Fig.~\ref{fig:task1-curve} reaches a similarly
+high validation score quickly, consistent with the proxy nature of the target
+rather than difficult semantic generalization.
 
 \begin{table}[t]
 \caption{Task 1 test performance on the MusicCaps proxy task.}
@@ -257,6 +260,14 @@ DistilBERT & 0.9976 & 0.9991 & 1.0000\\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{task1_distilbert_f1_curve.png}
+\caption{Task 1 DistilBERT training and validation F1 curves on the
+MusicCaps caption-to-tag proxy task.}
+\label{fig:task1-curve}
+\end{figure}
 
 \subsection{Task 2: Audio graph classification}
 Table~\ref{tab:task2} compares the audio graph model with the mel-CNN.
@@ -307,15 +318,28 @@ The per-class table is more informative than accuracy alone: GraphSAGE
 improves Electronic, International, and Pop, while the CNN has larger gains
 on Experimental, Instrumental, and Rock. Both models are strongest on
 Hip-Hop, suggesting that class separability and class frequency are not
-uniform across the eight genres.
+uniform across the eight genres. The learning curves in
+Fig.~\ref{fig:task2-curves} show the optimization behavior behind the final
+comparison, while the confusion matrices in Fig.~\ref{fig:task2-confusion}
+make class-specific errors visible.
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\columnwidth]{task2_cnn_learning_curves.png}
-\caption{Task 2 CNN learning curves; the companion GraphSAGE curves and
-confusion matrices are included in the uploaded figure assets.}
-\label{fig:task2}
+\includegraphics[width=.48\textwidth]{task2_cnn_learning_curves.png}
+\includegraphics[width=.48\textwidth]{task2_graphsage_learning_curves.png}
+\caption{Task 2 learning curves for the mel-CNN (left) and GraphSAGE
+(right).}
+\label{fig:task2-curves}
 \end{figure}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=.48\textwidth]{task2_cnn_confusion_matrix.png}
+\includegraphics[width=.48\textwidth]{task2_graphsage_confusion_matrix.png}
+\caption{Task 2 test confusion matrices for the mel-CNN (left) and
+GraphSAGE (right).}
+\label{fig:task2-confusion}
+\end{figure*}
 
 \subsection{Task 3: Fusion ablation}
 The four-condition results are shown in Table~\ref{tab:task3}. GNN-only
@@ -365,13 +389,15 @@ This delta table is included because the absolute Task 3 scores alone hide
 the practical effect of adding audio. Cross-attention gives the largest
 micro-F1 improvement, while GNN-only gives the largest macro-F1 and PR-AUC
 improvements. None of the audio-containing conditions minimizes BCE test
-loss, so the result is not a uniformly dominant fusion model.
+loss, so the result is not a uniformly dominant fusion model. The visual
+comparison in Fig.~\ref{fig:task3-comparison} reinforces this
+metric-dependent ranking.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{task3_ablation_comparison.png}
-\caption{Exported comparison of the four Task 3 conditions.}
-\label{fig:ablation}
+\caption{Task 3 ablation comparison across Macro-F1, Micro-F1, and PR-AUC.}
+\label{fig:task3-comparison}
 \end{figure}
 
 \subsection{Training histories and post-ablation comparison}
@@ -389,6 +415,11 @@ decisions and ranking quality, but the improvement is not uniform over
 labels. The ranking is metric-dependent: GNN-only is best for Macro-F1 and
 PR-AUC, cross-attention is best for micro-F1, and BERT-only has the lowest
 test loss.
+For the selected primary fusion run, Fig.~\ref{fig:task3-crossattn-curves}
+shows the train/validation history and Fig.~\ref{fig:task3-crossattn-pr}
+shows per-label precision--recall behavior. These figures support the
+overfitting and imbalance interpretation; Table~\ref{tab:task3} remains the
+primary cross-model evidence.
 
 \begin{table}[t]
 \caption{Best validation epochs recorded in exported histories.}
@@ -407,13 +438,29 @@ Task 3 cross-attention & 5 & 0.0393\\
 \end{tabular}
 \end{table}
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{task3_cross_attention_learning_curves.png}
+\caption{Cross-attention training and validation history. The widening
+training--validation gap motivates the overfitting interpretation.}
+\label{fig:task3-crossattn-curves}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{task3_cross_attention_pr_curve.png}
+\caption{Cross-attention test precision--recall curves across valid labels.}
+\label{fig:task3-crossattn-pr}
+\end{figure}
+
 \section{Qualitative Analysis}
-The repository exports t-SNE projections of fused embeddings, learning
-curves, and precision--recall curves for each ablation. These plots are
-included as supplementary figures in the Overleaf package. The t-SNE views
-should be read descriptively rather than as a quantitative metric: they
-visualize whether embedding neighborhoods appear label-structured, but do
-not replace held-out evaluation.
+The selected cross-attention t-SNE visualization is shown in
+Fig.~\ref{fig:task3-tsne}. It is used only as a qualitative diagnostic:
+embedding neighborhoods may suggest label structure, but t-SNE does not
+replace held-out evaluation. The remaining per-condition plot files remain
+available in the repository artifact bundle, but are not inserted into the
+main paper because they repeat the same diagnostic views without changing
+the ablation conclusion.
 
 Three case studies are exported for the full cross-attention run. Each
 case study contains the track identifier, text input, target labels,
@@ -421,6 +468,14 @@ predicted labels, and prediction scores. These examples are intended to
 support inspection of graph/text agreement and failure modes. In particular,
 the low macro-F1 of all Task 3 conditions motivates checking rare-label
 misses rather than presenting only successful examples.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{task3_cross_attention_fused_tsne.png}
+\caption{t-SNE projection of cross-attention fused test embeddings, shown
+as a qualitative diagnostic rather than a performance metric.}
+\label{fig:task3-tsne}
+\end{figure}
 
 \section{Discussion}
 The results provide three practical conclusions. First, the text pipeline is
@@ -492,50 +547,6 @@ are the strongest Task 3 source of macro-level multi-label signal. The
 ablation results support multimodal fusion as a useful direction, but also
 make clear that future gains require stronger supervision and improved
 generalization to rare labels.
-
-\appendices
-\section{Complete Plot Archive}
-The following figures are included so that the experimental work is retained
-in the Overleaf project rather than reduced to the summary tables. The
-learning curves show optimization histories, the precision--recall figures
-show per-label ranking behavior, the t-SNE figures show test embedding
-geometry, and the confusion matrices show class-specific Task 2 errors.
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=.48\textwidth]{task1_distilbert_f1_curve.png}
-\includegraphics[width=.48\textwidth]{task2_cnn_confusion_matrix.png}
-\includegraphics[width=.48\textwidth]{task2_graphsage_confusion_matrix.png}
-\includegraphics[width=.48\textwidth]{task2_cnn_learning_curves.png}
-\includegraphics[width=.48\textwidth]{task2_graphsage_learning_curves.png}
-\includegraphics[width=.48\textwidth]{task3_ablation_comparison.png}
-\caption{Task 1, Task 2, and post-ablation comparison plots.}
-\label{fig:archive-overview}
-\end{figure*}
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=.48\textwidth]{task3_bert_only_learning_curves.png}
-\includegraphics[width=.48\textwidth]{task3_bert_only_pr_curve.png}
-\includegraphics[width=.48\textwidth]{task3_bert_only_fused_tsne.png}
-\includegraphics[width=.48\textwidth]{task3_gnn_only_learning_curves.png}
-\includegraphics[width=.48\textwidth]{task3_gnn_only_pr_curve.png}
-\includegraphics[width=.48\textwidth]{task3_gnn_only_fused_tsne.png}
-\caption{BERT-only and GNN-only ablation diagnostics.}
-\label{fig:archive-single}
-\end{figure*}
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=.48\textwidth]{task3_early_concat_learning_curves.png}
-\includegraphics[width=.48\textwidth]{task3_early_concat_pr_curve.png}
-\includegraphics[width=.48\textwidth]{task3_early_concat_fused_tsne.png}
-\includegraphics[width=.48\textwidth]{task3_cross_attention_learning_curves.png}
-\includegraphics[width=.48\textwidth]{task3_cross_attention_pr_curve.png}
-\includegraphics[width=.48\textwidth]{task3_cross_attention_fused_tsne.png}
-\caption{Early-concatenation and cross-attention diagnostics.}
-\label{fig:archive-fusion}
-\end{figure*}
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
