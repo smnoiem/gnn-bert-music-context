@@ -14,6 +14,17 @@ from .utils import progress
 
 FMA_GENRE_COLUMN = "track_genre_top"
 FMA_TAG_COLUMN = "track_tags"
+FMA_BERT_TEXT_COLUMNS = (
+    "album_information",
+    "album_title",
+    "album_type",
+    "artist_bio",
+    "artist_location",
+    "artist_members",
+    "track_composer",
+    "track_information",
+    "track_title",
+)
 
 
 def _flatten_columns(columns: pd.MultiIndex) -> list[str]:
@@ -189,39 +200,15 @@ def prepare_task3_genre_dataset(
 def prepare_task3_text_dataset(
     input_csv: str | Path,
     output: str | Path,
-    text_columns: list[str] | None = None,
 ) -> pd.DataFrame:
-    """Append deterministic BERT text made from safe metadata text columns."""
+    """Append deterministic BERT text from fixed non-label FMA string columns."""
     tracks = pd.read_csv(input_csv, low_memory=False)
-    excluded_exact = {
-        "track_genre_top",
-        "track_genres",
-        "track_genres_all",
-        "track_tags",
-        "genre_label",
-        "genre_index",
-        "task3_labels",
-        "split",
-        "artist_id",
-        "track_id",
-        "path",
-    }
-    excluded_prefixes = ("label_",)
-    if text_columns is None:
-        candidates = [
-            str(column)
-            for column in tracks.columns
-            if pd.api.types.is_string_dtype(tracks[column])
-            and str(column).strip().lower() not in excluded_exact
-            and not str(column).strip().lower().startswith(excluded_prefixes)
-        ]
-    else:
-        missing = set(text_columns) - set(tracks.columns)
-        if missing:
-            raise ValueError(f"Text columns were not found: {sorted(missing)}")
-        candidates = text_columns
-    if not candidates:
-        raise ValueError("No safe text columns are available for BERT input")
+    missing = set(FMA_BERT_TEXT_COLUMNS) - set(tracks.columns)
+    if missing:
+        raise ValueError(
+            f"Prepared FMA data is missing fixed BERT columns: {sorted(missing)}"
+        )
+    candidates = FMA_BERT_TEXT_COLUMNS
 
     def format_value(column: str, value: object) -> str:
         text = str(value).strip()
@@ -230,20 +217,22 @@ def prepare_task3_text_dataset(
         return f"{column}: {text}"
 
     bert_text = []
+    retained_indices = []
     for _, row in progress(
         tracks.iterrows(),
         desc="Building BERT text",
         total=len(tracks),
     ):
-        bert_text.append(
-            ". ".join(
-                value
-                for column in candidates
-                for value in [format_value(column, row[column])]
-                if value
-            )
-            or "no track metadata available"
-        )
+        parts = [
+            value
+            for column in candidates
+            for value in [format_value(column, row[column])]
+            if value
+        ]
+        if parts:
+            retained_indices.append(row.name)
+            bert_text.append(". ".join(parts))
+    tracks = tracks.loc[retained_indices].copy()
     tracks["bert_text"] = bert_text
     output_path = Path(output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -331,11 +320,6 @@ def main() -> None:
     prepare_text = commands.add_parser("prepare-text")
     prepare_text.add_argument("--input", required=True)
     prepare_text.add_argument("--output", required=True)
-    prepare_text.add_argument(
-        "--columns",
-        nargs="+",
-        help="Optional explicit safe text columns; otherwise object columns are detected.",
-    )
 
     prepare = commands.add_parser("prepare")
     prepare.add_argument("--tracks-csv", required=True)
@@ -356,8 +340,11 @@ def main() -> None:
         result = prepare_task3_genre_dataset(args.tracks_csv, args.genres, args.output)
         print(f"Wrote {len(result)} tracks with genre_label and genre_index columns.")
     elif args.command == "prepare-text":
-        result = prepare_task3_text_dataset(args.input, args.output, args.columns)
-        print(f"Wrote {len(result)} tracks with bert_text from metadata columns.")
+        result = prepare_task3_text_dataset(args.input, args.output)
+        print(
+            f"Wrote {len(result)} retained tracks with bert_text from "
+            f"{', '.join(FMA_BERT_TEXT_COLUMNS)}."
+        )
     else:
         result = prepare_task3_dataset(args.tracks_csv, args.labels, args.output)
         print(f"Wrote {len(result)} tracks with {len(json.loads(Path(args.labels).read_text())['labels'])} label columns.")

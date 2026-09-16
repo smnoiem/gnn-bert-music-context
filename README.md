@@ -186,16 +186,29 @@ python -m src.prepare_task3_labels prepare-text `
   --output data\processed\task3\fma_task3_text.csv
 ```
 
-This appends `bert_text` from safe string metadata while excluding genres,
-tags, target columns, IDs, paths, and split fields. To control the text
-columns explicitly:
+This appends `bert_text` from the fixed compact set of descriptive FMA
+columns:
 
-```powershell
-python -m src.prepare_task3_labels prepare-text `
-  --input data\processed\task3\fma_task3_labels.csv `
-  --output data\processed\task3\fma_task3_text.csv `
-  --columns album track artist
+```text
+album_information
+album_title
+album_type
+artist_bio
+artist_location
+artist_members
+track_composer
+track_information
+track_title
 ```
+
+These fields were selected for descriptive musical context rather than
+administrative metadata or artist identity memorization. Genre and tag sources
+(`track_genre_top`, `track_genres`, `track_genres_all`, `track_tags`,
+`album_tags`, and `artist_tags`) plus artist identity, IDs, paths, dates,
+URLs, licenses, and split fields are excluded by construction.
+Null/NaN values are omitted from each row's text. Tracks with no usable value
+in any of the nine selected fields are excluded from the BERT/fusion copy, and
+the command reports the retained row count.
 
 After the Task 2 graph manifest exists, create the verified Task 3 manifest:
 
@@ -253,37 +266,6 @@ The fusion trainer uses the fixed vocabulary order from `labels.json`, creates
 one logit per selected label, and trains with `BCEWithLogitsLoss`. The
 cross-attention and early-concat runs must use identical manifests and
 splits.
-
-
-The source `tracks.csv` is never modified. Artist-level train/validation/test
-splits must be created after validation and preserved in the derived dataset.
-
-Build the BERT input text as a separate final preparation stage:
-
-```powershell
-python -m src.prepare_task3_labels prepare-text `
-  --input data\processed\task3\fma_task3_genre.csv `
-  --output data\processed\task3\fma_task3_text.csv
-```
-
-This appends a `bert_text` column by combining safe text-valued metadata
-columns in deterministic CSV order, for example:
-
-```text
-album: Ambient Sessions. track: Sunrise
-```
-
-The automatic mode excludes genre and tag fields, `genre_label`,
-`genre_index`, existing `label_*` columns, IDs, paths, and split fields. This
-prevents the target from leaking into BERT input. Use `--columns` to provide
-an explicit safe list when the FMA export has known title/album column names:
-
-```powershell
-python -m src.prepare_task3_labels prepare-text `
-  --input data\processed\task3\fma_task3_genre.csv `
-  --output data\processed\task3\fma_task3_text.csv `
-  --columns album_title track_title
-```
 
 The Task 3 architecture is:
 

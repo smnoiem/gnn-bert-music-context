@@ -56,11 +56,26 @@ The preparation process is intentionally split into reproducible stages:
 ## BERT text preparation
 
 The `prepare-text` command appends a `bert_text` column to a derived copy of
-the prepared dataset. Automatic column selection combines object/string
-metadata columns while excluding genre fields, tag fields, target columns,
-IDs, paths, and split fields. This avoids target leakage. The selected columns
-can be overridden with an explicit safe `--columns` list after inspecting the
-scan.
+the prepared dataset. It uses this compact descriptive set:
+
+```text
+album_information
+album_title
+album_type
+artist_bio
+artist_location
+artist_members
+track_composer
+track_information
+track_title
+```
+
+These fields are preferred over administrative metadata and artist identity
+to reduce irrelevant signals and memorization shortcuts. Genre/tag sources
+(`track_genre_top`, `track_genres`, `track_genres_all`, `track_tags`,
+`album_tags`, and `artist_tags`) plus IDs, paths, dates, URLs, licenses,
+publishers, and split fields are excluded. The command fails if a fixed text
+column is missing.
 
 The resulting text uses labeled fields, for example:
 
@@ -68,8 +83,9 @@ The resulting text uses labeled fields, for example:
    album: Ambient Sessions. track: Sunrise
    ```
 
-The fallback text for a row with no usable metadata is
-`no track metadata available`; genre and tags are never used as fallback text.
+Null/NaN fields are omitted from each row's text. If all nine selected fields
+are missing, the row is excluded from the BERT/fusion dataset rather than
+represented by placeholder text.
 
 The current helper is:
 
