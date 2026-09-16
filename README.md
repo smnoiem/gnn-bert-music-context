@@ -55,6 +55,35 @@ Graph construction handles failures per audio file: the failing track and full
 exception are logged, later files continue processing, and skipped rows are
 written to a `<manifest>_failures.jsonl` report next to the graph manifest.
 
+
+The relevant layout is:
+
+```text
+data\
+  raw\
+    fma\
+      fma_metadata\
+      fma_small\
+  processed\
+    task2\
+      fma_metadata.csv
+      graphs\
+      mels\
+      task2_graph_manifest.jsonl
+  splits\
+    task2\
+      train.json
+      val.json
+      test.json
+results\
+  task2\
+    graphsage_genre_best.pt
+    graphsage_genre_metrics.json
+    cnn_melspectrogram_genre_best.pt
+    cnn_melspectrogram_genre_metrics.json
+```
+
+
 ## Task 1: train the DistilBERT text classifier
 
 ### 1. Export the MusicCaps captions
@@ -96,39 +125,149 @@ Outputs are written to `results\`:
 To use a locally cached model without network access, add
 `--local-files-only` to the training command.
 
-## Tasks 2 and 3: real audio graphs and fusion
+## Tasks 2 GNN on Music Structure Graphs
 
 Task 2 keeps its derived metadata, graphs, manifest, splits, and results in
 task-specific locations. The original FMA files remain under `data\raw\fma`.
 
-The relevant layout is:
+Run these commands sequentially from the repository root after the FMA-small
+archives have been extracted under `data\raw\fma`.
 
-```text
-data\
-  raw\
-    fma\
-      fma_metadata\
-      fma_small\
-  processed\
-    task2\
-      fma_metadata.csv
-      graphs\
-      mels\
-      task2_graph_manifest.jsonl
-  splits\
-    task2\
-      train.json
-      val.json
-      test.json
-results\
-  task2\
-    graphsage_genre_best.pt
-    graphsage_genre_metrics.json
-    cnn_melspectrogram_genre_best.pt
-    cnn_melspectrogram_genre_metrics.json
+### 1. Prepare Task 2 metadata
+
+```powershell
+python -m src.graph_builder `
+  --prepare-metadata `
+  --tracks-csv data\raw\fma\fma_metadata\tracks.csv `
+  --audio-root data\raw\fma\fma_small `
+  --metadata-output data\processed\task2\fma_metadata.csv
 ```
 
-### Task 3 dataset and fixed labels
+### 2. Build Task 2 segment graphs, manifest, and split files
+
+```powershell
+python -m src.graph_builder `
+  --metadata data\processed\task2\fma_metadata.csv `
+  --audio-root data\raw\fma\fma_small `
+  --output data\processed\task2\graphs `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --split-dir data\splits\task2 `
+  --sample-rate 22050 `
+  --segment-seconds 5 `
+  --threshold 0.75
+```
+
+### 3. Train GraphSAGE
+
+```powershell
+python -m src.train `
+  --task gnn `
+  --config config.yaml `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --run-name graphsage_genre `
+  --epochs 10
+```
+
+### 4. Cache mel-spectrogram inputs for the CNN baseline
+
+```powershell
+python -m src.prepare_task2 `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --metadata data\processed\task2\fma_metadata.csv `
+  --audio-root data\raw\fma\fma_small `
+  --output data\processed\task2\mels `
+  --sample-rate 22050 `
+  --segment-seconds 5 `
+  --n-mels 128
+```
+
+This phase opens each successful Task 2 audio file once and stores its
+5-second log-mel segments under `data\processed\task2\mels`. CNN training and
+evaluation then load those cached tensors instead of decoding audio again.
+Training batches segments from multiple tracks together on the accelerator and
+averages the segment logits per track before computing the loss.
+
+### 5. Train the mel-spectrogram CNN baseline
+
+```powershell
+python -m src.train `
+  --task genre_cnn `
+  --config config.yaml `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --metadata data\processed\task2\fma_metadata.csv `
+  --audio-root data\raw\fma\fma_small `
+  --run-name cnn_melspectrogram_genre `
+  --epochs 10
+```
+
+### 6. Evaluate GraphSAGE on the held-out test split
+
+```powershell
+python -m src.evaluate `
+  --task gnn `
+  --checkpoint results\task2\graphsage_genre_best.pt `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --output-dir results\task2
+```
+
+### 7. Evaluate the CNN baseline on the held-out test split
+
+```powershell
+python -m src.evaluate `
+  --task genre_cnn `
+  --checkpoint results\task2\cnn_melspectrogram_genre_best.pt `
+  --manifest data\processed\task2\task2_graph_manifest.jsonl `
+  --metadata data\processed\task2\fma_metadata.csv `
+  --audio-root data\raw\fma\fma_small `
+  --output-dir results\task2
+```
+
+### 8. Compare GraphSAGE and CNN results
+
+```powershell
+python -m src.compare_task2_models `
+  --graphsage-metrics results\task2\task2_graphsage_test_metrics.json `
+  --cnn-metrics results\task2\task2_cnn_test_metrics.json `
+  --output results\task2\task2_model_comparison.json
+```
+
+For the Task 3 early-concatenation comparison:
+
+```powershell
+python -m src.train --task fusion --config config.yaml --manifest data\processed\manifest.jsonl --run-name task3_fusion_early_concat --epochs 10 --early-concat
+```
+
+The default Task 3 condition uses graph-guided cross-attention:
+
+```powershell
+python -m src.train --task fusion --config config.yaml --manifest data\processed\manifest.jsonl --run-name task3_fusion_cross_attention --epochs 10
+```
+
+Evaluate either saved fusion checkpoint on the held-out test split:
+
+```powershell
+python -m src.evaluate `
+  --task fusion `
+  --checkpoint results\task3_fusion_cross_attention_best.pt `
+  --manifest data\processed\manifest.jsonl `
+  --output-dir results
+```
+
+Evaluation writes `fusion_test_metrics.json` and
+`fusion_case_studies.json`. The fusion manifest must contain each graph path,
+caption/text, multilabel `labels`, split, and artist identifier; the same
+artist-level split constraint used by Task 2 is enforced.
+
+All checkpoints, metric histories, and learning curves are written to
+`results\`. The text model configured by default is
+`distilbert-base-uncased`; change `model.text_model` in `config.yaml` only when
+you intentionally want to use another Hugging Face checkpoint.
+
+
+
+## Task 3 The GNN-BERT Fusion
+
+### dataset and fixed labels
 
 Task 3 uses **FMA-small only**. Each example is an FMA track represented by:
 
@@ -402,141 +541,6 @@ matching the full-track coverage of the graph model.
 Graph feature scaling is fitted only on training-track segments and reused for
 validation and test tracks, so similarity edges remain comparable without
 leaking evaluation statistics.
-
-## Task 2 complete pipeline
-
-Run these commands sequentially from the repository root after the FMA-small
-archives have been extracted under `data\raw\fma`.
-
-### 1. Prepare Task 2 metadata
-
-```powershell
-python -m src.graph_builder `
-  --prepare-metadata `
-  --tracks-csv data\raw\fma\fma_metadata\tracks.csv `
-  --audio-root data\raw\fma\fma_small `
-  --metadata-output data\processed\task2\fma_metadata.csv
-```
-
-### 2. Build Task 2 segment graphs, manifest, and split files
-
-```powershell
-python -m src.graph_builder `
-  --metadata data\processed\task2\fma_metadata.csv `
-  --audio-root data\raw\fma\fma_small `
-  --output data\processed\task2\graphs `
-  --manifest data\processed\task2\task2_graph_manifest.jsonl `
-  --split-dir data\splits\task2 `
-  --sample-rate 22050 `
-  --segment-seconds 5 `
-  --threshold 0.75
-```
-
-### 3. Train GraphSAGE
-
-```powershell
-python -m src.train `
-  --task gnn `
-  --config config.yaml `
-  --manifest data\processed\task2\task2_graph_manifest.jsonl `
-  --run-name graphsage_genre `
-  --epochs 10
-```
-
-### 4. Cache mel-spectrogram inputs for the CNN baseline
-
-```powershell
-python -m src.prepare_task2 `
-  --manifest data\processed\task2\task2_graph_manifest.jsonl `
-  --metadata data\processed\task2\fma_metadata.csv `
-  --audio-root data\raw\fma\fma_small `
-  --output data\processed\task2\mels `
-  --sample-rate 22050 `
-  --segment-seconds 5 `
-  --n-mels 128
-```
-
-This phase opens each successful Task 2 audio file once and stores its
-5-second log-mel segments under `data\processed\task2\mels`. CNN training and
-evaluation then load those cached tensors instead of decoding audio again.
-Training batches segments from multiple tracks together on the accelerator and
-averages the segment logits per track before computing the loss.
-
-### 5. Train the mel-spectrogram CNN baseline
-
-```powershell
-python -m src.train `
-  --task genre_cnn `
-  --config config.yaml `
-  --manifest data\processed\task2\task2_graph_manifest.jsonl `
-  --metadata data\processed\task2\fma_metadata.csv `
-  --audio-root data\raw\fma\fma_small `
-  --run-name cnn_melspectrogram_genre `
-  --epochs 10
-```
-
-### 6. Evaluate GraphSAGE on the held-out test split
-
-```powershell
-python -m src.evaluate `
-  --task gnn `
-  --checkpoint results\task2\graphsage_genre_best.pt `
-  --manifest data\processed\task2\task2_graph_manifest.jsonl `
-  --output-dir results\task2
-```
-
-### 7. Evaluate the CNN baseline on the held-out test split
-
-```powershell
-python -m src.evaluate `
-  --task genre_cnn `
-  --checkpoint results\task2\cnn_melspectrogram_genre_best.pt `
-  --manifest data\processed\task2\task2_graph_manifest.jsonl `
-  --metadata data\processed\task2\fma_metadata.csv `
-  --audio-root data\raw\fma\fma_small `
-  --output-dir results\task2
-```
-
-### 8. Compare GraphSAGE and CNN results
-
-```powershell
-python -m src.compare_task2_models `
-  --graphsage-metrics results\task2\task2_graphsage_test_metrics.json `
-  --cnn-metrics results\task2\task2_cnn_test_metrics.json `
-  --output results\task2\task2_model_comparison.json
-```
-
-For the Task 3 early-concatenation comparison:
-
-```powershell
-python -m src.train --task fusion --config config.yaml --manifest data\processed\manifest.jsonl --run-name task3_fusion_early_concat --epochs 10 --early-concat
-```
-
-The default Task 3 condition uses graph-guided cross-attention:
-
-```powershell
-python -m src.train --task fusion --config config.yaml --manifest data\processed\manifest.jsonl --run-name task3_fusion_cross_attention --epochs 10
-```
-
-Evaluate either saved fusion checkpoint on the held-out test split:
-
-```powershell
-python -m src.evaluate `
-  --task fusion `
-  --checkpoint results\task3_fusion_cross_attention_best.pt `
-  --manifest data\processed\manifest.jsonl `
-  --output-dir results
-```
-
-Evaluation writes `fusion_test_metrics.json` and
-`fusion_case_studies.json`. The fusion manifest must contain each graph path,
-caption/text, multilabel `labels`, split, and artist identifier; the same
-artist-level split constraint used by Task 2 is enforced.
-
-All checkpoints, metric histories, and learning curves are written to
-`results\`. The text model configured by default is
-`distilbert-base-uncased`; change `model.text_model` in `config.yaml` only when
-you intentionally want to use another Hugging Face checkpoint.
 
 ## Ablation comparison
 
