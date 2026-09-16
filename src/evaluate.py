@@ -8,8 +8,16 @@ import numpy as np
 import torch
 from sklearn.metrics import average_precision_score
 
+from .fusion_model import FusionModel
 from .gnn_model import GenreGraphSAGEClassifier, MelCNN
-from .train import GenreGraphDataset, GenreMelDataset, collate_mels, device_graph
+from .train import (
+    GenreGraphDataset,
+    GenreMelDataset,
+    MusicGraphDataset,
+    collate_mels,
+    device_graph,
+)
+from .metrics import multilabel_metrics
 from .utils import configure_logging, ensure_dir, save_json
 
 
@@ -215,6 +223,63 @@ def evaluate_genre_cnn(
     return metrics
 
 
+def evaluate_fusion(checkpoint_path: Path, manifest: Path, output_dir: Path) -> dict:
+    """Evaluate a saved Task 3 multilabel fusion checkpoint on the test split."""
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    state = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    labels = state["vocab"]
+    config = state["config"]
+    dataset = MusicGraphDataset(manifest, "test", labels)
+    model = FusionModel(
+        num_labels=len(labels),
+        graph_input=int(dataset[0]["x"].shape[1]),
+        graph_hidden=config["model"]["gnn_hidden"],
+        text_hidden=config["model"]["text_hidden"],
+        layers=config["model"]["gnn_layers"],
+        dropout=config["model"]["dropout"],
+        model_name=config["model"]["text_model"],
+        max_length=config["data"]["max_text_length"],
+        freeze=config["training"]["freeze_text_encoder"],
+        cross_attention=not state.get("early_concat", False),
+    ).to(device)
+    model.load_state_dict(state["model"])
+    model.eval()
+
+    logits_rows, target_rows, cases = [], [], []
+    criterion = torch.nn.BCEWithLogitsLoss()
+    losses = []
+    with torch.no_grad():
+        for sample in dataset:
+            graph = device_graph(sample, device)
+            output = model(graph, sample["text"])
+            logits = output["logits"]
+            target = graph["y"].unsqueeze(0)
+            losses.append(float(criterion(logits, target).item()))
+            logits_rows.append(logits.squeeze(0).cpu().numpy())
+            target_rows.append(sample["y"].numpy())
+            probabilities = torch.sigmoid(logits.squeeze(0)).cpu().numpy()
+            cases.append(
+                {
+                    "track_id": str(sample["track_id"]),
+                    "text": sample["text"],
+                    "predictions": [
+                        {"label": label, "score": float(score)}
+                        for label, score in sorted(
+                            zip(labels, probabilities),
+                            key=lambda item: item[1],
+                            reverse=True,
+                        )
+                    ],
+                }
+            )
+
+    metrics = multilabel_metrics(np.asarray(logits_rows), np.asarray(target_rows))
+    metrics["test_loss"] = float(np.mean(losses))
+    save_json(metrics, output_dir / "fusion_test_metrics.json")
+    save_json({"case_studies": cases}, output_dir / "fusion_case_studies.json")
+    return metrics
+
+
 def main() -> None:
     logger = configure_logging()
     parser = argparse.ArgumentParser(description="Evaluate project models.")
@@ -246,7 +311,12 @@ def main() -> None:
         logger.info("Evaluation complete: %s", metrics)
         print(metrics, flush=True)
         return
-    raise NotImplementedError("Only Task 2 gnn and genre_cnn evaluation is currently implemented.")
+    if args.task == "fusion":
+        metrics = evaluate_fusion(args.checkpoint, args.manifest, output_dir)
+        logger.info("Evaluation complete: %s", metrics)
+        print(metrics, flush=True)
+        return
+    raise NotImplementedError("BERT evaluation is not currently implemented.")
 
 
 if __name__ == "__main__":

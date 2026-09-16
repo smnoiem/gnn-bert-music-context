@@ -295,11 +295,17 @@ def run_epoch(model, data, optimizer, task, device):
     phase = "train" if training else "validation"
     for graph in progress(data, desc=f"{phase} batches", total=len(data)):
         graph = device_graph(graph, device); y = graph["y"].unsqueeze(0).to(device)
-        if task == "bert": prediction = model([graph["text"]])
-        else: prediction = model(graph, graph["text"])["logits"]
+        if task == "bert":
+            prediction = model([graph["text"]])
+            output = None
+        else:
+            output = model(graph, graph["text"])
+            prediction = output["logits"]
         loss = criterion(prediction, y)
-        if task == "fusion" and "emotion" in graph:
-            output = model(graph, graph["text"]); loss = loss + .1 * nn.functional.mse_loss(output["emotion"], graph["emotion"].unsqueeze(0))
+        if task == "fusion" and output is not None and "emotion" in graph:
+            loss = loss + .1 * nn.functional.mse_loss(
+                output["emotion"], graph["emotion"].unsqueeze(0)
+            )
         if training: optimizer.zero_grad(); loss.backward(); optimizer.step()
         losses.append(loss.item()); logits.append(prediction.detach().cpu().numpy()[0]); targets.append(y.cpu().numpy()[0])
     return float(np.mean(losses)), multilabel_metrics(np.asarray(logits), np.asarray(targets))
@@ -712,7 +718,7 @@ def main():
         train_genre_cnn(args, cfg)
         return
     train=MusicGraphDataset(args.manifest, "train"); val=MusicGraphDataset(args.manifest, "val", train.vocab)
-    num_labels=len(train.vocab); model_args=dict(num_labels=num_labels, text_hidden=cfg["model"]["text_hidden"], graph_hidden=cfg["model"]["gnn_hidden"], layers=cfg["model"]["gnn_layers"], dropout=cfg["model"]["dropout"], model_name=cfg["model"]["text_model"], freeze=cfg["training"]["freeze_text_encoder"])
+    num_labels=len(train.vocab); model_args=dict(num_labels=num_labels, graph_input=train[0]["x"].shape[1], text_hidden=cfg["model"]["text_hidden"], graph_hidden=cfg["model"]["gnn_hidden"], layers=cfg["model"]["gnn_layers"], dropout=cfg["model"]["dropout"], model_name=cfg["model"]["text_model"], max_length=cfg["data"]["max_text_length"], freeze=cfg["training"]["freeze_text_encoder"])
     if args.task == "bert": model=BertTagClassifier(num_labels, hidden_size=cfg["model"]["text_hidden"], model_name=cfg["model"]["text_model"], freeze=cfg["training"]["freeze_text_encoder"], local_files_only=args.synthetic)
     else: model=FusionModel(**model_args, cross_attention=not args.early_concat, local_files_only=args.synthetic)
     device=torch.device("cuda" if torch.cuda.is_available() else "cpu"); model.to(device); opt=torch.optim.AdamW(filter(lambda p:p.requires_grad, model.parameters()), lr=cfg["training"]["learning_rate"], weight_decay=cfg["training"]["weight_decay"])
