@@ -29,14 +29,17 @@ def load_manifest(manifest: str | Path) -> list[dict]:
 
 
 def label_vocabulary(rows: list[dict]) -> list[str]:
-    return sorted(
-        {
-            tag
-            for row in rows
-            for tag in str(row.get("labels", "")).split("|")
-            if tag
-        }
-    )
+    labels = {
+        label
+        for row in rows
+        for label in (
+            row.get("labels", [])
+            if isinstance(row.get("labels"), list)
+            else str(row.get("labels", "")).split("|")
+        )
+        if str(label).strip()
+    }
+    return sorted(labels)
 
 
 def genre_vocabulary(rows: list[dict]) -> list[str]:
@@ -79,18 +82,28 @@ class MusicGraphDataset(Dataset):
         assert_no_artist_leakage(rows)
         self.rows = [row for row in rows if split is None or row.get("split") == split]
         self.vocab = vocab or label_vocabulary(rows)
+        self.manifest_parent = Path(manifest).resolve().parent
 
     def __len__(self) -> int:
         return len(self.rows)
 
     def __getitem__(self, index: int) -> dict:
         row = self.rows[index]
-        graph = torch.load(row["graph"], weights_only=False)
-        tagged = set(str(row["labels"]).split("|"))
-        graph["y"] = torch.tensor(
-            [label in tagged for label in self.vocab], dtype=torch.float32
-        )
-        graph["text"] = row.get("text", "")
+        graph_path = Path(row["graph"])
+        if not graph_path.is_absolute():
+            graph_path = self.manifest_parent / graph_path
+        graph = torch.load(graph_path, weights_only=False)
+        if "target" in row:
+            target = row["target"]
+        else:
+            tagged = set(
+                row.get("labels", [])
+                if isinstance(row.get("labels"), list)
+                else str(row.get("labels", "")).split("|")
+            )
+            target = [label in tagged for label in self.vocab]
+        graph["y"] = torch.tensor(target, dtype=torch.float32)
+        graph["text"] = row.get("bert_text", row.get("text", ""))
         graph["track_id"] = row["track_id"]
         if "valence" in row:
             graph["emotion"] = torch.tensor(
@@ -691,7 +704,7 @@ def train_genre_cnn(args, cfg) -> None:
 
 def main():
     configure_logging()
-    ap=argparse.ArgumentParser(); ap.add_argument("--task", choices=["bert","gnn","fusion","genre_cnn"], required=True); ap.add_argument("--config", default="config.yaml"); ap.add_argument("--manifest"); ap.add_argument("--metadata"); ap.add_argument("--audio-root"); ap.add_argument("--synthetic", action="store_true"); ap.add_argument("--epochs", type=int); ap.add_argument("--early-concat", action="store_true"); ap.add_argument("--run-name"); args=ap.parse_args()
+    ap=argparse.ArgumentParser(); ap.add_argument("--task", choices=["bert","gnn","fusion","genre_cnn"], required=True); ap.add_argument("--config", default="config.yaml"); ap.add_argument("--manifest"); ap.add_argument("--metadata"); ap.add_argument("--audio-root"); ap.add_argument("--labels"); ap.add_argument("--synthetic", action="store_true"); ap.add_argument("--epochs", type=int); ap.add_argument("--early-concat", action="store_true"); ap.add_argument("--run-name"); args=ap.parse_args()
     with open(args.config, encoding="utf-8") as stream:
         cfg = yaml.safe_load(stream)
     seed_everything(cfg["seed"])
@@ -717,7 +730,14 @@ def main():
     if args.task == "genre_cnn":
         train_genre_cnn(args, cfg)
         return
-    train=MusicGraphDataset(args.manifest, "train"); val=MusicGraphDataset(args.manifest, "val", train.vocab)
+    label_vocabulary_path = args.labels
+    if args.task == "fusion" and not label_vocabulary_path:
+        ap.error("--labels is required for fusion training")
+    vocabulary = None
+    if label_vocabulary_path:
+        with open(label_vocabulary_path, encoding="utf-8") as stream:
+            vocabulary = json.load(stream)["labels"]
+    train=MusicGraphDataset(args.manifest, "train", vocabulary); val=MusicGraphDataset(args.manifest, "val", train.vocab)
     num_labels=len(train.vocab); model_args=dict(num_labels=num_labels, graph_input=train[0]["x"].shape[1], text_hidden=cfg["model"]["text_hidden"], graph_hidden=cfg["model"]["gnn_hidden"], layers=cfg["model"]["gnn_layers"], dropout=cfg["model"]["dropout"], model_name=cfg["model"]["text_model"], max_length=cfg["data"]["max_text_length"], freeze=cfg["training"]["freeze_text_encoder"])
     if args.task == "bert": model=BertTagClassifier(num_labels, hidden_size=cfg["model"]["text_hidden"], model_name=cfg["model"]["text_model"], freeze=cfg["training"]["freeze_text_encoder"], local_files_only=args.synthetic)
     else: model=FusionModel(**model_args, cross_attention=not args.early_concat, local_files_only=args.synthetic)
