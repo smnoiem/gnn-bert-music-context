@@ -134,20 +134,24 @@ Task 3 uses **FMA-small only**. Each example is an FMA track represented by:
 
 - a graph of its 5-second audio segments;
 - its FMA genre and tag metadata;
-- a fixed multilabel target vector.
+- one top-level genre target.
 
-The label vocabulary is capped at 100 labels. All unique values from the
-track genre column are included first, sorted lexicographically. Remaining
-slots are filled by the most frequent values from the array-valued tag column.
-Frequency ties are resolved lexicographically, making the vocabulary
-reproducible. Tags duplicating a genre are not added twice.
+Task 3 is a **single-label multi-class genre-classification** task. The target
+is `track_genre_top`, so each track has exactly one class and training uses
+`CrossEntropyLoss`. Tags are scanned and retained for descriptive statistics,
+but are not combined with genres as primary target classes. The earlier
+genre-plus-tag 100-label multihot format is not the main Task 3 target.
 
-Run the three preparation stages separately:
+The complete decision record is in
+[`task3_decisions.md`](C:/Users/user5/projects/gnn-bert-music-context.worktrees/task3-gnn-bert-fusion-implementation/task3_decisions.md).
+
+Run the metadata inventory stage:
 
 ```powershell
 python -m src.prepare_task3_labels scan `
   --tracks-csv data\raw\fma\fma_metadata\tracks.csv `
   --output data\processed\task3\task3_metadata_scan.json
+<<<<<<< Updated upstream
 ```
 ```
 python -m src.prepare_task3_labels select `
@@ -160,14 +164,63 @@ python -m src.prepare_task3_labels prepare `
   --tracks-csv data\raw\fma\fma_metadata\tracks.csv `
   --labels data\processed\task3\labels.json `
   --output data\processed\task3\fma_task3_labels.csv
+=======
+>>>>>>> Stashed changes
 ```
 
-The first output contains every unique genre and tag plus their frequencies.
-The second output contains the fixed 100-label vocabulary. The third output
-contains the original track metadata plus one `label_<label>` binary column
-per selected label and a pipe-delimited `task3_labels` column. The genre and
-tag values are retained as source metadata; the new label columns are the
-training targets.
+The scan output contains every unique genre and tag and their frequencies.
+Create the fixed primary genre vocabulary and the derived training CSV:
+
+```powershell
+python -m src.prepare_task3_labels select-genres `
+  --scan data\processed\task3\task3_metadata_scan.json `
+  --output data\processed\task3\genre_vocabulary.json
+
+python -m src.prepare_task3_labels prepare-genre `
+  --tracks-csv data\raw\fma\fma_metadata\tracks.csv `
+  --genres data\processed\task3\genre_vocabulary.json `
+  --output data\processed\task3\fma_task3_genre.csv
+```
+
+The derived CSV contains the original metadata plus:
+
+```text
+track_genre_top,genre_label,genre_index
+Rock,Rock,4
+```
+
+`genre_index` is the scalar target for `CrossEntropyLoss`; it is not a
+one-hot or multihot vector.
+
+The source `tracks.csv` is never modified. Artist-level train/validation/test
+splits must be created after validation and preserved in the derived dataset.
+
+Build the BERT input text as a separate final preparation stage:
+
+```powershell
+python -m src.prepare_task3_labels prepare-text `
+  --input data\processed\task3\fma_task3_genre.csv `
+  --output data\processed\task3\fma_task3_text.csv
+```
+
+This appends a `bert_text` column by combining safe text-valued metadata
+columns in deterministic CSV order, for example:
+
+```text
+album: Ambient Sessions. track: Sunrise
+```
+
+The automatic mode excludes genre and tag fields, `genre_label`,
+`genre_index`, existing `label_*` columns, IDs, paths, and split fields. This
+prevents the target from leaking into BERT input. Use `--columns` to provide
+an explicit safe list when the FMA export has known title/album column names:
+
+```powershell
+python -m src.prepare_task3_labels prepare-text `
+  --input data\processed\task3\fma_task3_genre.csv `
+  --output data\processed\task3\fma_task3_text.csv `
+  --columns album_title track_title
+```
 
 The Task 3 architecture is:
 
