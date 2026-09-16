@@ -315,9 +315,42 @@ def multilabel_metrics(logits: Iterable, targets: Iterable) -> dict[str, float]:
     return {
         "macro_f1": float(np.mean(per_label)),
         "micro_f1": micro_f1,
+        "label_accuracy": float(np.mean(actual == predicted)),
+        "exact_match_accuracy": float(np.mean(np.all(actual == predicted, axis=1))),
         "mean_ap": mean_ap,
         "auc_pr": mean_ap,
     }
+
+
+def multilabel_diagnostics(
+    logits: Iterable, targets: Iterable, labels: Sequence[str]
+) -> dict:
+    """Return per-label scores and binary confusion counts for Task 3 reports."""
+    scores = 1.0 / (1.0 + np.exp(-np.asarray(logits)))
+    actual = np.asarray(targets).astype(int)
+    predicted = (scores >= 0.5).astype(int)
+    per_label = []
+    confusion = []
+    for index, label in enumerate(labels):
+        y, p = actual[:, index], predicted[:, index]
+        tp = int(((y == 1) & (p == 1)).sum())
+        fp = int(((y == 0) & (p == 1)).sum())
+        fn = int(((y == 1) & (p == 0)).sum())
+        tn = int(((y == 0) & (p == 0)).sum())
+        per_label.append(
+            {
+                "label": label,
+                "support": int(y.sum()),
+                "f1": float(2 * tp / max(2 * tp + fp + fn, 1)),
+                "average_precision": float(
+                    (np.cumsum(y[np.argsort(-scores[:, index])]) /
+                     np.arange(1, len(y) + 1) *
+                     y[np.argsort(-scores[:, index])]).sum() / max(y.sum(), 1)
+                ) if y.sum() else None,
+            }
+        )
+        confusion.append({"label": label, "tn": tn, "fp": fp, "fn": fn, "tp": tp})
+    return {"per_label": per_label, "confusion": confusion}
 
 
 # Descriptive aliases make the Task 3-only API convenient for small fixture

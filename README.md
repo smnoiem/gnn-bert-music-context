@@ -261,15 +261,20 @@ the same manifest and splits:
 ```powershell
 python -m src.train_task3 --model bert --run-name task3_bert_only `
   --manifest data\processed\task3\task3_fusion_manifest.jsonl `
-  --labels data\processed\task3\labels.json
+  --labels data\processed\task3\labels.json `
+  --output-dir results\task3
 python -m src.train_task3 --model gnn --run-name task3_gnn_only `
   --manifest data\processed\task3\task3_fusion_manifest.jsonl `
-  --labels data\processed\task3\labels.json
+  --labels data\processed\task3\labels.json `
+  --output-dir results\task3
 ```
 
 Each run writes `<run-name>_best.pt` and `<run-name>_metrics.json` under the
-selected output directory.  The metrics JSON reports train, validation, and
-test Macro-F1, Micro-F1, mean AP (also exposed as `auc_pr`), and loss.
+selected output directory. Training history contains train/validation loss,
+Macro-F1, Micro-F1, label-level accuracy, exact-match accuracy, and mean AP
+(also exposed as `auc_pr`). Test evaluation, plots, per-label reports,
+confusion analysis, t-SNE, and case studies are deferred to the later Task 3
+evaluation and analysis phase.
 
 After the verified Task 3 manifest is available, run the primary fusion
 condition with graph-guided cross-attention:
@@ -281,6 +286,7 @@ python -m src.train `
   --manifest data\processed\task3\task3_fusion_manifest.jsonl `
   --labels data\processed\task3\labels.json `
   --run-name task3_fusion_cross_attention `
+  --output-dir results\task3 `
   --epochs 10
 ```
 
@@ -294,6 +300,7 @@ python -m src.train `
   --labels data\processed\task3\labels.json `
   --run-name task3_fusion_early_concat `
   --early-concat `
+  --output-dir results\task3 `
   --epochs 10
 ```
 
@@ -302,9 +309,9 @@ Evaluate a fusion checkpoint:
 ```powershell
 python -m src.evaluate `
   --task fusion `
-  --checkpoint results\task3_fusion_cross_attention_best.pt `
+  --checkpoint results\task3\task3_fusion_cross_attention_best.pt `
   --manifest data\processed\task3\task3_fusion_manifest.jsonl `
-  --output-dir results
+  --output-dir results\task3
 ```
 
 The fusion trainer uses the fixed vocabulary order from `labels.json`, creates
@@ -515,7 +522,7 @@ python -m src.train --task fusion --config config.yaml --manifest data\processed
 The default Task 3 condition uses graph-guided cross-attention:
 
 ```powershell
-python -m src.train --task fusion --config config.yaml --manifest data\processed\manifest.jsonl --run-name task3_fusion_cross_attention --epochs 10
+python -m src.train --task fusion --config config.yaml --manifest data\processed\manifest.jsonl --run-name task3_fusion_cross_attention --output-dir results\task3 --epochs 10
 ```
 
 Evaluate either saved fusion checkpoint on the held-out test split:
@@ -523,9 +530,9 @@ Evaluate either saved fusion checkpoint on the held-out test split:
 ```powershell
 python -m src.evaluate `
   --task fusion `
-  --checkpoint results\task3_fusion_cross_attention_best.pt `
+  --checkpoint results\task3\task3_fusion_cross_attention_best.pt `
   --manifest data\processed\manifest.jsonl `
-  --output-dir results
+  --output-dir results\task3
 ```
 
 Evaluation writes `fusion_test_metrics.json` and
@@ -533,8 +540,8 @@ Evaluation writes `fusion_test_metrics.json` and
 caption/text, multilabel `labels`, split, and artist identifier; the same
 artist-level split constraint used by Task 2 is enforced.
 
-All checkpoints, metric histories, and learning curves are written to
-`results\`. The text model configured by default is
+Task 3 checkpoints, metric histories, and evaluation artifacts are written to
+`results\task3\`; Task 2 artifacts remain under `results\task2\`. The text model configured by default is
 `distilbert-base-uncased`; change `model.text_model` in `config.yaml` only when
 you intentionally want to use another Hugging Face checkpoint.
 

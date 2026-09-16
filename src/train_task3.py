@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import random
 from pathlib import Path
 from typing import Any
@@ -16,7 +17,7 @@ from torch.nn.utils import clip_grad_norm_
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
-
+from .utils import configure_logging
 from .task3_training import (
     SPLITS,
     Task3BertOnlyModel,
@@ -31,6 +32,7 @@ from .task3_training import (
     validate_manifest,
 )
 
+LOGGER = logging.getLogger("music-context.task3")
 
 def _seed_everything(seed: int) -> None:
     random.seed(seed)
@@ -240,6 +242,19 @@ def train_task3(
             "learning_rate": optimizer.param_groups[0]["lr"],
         }
         history.append(record)
+        LOGGER.info(
+            "Epoch %d/%d | train loss=%.5f Macro-F1=%.4f Micro-F1=%.4f | "
+            "val loss=%.5f Macro-F1=%.4f Micro-F1=%.4f mean AUC-PR=%.4f",
+            epoch,
+            epochs,
+            train_loss,
+            train_metrics["macro_f1"],
+            train_metrics["micro_f1"],
+            val_loss,
+            val_metrics["macro_f1"],
+            val_metrics["micro_f1"],
+            val_metrics["auc_pr"],
+        )
         if val_metrics["macro_f1"] > best_score + min_delta:
             best_score = val_metrics["macro_f1"]
             stale = 0
@@ -271,15 +286,19 @@ def train_task3(
         raise RuntimeError("Training did not produce a best checkpoint")
     checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
     model.load_state_dict(checkpoint["model_state"])
-    result = {
-        split: _run_epoch(model, loaders[split], criterion, device)[1]
-        for split in SPLITS
-    }
-    result["best_epoch"] = {"epoch": checkpoint["epoch"]}
+    result = {"best_epoch": {"epoch": checkpoint["epoch"]}}
     metrics_path = output / f"{run_name}_metrics.json"
     metrics_path.write_text(
         json.dumps({"metrics": result, "history": history}, indent=2, allow_nan=True),
         encoding="utf-8",
+    )
+    LOGGER.info(
+        "%s best epoch=%d | validation Macro-F1=%.4f Micro-F1=%.4f mean AUC-PR=%.4f",
+        run_name,
+        checkpoint["epoch"],
+        checkpoint["val_metrics"]["macro_f1"],
+        checkpoint["val_metrics"]["micro_f1"],
+        checkpoint["val_metrics"]["auc_pr"],
     )
     return result
 
@@ -312,6 +331,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
+    configure_logging()
     args = build_parser().parse_args()
     overrides = vars(args).copy()
     config_path = overrides.pop("config_path")

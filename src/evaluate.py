@@ -292,9 +292,13 @@ def main() -> None:
     parser.add_argument(
         "--task", choices=["gnn", "genre_cnn", "bert", "fusion"], required=True
     )
-    parser.add_argument("--output-dir", default="results/task2")
+    parser.add_argument(
+        "--output-dir",
+        help="Output directory; defaults to results/task3 for fusion and results/task2 otherwise.",
+    )
     args = parser.parse_args()
-    output_dir = ensure_dir(args.output_dir)
+    default_output_dir = "results/task3" if args.task == "fusion" else "results/task2"
+    output_dir = ensure_dir(args.output_dir or default_output_dir)
     if args.task == "gnn":
         metrics = evaluate_gnn(args.checkpoint, args.manifest, output_dir)
         logger.info("Evaluation complete: %s", metrics)

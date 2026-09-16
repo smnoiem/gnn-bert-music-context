@@ -709,7 +709,7 @@ def train_genre_cnn(args, cfg) -> None:
 
 def main():
     configure_logging()
-    ap=argparse.ArgumentParser(); ap.add_argument("--task", choices=["bert","gnn","fusion","genre_cnn"], required=True); ap.add_argument("--config", default="config.yaml"); ap.add_argument("--manifest"); ap.add_argument("--metadata"); ap.add_argument("--audio-root"); ap.add_argument("--labels"); ap.add_argument("--synthetic", action="store_true"); ap.add_argument("--epochs", type=int); ap.add_argument("--early-concat", action="store_true"); ap.add_argument("--run-name"); args=ap.parse_args()
+    ap=argparse.ArgumentParser(); ap.add_argument("--task", choices=["bert","gnn","fusion","genre_cnn"], required=True); ap.add_argument("--config", default="config.yaml"); ap.add_argument("--manifest"); ap.add_argument("--metadata"); ap.add_argument("--audio-root"); ap.add_argument("--labels"); ap.add_argument("--synthetic", action="store_true"); ap.add_argument("--epochs", type=int); ap.add_argument("--early-concat", action="store_true"); ap.add_argument("--run-name"); ap.add_argument("--output-dir"); args=ap.parse_args()
     with open(args.config, encoding="utf-8") as stream:
         cfg = yaml.safe_load(stream)
     seed_everything(cfg["seed"])
@@ -747,7 +747,8 @@ def main():
     if args.task == "bert": model=BertTagClassifier(num_labels, hidden_size=cfg["model"]["text_hidden"], model_name=cfg["model"]["text_model"], freeze=cfg["training"]["freeze_text_encoder"], local_files_only=args.synthetic)
     else: model=FusionModel(**model_args, cross_attention=not args.early_concat, local_files_only=args.synthetic)
     device=torch.device("cuda" if torch.cuda.is_available() else "cpu"); model.to(device); opt=torch.optim.AdamW(filter(lambda p:p.requires_grad, model.parameters()), lr=cfg["training"]["learning_rate"], weight_decay=cfg["training"]["weight_decay"])
-    results=ensure_dir("results"); run_name=args.run_name or args.task; history=[]; best=-1
+    default_results = "results/task3" if args.task == "fusion" else "results"
+    results=ensure_dir(args.output_dir or default_results); run_name=args.run_name or args.task; history=[]; best=-1
     total_epochs = args.epochs or cfg["training"]["epochs"]
     LOGGER.info("Starting %s for %d epochs on %s", run_name, total_epochs, device)
     for epoch in range(total_epochs):
