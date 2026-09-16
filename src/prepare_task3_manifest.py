@@ -9,6 +9,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from .utils import progress
+
 
 def load_jsonl(path: Path) -> list[dict]:
     with path.open(encoding="utf-8") as stream:
@@ -48,7 +50,11 @@ def build_task3_manifest(
     output_rows = []
     seen_tracks: set[int] = set()
     artists: dict[int, str] = {}
-    for graph_row in rows:
+    for graph_row in progress(
+        rows,
+        desc="Joining Task 3 graph/text/labels",
+        total=len(rows),
+    ):
         track_id = int(graph_row["track_id"])
         if track_id in seen_tracks:
             raise ValueError(f"Graph manifest contains duplicate track_id: {track_id}")

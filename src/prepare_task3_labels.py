@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Iterable
 
 import pandas as pd
+from .utils import progress
 
 
 def _flatten_columns(columns: pd.MultiIndex) -> list[str]:
@@ -100,14 +101,17 @@ def scan_task3_metadata(tracks_csv: str | Path, output: str | Path) -> dict:
     tag_column = _find_column(
         tracks.columns, ("track_tags", "tags", "tag", "track_tag")
     )
-    genre_counts = Counter(
-        normalize_label(value)
-        for value in tracks[genre_column]
-        if normalize_label(value) and normalize_label(value) != "nan"
-    )
-    tag_counts = Counter(
-        tag for value in tracks[tag_column] for tag in parse_array_cell(value)
-    )
+    genre_counts = Counter()
+    tag_counts = Counter()
+    for _, row in progress(
+        tracks[[genre_column, tag_column]].itertuples(index=False, name=None),
+        desc="Scanning genres and tags",
+        total=len(tracks),
+    ):
+        genre = normalize_label(row[0])
+        if genre and genre != "nan":
+            genre_counts[genre] += 1
+        tag_counts.update(parse_array_cell(row[1]))
     result = {
         "tracks_scanned": len(tracks),
         "genre_column": genre_column,
@@ -244,16 +248,22 @@ def prepare_task3_text_dataset(
             return ""
         return f"{column}: {text}"
 
-    tracks["bert_text"] = [
-        ". ".join(
-            value
-            for column in candidates
-            for value in [format_value(column, row[column])]
-            if value
+    bert_text = []
+    for _, row in progress(
+        tracks.iterrows(),
+        desc="Building BERT text",
+        total=len(tracks),
+    ):
+        bert_text.append(
+            ". ".join(
+                value
+                for column in candidates
+                for value in [format_value(column, row[column])]
+                if value
+            )
+            or "no track metadata available"
         )
-        or "no track metadata available"
-        for _, row in tracks.iterrows()
-    ]
+    tracks["bert_text"] = bert_text
     output_path = Path(output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     tracks.to_csv(output_path, index=False)
@@ -280,13 +290,16 @@ def prepare_task3_dataset(
         )
     )
     track_tags = tracks[tag_column].map(parse_array_cell).map(set)
-    label_values = {
-        f"label_{label}": [
-            int(label in genres or label in tags)
-            for genres, tags in zip(track_genres, track_tags)
-        ]
-        for label in labels
-    }
+    label_values = {f"label_{label}": [] for label in labels}
+    for genres, tags in progress(
+        zip(track_genres, track_tags),
+        desc="Encoding multihot labels",
+        total=len(tracks),
+    ):
+        for label in labels:
+            label_values[f"label_{label}"].append(
+                int(label in genres or label in tags)
+            )
     label_frame = pd.DataFrame(label_values, index=tracks.index, dtype="int8")
     tracks = pd.concat([tracks, label_frame], axis=1)
     tracks["task3_labels"] = [
