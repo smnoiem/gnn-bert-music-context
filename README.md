@@ -128,6 +128,61 @@ results\
     cnn_melspectrogram_genre_metrics.json
 ```
 
+### Task 3 dataset and fixed labels
+
+Task 3 uses **FMA-small only**. Each example is an FMA track represented by:
+
+- a graph of its 5-second audio segments;
+- its FMA genre and tag metadata;
+- a fixed multilabel target vector.
+
+The label vocabulary is capped at 100 labels. All unique values from the
+track genre column are included first, sorted lexicographically. Remaining
+slots are filled by the most frequent values from the array-valued tag column.
+Frequency ties are resolved lexicographically, making the vocabulary
+reproducible. Tags duplicating a genre are not added twice.
+
+Run the three preparation stages separately:
+
+```powershell
+python -m src.prepare_task3_labels scan `
+  --tracks-csv data\raw\fma\fma_metadata\tracks.csv `
+  --output data\processed\task3\task3_metadata_scan.json
+
+python -m src.prepare_task3_labels select `
+  --scan data\processed\task3\task3_metadata_scan.json `
+  --output data\processed\task3\labels.json `
+  --max-labels 100
+
+python -m src.prepare_task3_labels prepare `
+  --tracks-csv data\raw\fma\fma_metadata\tracks.csv `
+  --labels data\processed\task3\labels.json `
+  --output data\processed\task3\fma_task3_labels.csv
+```
+
+The first output contains every unique genre and tag plus their frequencies.
+The second output contains the fixed 100-label vocabulary. The third output
+contains the original track metadata plus one `label_<label>` binary column
+per selected label and a pipe-delimited `task3_labels` column. The genre and
+tag values are retained as source metadata; the new label columns are the
+training targets.
+
+The Task 3 architecture is:
+
+```text
+FMA audio -> 5-second feature graph -> residual GraphSAGE
+          -> mean/max/std pooling -> graph embedding
+FMA track title/album text -> BERT -> text embedding
+graph embedding + text embedding -> cross-attention or early-concat classifier
+FMA genre/tags -> fixed 100-label multilabel target
+```
+
+The BERT input must use only non-target metadata fields such as track title and
+album title. It must not serialize the genre or tag columns into the input,
+because those columns define the prediction target and would leak the labels.
+If the chosen FMA export has no usable title/album fields, the honest fallback
+is a GNN-only model; a fabricated caption or random text pairing is invalid.
+
 Build the segment graphs:
 
 ```powershell
@@ -311,6 +366,27 @@ For the Task 3 early-concatenation comparison:
 ```powershell
 python -m src.train --task fusion --config config.yaml --manifest data\processed\manifest.jsonl --run-name task3_fusion_early_concat --epochs 10 --early-concat
 ```
+
+The default Task 3 condition uses graph-guided cross-attention:
+
+```powershell
+python -m src.train --task fusion --config config.yaml --manifest data\processed\manifest.jsonl --run-name task3_fusion_cross_attention --epochs 10
+```
+
+Evaluate either saved fusion checkpoint on the held-out test split:
+
+```powershell
+python -m src.evaluate `
+  --task fusion `
+  --checkpoint results\task3_fusion_cross_attention_best.pt `
+  --manifest data\processed\manifest.jsonl `
+  --output-dir results
+```
+
+Evaluation writes `fusion_test_metrics.json` and
+`fusion_case_studies.json`. The fusion manifest must contain each graph path,
+caption/text, multilabel `labels`, split, and artist identifier; the same
+artist-level split constraint used by Task 2 is enforced.
 
 All checkpoints, metric histories, and learning curves are written to
 `results\`. The text model configured by default is
