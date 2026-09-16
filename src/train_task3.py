@@ -28,6 +28,7 @@ from .task3_training import (
     load_labels,
     multilabel_metrics,
     positive_weight,
+    progress,
     validate_manifest,
 )
 
@@ -61,12 +62,14 @@ def _run_epoch(
     device: torch.device,
     optimizer: torch.optim.Optimizer | None = None,
     clip_norm: float | None = 1.0,
+    desc: str = "Batches",
 ) -> tuple[float, dict[str, float]]:
     training = optimizer is not None
     model.train(training)
     total_loss, examples = 0.0, 0
     all_logits, all_targets = [], []
-    for batch in loader:
+    batches = progress(loader, desc=desc, total=len(loader))
+    for batch in batches:
         graph = {key: value.to(device) for key, value in batch["graph"].items()}
         targets = batch["targets"].to(device)
         if training:
@@ -88,6 +91,7 @@ def _run_epoch(
         raise ValueError("DataLoader produced no batches")
     metrics = multilabel_metrics(torch.cat(all_logits), torch.cat(all_targets))
     metrics["loss"] = total_loss / max(examples, 1)
+    batches.set_postfix(loss=f"{metrics['loss']:.4f}", macro_f1=f"{metrics['macro_f1']:.4f}")
     return metrics["loss"], metrics
 
 
@@ -225,11 +229,28 @@ def train_task3(
     checkpoint_path = output / f"{run_name}_best.pt"
     best_score, stale = -float("inf"), 0
     history: list[dict[str, Any]] = []
-    for epoch in range(1, epochs + 1):
+    epoch_bar = progress(
+        range(1, epochs + 1),
+        desc=f"Training {model_kind}",
+        total=epochs,
+    )
+    for epoch in epoch_bar:
         train_loss, train_metrics = _run_epoch(
-            model, loaders["train"], criterion, device, optimizer, clip_norm
+            model,
+            loaders["train"],
+            criterion,
+            device,
+            optimizer,
+            clip_norm,
+            desc=f"Epoch {epoch}/{epochs} train",
         )
-        val_loss, val_metrics = _run_epoch(model, loaders["val"], criterion, device)
+        val_loss, val_metrics = _run_epoch(
+            model,
+            loaders["val"],
+            criterion,
+            device,
+            desc=f"Epoch {epoch}/{epochs} val",
+        )
         scheduler.step(val_metrics["macro_f1"])
         record = {
             "epoch": epoch,
@@ -240,6 +261,12 @@ def train_task3(
             "learning_rate": optimizer.param_groups[0]["lr"],
         }
         history.append(record)
+        epoch_bar.set_postfix(
+            train_loss=f"{train_loss:.4f}",
+            val_loss=f"{val_loss:.4f}",
+            val_macro_f1=f"{val_metrics['macro_f1']:.4f}",
+            best="yes" if val_metrics["macro_f1"] >= best_score + min_delta else "no",
+        )
         if val_metrics["macro_f1"] > best_score + min_delta:
             best_score = val_metrics["macro_f1"]
             stale = 0
@@ -271,10 +298,20 @@ def train_task3(
         raise RuntimeError("Training did not produce a best checkpoint")
     checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
     model.load_state_dict(checkpoint["model_state"])
-    result = {
-        split: _run_epoch(model, loaders[split], criterion, device)[1]
-        for split in SPLITS
-    }
+    result = {}
+    evaluation_bar = progress(SPLITS, desc="Evaluating Task 3 splits", total=len(SPLITS))
+    for split in evaluation_bar:
+        result[split] = _run_epoch(
+            model,
+            loaders[split],
+            criterion,
+            device,
+            desc=f"Evaluate {split}",
+        )[1]
+        evaluation_bar.set_postfix(
+            split=split,
+            macro_f1=f"{result[split]['macro_f1']:.4f}",
+        )
     result["best_epoch"] = {"epoch": checkpoint["epoch"]}
     metrics_path = output / f"{run_name}_metrics.json"
     metrics_path.write_text(

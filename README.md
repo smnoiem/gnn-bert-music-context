@@ -449,7 +449,10 @@ python -m src.evaluate `
 The fusion trainer uses the fixed vocabulary order from `labels.json`, creates
 one logit per selected label, and trains with `BCEWithLogitsLoss`. The
 cross-attention and early-concat runs must use identical manifests and
-splits.
+splits. Long-running Task 3 commands display progress bars for manifest
+validation, class-weight computation, each training and validation batch,
+epoch progression, and final train/validation/test evaluation. The bars write
+to stderr so structured JSON output on stdout remains usable.
 
 The Task 3 architecture is:
 

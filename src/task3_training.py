@@ -18,6 +18,7 @@ from torch.utils.data import Dataset
 
 from .bert_encoder import BertTextEncoder
 from .gnn_model import GraphSAGEEncoder
+from .utils import progress
 
 
 SPLITS = ("train", "val", "test")
@@ -72,7 +73,7 @@ def validate_manifest(
     counts = {split: 0 for split in SPLITS}
     artists: dict[str, str] = {}
     track_ids: set[str] = set()
-    for row in rows:
+    for row in progress(rows, desc="Validating Task 3 manifest", total=len(rows)):
         track_id = str(row.get("track_id", "")).strip()
         if not track_id or track_id in track_ids:
             raise ValueError(f"Missing or duplicate track_id in {manifest}")
@@ -197,7 +198,16 @@ def collate_task3_graphs(samples: list[dict]) -> dict:
 
 def positive_weight(dataset: Task3GraphDataset) -> torch.Tensor:
     """Compute ``negative / positive`` weights using only the given split."""
-    targets = torch.stack([dataset[index]["target"] for index in range(len(dataset))])
+    targets = torch.stack(
+        [
+            dataset[index]["target"]
+            for index in progress(
+                range(len(dataset)),
+                desc=f"Computing {dataset.split} positive weights",
+                total=len(dataset),
+            )
+        ]
+    )
     positives = targets.sum(dim=0)
     weights = torch.where(positives > 0, (len(dataset) - positives) / positives, torch.ones_like(positives))
     return weights.float()
