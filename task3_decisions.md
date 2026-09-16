@@ -18,48 +18,58 @@ implementation and report generation.
 
 ## Confirmed prediction task
 
-Task 3 is **single-label multi-class genre classification**, not multilabel
-genre/tag prediction.
+Task 3 is **multilabel genre/tag prediction**.
 
-- The target is the scalar `track_genre_top` value.
-- Each track has exactly one target genre.
-- The model predicts exactly one genre using `argmax`.
-- Training uses `CrossEntropyLoss`.
-- The output dimension is the number of selected genre classes.
-- FMA tags are not primary targets.
+- The target combines the normalized `track_genre_top` value and normalized
+  values from the `track_tags` array.
+- A track may have multiple positive labels.
+- The model outputs one logit per selected label.
+- Training uses `BCEWithLogitsLoss`.
+- The target is a fixed-length multihot vector.
+- A label is present when it matches the track genre or appears in the track's
+  tag array.
 
-Tags may be retained for descriptive statistics or a future auxiliary
-multi-label experiment, but they must not be combined with the primary genre
-target for the main Task 3 result.
+The fixed vocabulary contains at most 100 labels:
+
+1. Include all unique normalized genres first.
+2. Fill remaining slots with the most frequent normalized tags.
+3. Exclude tags already represented as genres.
+4. Resolve frequency ties deterministically.
+
+The exact ordered vocabulary must be persisted in JSON and reused for every
+split and experiment.
 
 ## Metadata preparation decisions
 
 The preparation process is intentionally split into reproducible stages:
 
-1. **Scan:** read the complete `tracks.csv`, parse the genre and array-valued
-   tag columns, and write all unique values and frequencies.
-2. **Select:** use the complete genre list as the fixed multi-class vocabulary.
-   Tags are reported for analysis only and do not become primary classes.
+1. **Scan:** read the complete `tracks.csv`, parse the genre and plain
+   array-valued tag columns, normalize values, and write all unique values and
+   frequencies.
+2. **Select:** include all genres and then the most frequent tags up to the
+   100-label limit.
 3. **Prepare:** write a new derived dataset containing the original metadata,
-   a deterministic integer `genre_index` target, and a `genre_label` display
-   column. The source `tracks.csv` is never modified.
+   one binary `label_<name>` column per selected label, and a
+   `task3_labels` convenience string. The source `tracks.csv` is never
+   modified.
 
-   ## BERT text preparation
+## BERT text preparation
 
-   The `prepare-text` command appends a `bert_text` column to a derived copy of
-   the genre dataset. Automatic column selection combines object/string metadata
-   columns while excluding genre fields, tag fields, target columns, IDs, paths,
-   and split fields. This avoids target leakage. The selected columns can be
-   overridden with an explicit safe `--columns` list after inspecting the scan.
+The `prepare-text` command appends a `bert_text` column to a derived copy of
+the prepared dataset. Automatic column selection combines object/string
+metadata columns while excluding genre fields, tag fields, target columns,
+IDs, paths, and split fields. This avoids target leakage. The selected columns
+can be overridden with an explicit safe `--columns` list after inspecting the
+scan.
 
-   The resulting text uses labeled fields, for example:
+The resulting text uses labeled fields, for example:
 
    ```text
    album: Ambient Sessions. track: Sunrise
    ```
 
-   The fallback text for a row with no usable metadata is
-   `no track metadata available`; genre and tags are never used as fallback text.
+The fallback text for a row with no usable metadata is
+`no track metadata available`; genre and tags are never used as fallback text.
 
 The current helper is:
 
@@ -67,45 +77,55 @@ The current helper is:
 src/prepare_task3_labels.py
 ```
 
-Its existing `scan` command is retained for full genre/tag inventory. The
-primary Task 3 training preparation must use the genre-only target contract
-above; the earlier 100-label multihot output is only an exploratory artifact
-and must not be used as the main multi-class target.
+Its `scan`, `select`, and `prepare` commands define the primary label
+preparation flow. The genre-only commands are not the primary Task 3 target.
 
 ## Target encoding
 
 For a fixed vocabulary such as:
 
 ```text
-["Blues", "Electronic", "Folk", "Jazz", "Rock"]
+["guitar", "jazz", "live", "rock"]
 ```
 
-the prepared target is:
+a track with genre `rock` and tags `["guitar", "live"]` has:
 
 ```text
-genre_label: Rock
-genre_index: 4
+[1, 0, 1, 1]
 ```
 
-For a batch of 32 tracks and five genres:
+Each selected label has its own binary position.
+
+For a batch of 32 tracks and 100 labels:
 
 ```text
-logits: [32, 5]
-targets: [32]
+logits:  [32, 100]
+targets: [32, 100]
 ```
 
 The expected training contract is:
 
 ```python
-loss = torch.nn.CrossEntropyLoss()(logits, targets)
-prediction = logits.argmax(dim=1)
+loss = torch.nn.BCEWithLogitsLoss()(logits, targets.float())
+probabilities = torch.sigmoid(logits)
 ```
+
+## Normalization and tag parsing
+
+- Normalize every genre and tag by trimming, lowercasing, and collapsing
+  repeated whitespace.
+- Treat `track_tags` as an array of tag strings.
+- Values such as `80s` are literal tag names, not counts.
+- Do not interpret tag values as `(name, count)` pairs.
+- Malformed tag entries are silently skipped according to the confirmed
+  preparation behavior.
+- Each track contributes a tag at most once to its target, even if a malformed
+  or repeated source entry contains duplicates.
 
 ## Reproducibility requirements
 
 - Preserve the exact ordered genre vocabulary in a JSON artifact.
-- Resolve genre normalization explicitly and consistently.
+- Resolve genre and tag normalization explicitly and consistently.
 - Record track counts per split and per genre.
-- Report missing or invalid genre values instead of silently assigning a
-  fallback class.
+- Report missing genre values instead of silently assigning a fallback label.
 - Generate the derived CSV under `data/processed/task3/`.
