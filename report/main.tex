@@ -177,6 +177,8 @@ progress reporting, and separate training commands for all ablation
 conditions. The final analytics command reads completed runs without
 retraining and produces rankings, metric deltas, plots, predictions, and
 case studies.
+The complete progression and the evidence retained at each stage are
+summarized in Table~\ref{tab:milestones}.
 
 \begin{table*}[t]
 \caption{Development milestones and preserved evidence.}
@@ -214,7 +216,8 @@ batch size 8, learning rate $2\times10^{-5}$, and the documented real run.
 Task 2 and Task 3 use the same seed/configuration contract; Task 3 runs are
 capped at 20 epochs and select the best validation Macro-F1 checkpoint.
 The primary Task 3 fusion run uses positive weighting and every ablation
-uses the same fixed label order.
+uses the same fixed label order. The consolidated settings are listed in
+Table~\ref{tab:hyperparameters}.
 
 \begin{table}[t]
 \caption{Core experimental hyperparameters.}
@@ -246,7 +249,8 @@ proxy labels, these values should be interpreted as a verification of the
 text pipeline and not as evidence of general MusicCaps tag understanding.
 The training trajectory in Fig.~\ref{fig:task1-curve} reaches a similarly
 high validation score quickly, consistent with the proxy nature of the target
-rather than difficult semantic generalization.
+rather than difficult semantic generalization. The held-out values are
+reported in Table~\ref{tab:task1}.
 
 \begin{table}[t]
 \caption{Task 1 test performance on the MusicCaps proxy task.}
@@ -314,7 +318,8 @@ Macro-F1 & \textbf{0.4544} & 0.4323 & +0.0222\\
 \end{table*}
 
 \noindent
-The per-class table is more informative than accuracy alone: GraphSAGE
+The per-genre breakdown in Table~\ref{tab:task2-perclass} is more informative
+than accuracy alone: GraphSAGE
 improves Electronic, International, and Pop, while the CNN has larger gains
 on Experimental, Instrumental, and Rock. Both models are strongest on
 Hip-Hop, suggesting that class separability and class frequency are not
@@ -389,7 +394,8 @@ This delta table is included because the absolute Task 3 scores alone hide
 the practical effect of adding audio. Cross-attention gives the largest
 micro-F1 improvement, while GNN-only gives the largest macro-F1 and PR-AUC
 improvements. None of the audio-containing conditions minimizes BCE test
-loss, so the result is not a uniformly dominant fusion model. The visual
+loss, so the result is not a uniformly dominant fusion model. These
+baseline-relative changes are reported in Table~\ref{tab:task3-deltas}. The visual
 comparison in Fig.~\ref{fig:task3-comparison} reinforces this
 metric-dependent ranking.
 
@@ -419,7 +425,8 @@ For the selected primary fusion run, Fig.~\ref{fig:task3-crossattn-curves}
 shows the train/validation history and Fig.~\ref{fig:task3-crossattn-pr}
 shows per-label precision--recall behavior. These figures support the
 overfitting and imbalance interpretation; Table~\ref{tab:task3} remains the
-primary cross-model evidence.
+primary cross-model evidence. The corresponding checkpoint epochs and test
+Macro-F1 values are summarized in Table~\ref{tab:epochs}.
 
 \begin{table}[t]
 \caption{Best validation epochs recorded in exported histories.}
