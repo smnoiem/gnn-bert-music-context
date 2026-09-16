@@ -263,7 +263,7 @@ class Task3FusionModel(nn.Module):
             nn.Linear(combined, num_labels),
         )
 
-    def forward(self, graph: dict, texts: Sequence[str]) -> torch.Tensor:
+    def fused_embedding(self, graph: dict, texts: Sequence[str]) -> torch.Tensor:
         graph_embedding = self.graph(graph)
         tokens, pooled = self.text(list(texts), return_tokens=True)
         if self.cross_attention:
@@ -271,7 +271,10 @@ class Task3FusionModel(nn.Module):
             semantic = self.attention(query, tokens, tokens, need_weights=False)[0].squeeze(1)
         else:
             semantic = pooled
-        return self.head(torch.cat((graph_embedding, semantic), dim=1))
+        return torch.cat((graph_embedding, semantic), dim=1)
+
+    def forward(self, graph: dict, texts: Sequence[str]) -> torch.Tensor:
+        return self.head(self.fused_embedding(graph, texts))
 
 
 class Task3BertOnlyModel(nn.Module):

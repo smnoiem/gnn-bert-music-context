@@ -231,43 +231,9 @@ python -m src.compare_task2_models `
   --output results\task2\task2_model_comparison.json
 ```
 
-For the Task 3 early-concatenation comparison:
-
-```powershell
-python -m src.train --task fusion --config config.yaml --manifest data\processed\manifest.jsonl --run-name task3_fusion_early_concat --epochs 10 --early-concat
-```
-
-The default Task 3 condition uses graph-guided cross-attention:
-
-```powershell
-python -m src.train --task fusion --config config.yaml --manifest data\processed\manifest.jsonl --run-name task3_fusion_cross_attention --epochs 10
-```
-
-Evaluate either saved fusion checkpoint on the held-out test split:
-
-```powershell
-python -m src.evaluate `
-  --task fusion `
-  --checkpoint results\task3_fusion_cross_attention_best.pt `
-  --manifest data\processed\manifest.jsonl `
-  --output-dir results
-```
-
-Evaluation writes `fusion_test_metrics.json` and
-`fusion_case_studies.json`. The fusion manifest must contain each graph path,
-caption/text, multilabel `labels`, split, and artist identifier; the same
-artist-level split constraint used by Task 2 is enforced.
-
-All checkpoints, metric histories, and learning curves are written to
-`results\`. The text model configured by default is
-`distilbert-base-uncased`; change `model.text_model` in `config.yaml` only when
-you intentionally want to use another Hugging Face checkpoint.
-
-
-
 ## Task 3 The GNN-BERT Fusion
 
-### dataset and fixed labels
+### Phase 1: Create the fixed Task 3 label vocabulary
 
 Task 3 uses **FMA-small only**. Each example is an FMA track represented by:
 
@@ -281,13 +247,13 @@ of the normalized `track_genre_top` value and normalized values in the
 `BCEWithLogitsLoss` with a fixed-length multihot target.
 
 The complete decision record is in
-[`task3_decisions.md`](C:/Users/user5/projects/gnn-bert-music-context.worktrees/task3-gnn-bert-fusion-implementation/task3_decisions.md).
+[`task3_decisions.md`](C:/Users/user5/projects/gnn-bert-music-context.worktrees/gnn-bert-fusion-multimodal-improvements/task3_decisions.md).
 
 The fixed vocabulary contains at most 100 labels: all normalized genres first,
 then the most frequent normalized tags, excluding tags already present as
 genres. Frequency ties must be resolved deterministically.
 
-Run the metadata inventory stage:
+Run the metadata inventory and vocabulary-selection commands in order:
 
 ```powershell
 python -m src.prepare_task3_labels scan `
@@ -296,8 +262,7 @@ python -m src.prepare_task3_labels scan `
 ```
 
 The scan output contains every unique normalized genre and tag and their
-frequencies. Create the fixed genre-plus-tag vocabulary and the derived
-multilabel training CSV:
+frequencies. Select the fixed vocabulary:
 
 ```powershell
 python -m src.prepare_task3_labels select `
@@ -306,7 +271,11 @@ python -m src.prepare_task3_labels select `
   --max-labels 100
 ```
 
-```
+### Phase 2: Prepare multilabel metadata and BERT text
+
+Create the derived multilabel CSV, then append the non-target BERT text:
+
+```powershell
 python -m src.prepare_task3_labels prepare `
   --tracks-csv data\raw\fma\fma_metadata\tracks.csv `
   --labels data\processed\task3\labels.json `
@@ -316,8 +285,6 @@ python -m src.prepare_task3_labels prepare `
 The derived CSV contains the original metadata plus one binary
 `label_<normalized_label>` column per selected label and a pipe-delimited
 `task3_labels` convenience column. The source `tracks.csv` is never modified.
-
-Generate the BERT text copy:
 
 ```powershell
 python -m src.prepare_task3_labels prepare-text `
@@ -349,7 +316,9 @@ Null/NaN values are omitted from each row's text. Tracks with no usable value
 in any of the nine selected fields are excluded from the BERT/fusion copy, and
 the command reports the retained row count.
 
-After the Task 2 graph manifest exists, create the verified Task 3 manifest:
+### Phase 3: Create the verified graph/text/label manifest
+
+Run this after the Task 2 graph manifest exists:
 
 ```powershell
 python -m src.prepare_task3_manifest `
@@ -370,17 +339,19 @@ The command reports how many graph tracks had no metadata match. It still
 rejects duplicate tracks, non-binary targets, invalid graph files, and artist
 leakage.
 
-## Task 3 training stages
+## Task 3 sequential training pipeline
 
-### Task 3-only batched trainer
+Continue with these phases after Phase 3. Every phase uses the same prepared
+metadata, fixed label vocabulary, and artist-disjoint split inherited from the
+Task 2 graph manifest.
 
-The dedicated Task 3 runner keeps the Task 2 trainer and manifests unchanged.
-It validates the fixed `train`/`val`/`test` manifest, checks every graph path,
-collates variable-size graphs into GraphSAGE batches, and tokenizes each text
-batch once for BERT.  The best validation Macro-F1 checkpoint is restored
-before test evaluation.  Loss is `BCEWithLogitsLoss`; use
-`--class-weighting positive` to compute `negative / positive` weights from the
-training split only.
+### Phase 4: Train the primary cross-attention model
+
+This is the main Task 3 result. The trainer restores the checkpoint with the
+best validation Macro-F1, then evaluates train, validation, and test splits.
+`--epochs` is the maximum number of epochs; early stopping is already enabled
+through `config.yaml` and stops sooner when validation Macro-F1 does not
+improve.
 
 ```powershell
 python -m src.train_task3 `
@@ -391,68 +362,121 @@ python -m src.train_task3 `
   --run-name task3_cross_attention `
   --output-dir results\task3 `
   --class-weighting positive `
-  --epochs 20
+  --epochs 20 `
+  --seed 42
 ```
 
-Use `--early-concat` for the fusion ablation.  Feasible unimodal baselines use
-the same manifest and splits:
+### Phase 5: Run the ablation models individually
+
+Because each model may require substantial time and GPU memory, the recommended
+workflow is to run and inspect each condition separately. A failed or
+interrupted condition can then be rerun without repeating completed runs.
+Use the same manifest, labels, seed, and training settings for every command:
 
 ```powershell
-python -m src.train_task3 --model bert --run-name task3_bert_only `
-  --manifest data\processed\task3\task3_fusion_manifest.jsonl `
-  --labels data\processed\task3\labels.json
-python -m src.train_task3 --model gnn --run-name task3_gnn_only `
-  --manifest data\processed\task3\task3_fusion_manifest.jsonl `
-  --labels data\processed\task3\labels.json
-```
-
-Each run writes `<run-name>_best.pt` and `<run-name>_metrics.json` under the
-selected output directory.  The metrics JSON reports train, validation, and
-test Macro-F1, Micro-F1, mean AP (also exposed as `auc_pr`), and loss.
-
-After the verified Task 3 manifest is available, run the primary fusion
-condition with graph-guided cross-attention:
-
-```powershell
-python -m src.train `
-  --task fusion `
-  --config config.yaml `
+# 1. BERT-only
+python -m src.train_task3 `
   --manifest data\processed\task3\task3_fusion_manifest.jsonl `
   --labels data\processed\task3\labels.json `
-  --run-name task3_fusion_cross_attention `
-  --epochs 10
-```
-
-Run the early-concatenation ablation with the same manifest and vocabulary:
-
-```powershell
-python -m src.train `
-  --task fusion `
   --config config.yaml `
+  --model bert `
+  --run-name task3_bert_only `
+  --output-dir results\task3\ablation `
+  --epochs 20 `
+  --seed 42
+
+# 2. GNN-only
+python -m src.train_task3 `
   --manifest data\processed\task3\task3_fusion_manifest.jsonl `
   --labels data\processed\task3\labels.json `
-  --run-name task3_fusion_early_concat `
+  --config config.yaml `
+  --model gnn `
+  --run-name task3_gnn_only `
+  --output-dir results\task3\ablation `
+  --epochs 20 `
+  --seed 42
+
+# 3. Early-concatenation fusion
+python -m src.train_task3 `
+  --manifest data\processed\task3\task3_fusion_manifest.jsonl `
+  --labels data\processed\task3\labels.json `
+  --config config.yaml `
+  --model fusion `
   --early-concat `
-  --epochs 10
+  --run-name task3_early_concat `
+  --output-dir results\task3\ablation `
+  --epochs 20 `
+  --seed 42
+
+# 4. Cross-attention fusion
+python -m src.train_task3 `
+  --manifest data\processed\task3\task3_fusion_manifest.jsonl `
+  --labels data\processed\task3\labels.json `
+  --config config.yaml `
+  --model fusion `
+  --run-name task3_cross_attention `
+  --output-dir results\task3\ablation `
+  --epochs 20 `
+  --seed 42
 ```
 
-Evaluate a fusion checkpoint:
+Live terminal output includes batch loss, epoch
+train/validation loss, validation Macro-F1, and the current best-checkpoint
+status. After each run, the filesystem contains the full metrics history,
+checkpoint, predictions, case studies, learning curves, PR curves, and (for
+fusion runs) the fused-embedding t-SNE plot. These individual commands store
+the files under `results\task3\ablation`.
+
+### Phase 6: Review generated metrics and plots
+
+After all four individual ablation runs are complete, run the comparison-only
+analytics command. It reads existing metrics files; it does not start
+training, load the dataset, or modify any model checkpoint.
 
 ```powershell
-python -m src.evaluate `
-  --task fusion `
-  --checkpoint results\task3_fusion_cross_attention_best.pt `
-  --manifest data\processed\task3\task3_fusion_manifest.jsonl `
-  --output-dir results
+python -m src.compare_task3_runs `
+  --input-dir results\task3\ablation `
+  --output-dir results\task3\ablation
 ```
 
-The fusion trainer uses the fixed vocabulary order from `labels.json`, creates
-one logit per selected label, and trains with `BCEWithLogitsLoss`. The
-cross-attention and early-concat runs must use identical manifests and
-splits. Long-running Task 3 commands display progress bars for manifest
-validation, class-weight computation, each training and validation batch,
-epoch progression, and final train/validation/test evaluation. The bars write
-to stderr so structured JSON output on stdout remains usable.
+Each completed model run writes a checkpoint, metrics history, predictions,
+and qualitative case studies. Plots are kept in the `plots` subdirectory so
+they are easy to distinguish from JSON and checkpoint files.
+
+```text
+results\task3\<run-name>_best.pt
+results\task3\<run-name>_metrics.json
+results\task3\<run-name>_predictions.json
+results\task3\<run-name>_case_studies.json
+results\task3\plots\<run-name>_learning_curves.png
+results\task3\plots\<run-name>_pr_curve.png
+results\task3\plots\<run-name>_fused_tsne.png
+```
+
+The learning curves show train/validation BCE loss and Macro-F1. The
+precision-recall plot shows one curve per label with positive test examples.
+The t-SNE plot uses fused test embeddings and dominant target labels; the
+confirmed Task 3 target has genre/tag labels, not DEAM mood labels.
+
+The ablation directory contains the same files for each condition plus:
+
+```text
+results\task3\ablation\task3_ablation_comparison.json
+results\task3\ablation\task3_ablation_analysis.txt
+results\task3\ablation\plots\task3_ablation_comparison.png
+```
+
+The comparison JSON reports held-out test Macro-F1, Micro-F1, mean AP/PR-AUC,
+and loss for all four conditions, ranks the models for every metric, and
+computes deltas against the BERT-only baseline. The text file summarizes the
+best model for each metric and the cross-attention change relative to BERT-only.
+The plot compares Macro-F1, Micro-F1, and PR-AUC side by side. If a metrics
+file is missing, the command stops with the exact run that must be completed.
+
+The dedicated trainer uses the fixed vocabulary order from `labels.json`,
+creates one logit per selected label, and trains with
+`BCEWithLogitsLoss`. Long-running phases display progress bars for manifest
+validation, class-weight computation, batches, epochs, and final evaluation.
 
 The Task 3 architecture is:
 
@@ -544,18 +568,6 @@ matching the full-track coverage of the graph model.
 Graph feature scaling is fitted only on training-track segments and reused for
 validation and test tracks, so similarity edges remain comparable without
 leaking evaluation statistics.
-
-## Ablation comparison
-
-After building the real graph manifest, run all four real-data conditions:
-
-```powershell
-python -m src.run_ablations --epochs 10
-```
-
-The ablation script runs BERT-only, GNN-only, early-concatenation fusion, and
-cross-attention fusion. Compare their test Macro-F1, Micro-F1, and mean
-PR-AUC in the report.
 
 ## Project directories
 
