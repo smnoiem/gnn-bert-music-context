@@ -235,8 +235,8 @@ def main() -> None:
         help="MusicCaps CSV, JSON, JSONL, or parquet file (defaults to the only CSV in data/raw).",
     )
     parser.add_argument("--model-name", default="distilbert-base-uncased")
-    parser.add_argument("--output-dir", type=Path, default=Path("results"))
-    parser.add_argument("--run-name", default="bert_musiccaps")
+    parser.add_argument("--output-dir", type=Path, default=Path("results/task1"))
+    parser.add_argument("--run-name", default="task1_distilbert")
     parser.add_argument("--epochs", type=int, default=5)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--learning-rate", type=float, default=2e-5)
@@ -359,6 +359,7 @@ def main() -> None:
     import matplotlib.pyplot as plt
 
     epochs = [record["epoch"] for record in history]
+    plots_dir = ensure_dir(output_dir / "plots")
     plt.figure(figsize=(7, 4))
     plt.plot(epochs, [record["val_macro_f1"] for record in history], label="validation Macro-F1")
     plt.plot(epochs, [record["val_micro_f1"] for record in history], label="validation Micro-F1")
@@ -366,7 +367,7 @@ def main() -> None:
     plt.ylabel("F1")
     plt.legend()
     plt.tight_layout()
-    plt.savefig(output_dir / f"{args.run_name}_f1_curve.png", dpi=160)
+    plt.savefig(plots_dir / f"{args.run_name}_f1_curve.png", dpi=160)
     plt.close()
     logger.info("Completed %s; test metrics: loss=%.4f, %s", args.run_name, test_loss, test_metrics)
 

@@ -76,6 +76,13 @@ data\
       val.json
       test.json
 results\
+  task1\
+    task1_distilbert_best.pt
+    task1_distilbert_metrics.json
+    task1_distilbert_test_metrics.json
+    task1_distilbert_predictions.json
+    plots\
+      task1_distilbert_f1_curve.png
   task2\
     graphsage_genre_best.pt
     graphsage_genre_metrics.json
@@ -107,20 +114,20 @@ proxy-task labels, not human-annotated MusicCaps tags.
 Run this from the repository root:
 
 ```powershell
-python -m src.train_bert_musiccaps --input data\raw\musiccaps\musiccaps_public.csv --model-name distilbert-base-uncased --output-dir results --run-name task1_distilbert --epochs 10 --batch-size 8 --learning-rate 2e-5 --max-length 128 --hidden-size 256 --seed 42
+python -m src.train_bert_musiccaps --input data\raw\musiccaps\musiccaps_public.csv --model-name distilbert-base-uncased --output-dir results\task1 --run-name task1_distilbert --epochs 10 --batch-size 8 --learning-rate 2e-5 --max-length 128 --hidden-size 256 --seed 42
 ```
 
 This command uses the best validation Macro-F1 checkpoint and evaluates it on
 the held-out test split. The stable hash split is 80% train, 10% validation,
 and 10% test.
 
-Outputs are written to `results\`:
+Outputs are written to `results\task1`:
 
 - `task1_distilbert_best.pt`
 - `task1_distilbert_metrics.json`
 - `task1_distilbert_test_metrics.json`
 - `task1_distilbert_predictions.json`
-- `task1_distilbert_f1_curve.png`
+- `plots\task1_distilbert_f1_curve.png`
 
 To use a locally cached model without network access, add
 `--local-files-only` to the training command.
@@ -438,7 +445,7 @@ python -m src.compare_task3_runs `
   --input-dir results\task3\ablation `
   --output-dir results\task3\ablation
 ```
-c
+
 By default, the command looks for the four standard files:
 `task3_bert_only_metrics.json`, `task3_gnn_only_metrics.json`,
 `task3_early_concat_metrics.json`, and
@@ -498,83 +505,8 @@ FMA genre/tags -> fixed 100-label multilabel target
 The BERT input must use only non-target metadata fields such as track title and
 album title. It must not serialize the genre or tag columns into the input,
 because those columns define the prediction target and would leak the labels.
-If the chosen FMA export has no usable title/album fields, the honest fallback
-is a GNN-only model; a fabricated caption or random text pairing is invalid.
-
-Build the segment graphs:
-
-```powershell
-python -m src.graph_builder --prepare-metadata --tracks-csv data\raw\fma\fma_metadata\tracks.csv --audio-root data\raw\fma\fma_small --metadata-output data\processed\task2\fma_metadata.csv
-python -m src.graph_builder --metadata data\processed\task2\fma_metadata.csv --audio-root data\raw\fma\fma_small --output data\processed\task2\graphs --manifest data\processed\task2\task2_graph_manifest.jsonl --split-dir data\splits\task2 --sample-rate 22050 --segment-seconds 5 --threshold 0.75
-python -m src.prepare_task2 --manifest data\processed\task2\task2_graph_manifest.jsonl --metadata data\processed\task2\fma_metadata.csv --audio-root data\raw\fma\fma_small --output data\processed\task2\mels --sample-rate 22050 --segment-seconds 5 --n-mels 128
-```
-
-Train the real-data models:
-
-```powershell
-python -m src.train --task gnn --config config.yaml --manifest data\processed\task2\task2_graph_manifest.jsonl --run-name graphsage_genre
-python -m src.train --task genre_cnn --config config.yaml --manifest data\processed\task2\task2_graph_manifest.jsonl --metadata data\processed\task2\fma_metadata.csv --audio-root data\raw\fma\fma_small --run-name cnn_melspectrogram_genre --epochs 10
-```
-
-The mature GraphSAGE path uses a learned input projection, three residual
-GraphSAGE blocks, and mean/max/standard-deviation graph pooling before its
-classifier head. Training uses configurable balanced class weights, AdamW,
-validation Macro-F1 learning-rate reduction, gradient clipping, best-checkpoint
-restoration, and early stopping. The defaults are configured in `config.yaml`;
-pass `--epochs` to cap a run explicitly.
-
-Evaluate the best Task 2 checkpoint:
-
-```powershell
-python -m src.evaluate --task gnn --checkpoint results\task2\graphsage_genre_best.pt --manifest data\processed\task2\task2_graph_manifest.jsonl --output-dir results\task2
-```
-
-Task 2 evaluation writes `task2_graphsage_test_metrics.json`,
-`task2_graphsage_predictions.json`, and
-`plots\task2_graphsage_confusion_matrix.png` under `results\task2`.
-
-Evaluate the CNN baseline:
-
-```powershell
-python -m src.evaluate `
-  --task genre_cnn `
-  --checkpoint results\task2\cnn_melspectrogram_genre_best.pt `
-  --manifest data\processed\task2\task2_graph_manifest.jsonl `
-  --metadata data\processed\task2\fma_metadata.csv `
-  --audio-root data\raw\fma\fma_small `
-  --output-dir results\task2
-```
-
-This writes `task2_cnn_test_metrics.json`, `task2_cnn_predictions.json`, and
-`plots\task2_cnn_confusion_matrix.png` under `results\task2`.
-
-Both Task 2 training commands also save learning curves under
-`results\task2\plots`:
-
-```text
-task2_graphsage_learning_curves.png
-task2_cnn_learning_curves.png
-```
-
-Compare the trained Task 2 models:
-
-```powershell
-python -m src.compare_task2_models `
-  --graphsage-metrics results\task2\task2_graphsage_test_metrics.json `
-  --cnn-metrics results\task2\task2_cnn_test_metrics.json `
-  --output results\task2\task2_model_comparison.json
-```
-
-The graph nodes capture 182 normalized descriptors per 5-second segment:
-MFCC distribution and temporal coefficients, chroma, spectral contrast, tonnetz,
-spectral shape, energy, and zero-crossing statistics. The comparison file
-contains test loss, Accuracy, Macro-F1, Micro-F1, and
-one-vs-rest Macro PR-AUC for the GraphSAGE model and the mel-spectrogram CNN
-baseline. The CNN averages logits from every 5-second segment in each track,
-matching the full-track coverage of the graph model.
-Graph feature scaling is fitted only on training-track segments and reused for
-validation and test tracks, so similarity edges remain comparable without
-leaking evaluation statistics.
+If no usable text fields are available, use the GNN-only baseline instead of
+creating synthetic or randomly paired text.
 
 ## Project directories
 
@@ -583,7 +515,9 @@ leaking evaluation statistics.
 - `data\splits\`: train/validation/test split files.
 - `notebooks\`: exploratory analysis and the end-to-end demo notebook.
 - `src\`: preprocessing, graph, model, training, evaluation, and metric code.
-- `results\`: metrics, plots, checkpoints, and retrieval examples.
+- `results\task1\`: Task 1 checkpoints, metrics, predictions, and plots.
+- `results\task2\`: Task 2 checkpoints, metrics, predictions, and plots.
+- `results\task3\`: Task 3 checkpoints, metrics, predictions, and plots.
 - `report\`: final report PDF and related report assets.
 - `config.yaml`: default model and training settings.
 
