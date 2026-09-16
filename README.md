@@ -233,6 +233,44 @@ leakage.
 
 ## Task 3 training stages
 
+### Task 3-only batched trainer
+
+The dedicated Task 3 runner keeps the Task 2 trainer and manifests unchanged.
+It validates the fixed `train`/`val`/`test` manifest, checks every graph path,
+collates variable-size graphs into GraphSAGE batches, and tokenizes each text
+batch once for BERT.  The best validation Macro-F1 checkpoint is restored
+before test evaluation.  Loss is `BCEWithLogitsLoss`; use
+`--class-weighting positive` to compute `negative / positive` weights from the
+training split only.
+
+```powershell
+python -m src.train_task3 `
+  --manifest data\processed\task3\task3_fusion_manifest.jsonl `
+  --labels data\processed\task3\labels.json `
+  --config config.yaml `
+  --model fusion `
+  --run-name task3_cross_attention `
+  --output-dir results\task3 `
+  --class-weighting positive `
+  --epochs 20
+```
+
+Use `--early-concat` for the fusion ablation.  Feasible unimodal baselines use
+the same manifest and splits:
+
+```powershell
+python -m src.train_task3 --model bert --run-name task3_bert_only `
+  --manifest data\processed\task3\task3_fusion_manifest.jsonl `
+  --labels data\processed\task3\labels.json
+python -m src.train_task3 --model gnn --run-name task3_gnn_only `
+  --manifest data\processed\task3\task3_fusion_manifest.jsonl `
+  --labels data\processed\task3\labels.json
+```
+
+Each run writes `<run-name>_best.pt` and `<run-name>_metrics.json` under the
+selected output directory.  The metrics JSON reports train, validation, and
+test Macro-F1, Micro-F1, mean AP (also exposed as `auc_pr`), and loss.
+
 After the verified Task 3 manifest is available, run the primary fusion
 condition with graph-guided cross-attention:
 
