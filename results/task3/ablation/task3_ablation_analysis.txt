@@ -1,0 +1,5 @@
+Best Macro-F1: task3_gnn_only (0.0427)
+Best Micro-F1: task3_cross_attention (0.3546)
+Best PR-AUC: task3_gnn_only (0.1340)
+Lowest test loss: task3_bert_only (1.9332)
+Cross-attention vs BERT-only: Macro-F1 +0.0281, Micro-F1 +0.1516, PR-AUC +0.0942, loss +0.6663.

@@ -1,0 +1,94 @@
+{
+  "runs": {
+    "task3_bert_only": {
+      "macro_f1": 0.011130842274016523,
+      "micro_f1": 0.20303951367781156,
+      "auc_pr": 0.03660164939527065,
+      "loss": 1.9331773908436298
+    },
+    "task3_gnn_only": {
+      "macro_f1": 0.04265386595374759,
+      "micro_f1": 0.3353174603174603,
+      "auc_pr": 0.13396740677007046,
+      "loss": 3.3087342154607176
+    },
+    "task3_early_concat": {
+      "macro_f1": 0.04029795823220073,
+      "micro_f1": 0.35421994884910485,
+      "auc_pr": 0.1255145317532693,
+      "loss": 2.391011741794646
+    },
+    "task3_cross_attention": {
+      "macro_f1": 0.03925590907653031,
+      "micro_f1": 0.35463483146067415,
+      "auc_pr": 0.13080951398618504,
+      "loss": 2.5995111905038355
+    }
+  },
+  "baseline": "task3_bert_only",
+  "deltas_vs_baseline": {
+    "task3_bert_only": {
+      "macro_f1": 0.0,
+      "micro_f1": 0.0,
+      "auc_pr": 0.0,
+      "loss": 0.0
+    },
+    "task3_gnn_only": {
+      "macro_f1": 0.03152302367973106,
+      "micro_f1": 0.13227794663964873,
+      "auc_pr": 0.09736575737479981,
+      "loss": 1.3755568246170877
+    },
+    "task3_early_concat": {
+      "macro_f1": 0.02916711595818421,
+      "micro_f1": 0.1511804351712933,
+      "auc_pr": 0.08891288235799864,
+      "loss": 0.4578343509510161
+    },
+    "task3_cross_attention": {
+      "macro_f1": 0.028125066802513785,
+      "micro_f1": 0.1515953177828626,
+      "auc_pr": 0.09420786459091439,
+      "loss": 0.6663337996602057
+    }
+  },
+  "rankings": {
+    "macro_f1": [
+      "task3_gnn_only",
+      "task3_early_concat",
+      "task3_cross_attention",
+      "task3_bert_only"
+    ],
+    "micro_f1": [
+      "task3_cross_attention",
+      "task3_early_concat",
+      "task3_gnn_only",
+      "task3_bert_only"
+    ],
+    "auc_pr": [
+      "task3_gnn_only",
+      "task3_cross_attention",
+      "task3_early_concat",
+      "task3_bert_only"
+    ],
+    "loss": [
+      "task3_bert_only",
+      "task3_early_concat",
+      "task3_cross_attention",
+      "task3_gnn_only"
+    ]
+  },
+  "best_by_metric": {
+    "macro_f1": "task3_gnn_only",
+    "micro_f1": "task3_cross_attention",
+    "auc_pr": "task3_gnn_only",
+    "loss": "task3_bert_only"
+  },
+  "analysis": [
+    "Best Macro-F1: task3_gnn_only (0.0427)",
+    "Best Micro-F1: task3_cross_attention (0.3546)",
+    "Best PR-AUC: task3_gnn_only (0.1340)",
+    "Lowest test loss: task3_bert_only (1.9332)",
+    "Cross-attention vs BERT-only: Macro-F1 +0.0281, Micro-F1 +0.1516, PR-AUC +0.0942, loss +0.6663."
+  ]
+}
